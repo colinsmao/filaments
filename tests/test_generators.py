@@ -14,6 +14,20 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_layer_filaments_independent_vertical_profile(self):
+        _, modules, errors = worker.load_catalog(ROOT / "generators")
+        self.assertFalse(errors)
+        module = modules["layer_filaments"]
+        flat, colors, sizes = module.generate(30000, 42, height=0, y_spread=0)
+        thick, _, _ = module.generate(30000, 42, height=0, y_spread=0.4)
+        wavy, _, _ = module.generate(30000, 42, height=2, y_spread=0.4)
+        np.testing.assert_array_equal(flat[:, [0, 2]], thick[:, [0, 2]])
+        np.testing.assert_array_equal(flat[:, [0, 2]], wavy[:, [0, 2]])
+        self.assertTrue((flat[:, 1] == 0).all())
+        self.assertAlmostEqual(float(thick[:, 1].std()), 0.4, delta=0.01)
+        self.assertGreater(float(np.std(wavy[:, 1] - thick[:, 1])), 0.05)
+        self.assertTrue((np.abs(flat[:, [0, 2]]) <= 6).all())
+
     def test_thin_region_preserves_noise_wavelength_and_fade_envelope(self):
         worker.load_catalog(ROOT / "generators")
         from _noise import grid, fractal_noise, fade_density
@@ -54,6 +68,10 @@ class Generators(unittest.TestCase):
         worker.load_catalog(ROOT / "generators")  # Also enables shared generator imports.
         from _noise import sample_density, fractal_noise
         rng = np.random.default_rng(91)
+        planar, _ = sample_density(np.ones((17, 17)), 100000, rng)
+        self.assertEqual(planar.shape, (100000, 2))
+        np.testing.assert_allclose(planar.mean(axis=0), 0, atol=0.01)
+        np.testing.assert_allclose((planar * planar).mean(axis=0), 1 / 3, atol=0.01)
         points, _ = sample_density(np.ones((9, 9, 9)), 100000, rng)
         self.assertTrue((np.abs(points) < 1).all())
         np.testing.assert_allclose(points.mean(axis=0), 0, atol=0.01)

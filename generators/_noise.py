@@ -25,7 +25,7 @@ def fractal_noise(points, seed, frequency, octaves, roughness=0.5):
     noise.fractal_octaves = int(octaves)
     noise.fractal_gain = float(roughness)
     noise.fractal_lacunarity = 2.0
-    offset = rng.uniform(0, 128, 3).astype(np.float32)
+    offset = rng.uniform(0, 128, points.shape[1]).astype(np.float32)
     coords = np.ascontiguousarray((points * frequency + offset).T, dtype=np.float32)
     return noise.gen_from_coords(coords)
 
@@ -49,17 +49,18 @@ def fade_density(density):
 
 
 def sample_density(density, count, rng):
-    """Exactly sample the trilinearly interpolated density inside [-1, 1]^3.
+    """Sample a bilinear/trilinear density inside a 2D/3D [-1, 1] domain.
 
     Each grid vertex contributes a separable triangular tent. Boundary tents
     have half the mass on each boundary axis. Selecting a tent by mass, then
-    sampling its three axes, avoids blocky cell jitter and rejection loops.
+    sampling its axes, avoids blocky cell jitter and rejection loops.
     """
     resolution = density.shape[0]
     mass = np.asarray(density, dtype=np.float64).copy()
-    for axis in range(3):
+    dimensions = density.ndim
+    for axis in range(dimensions):
         for boundary in (0, -1):
-            slices = [slice(None)] * 3
+            slices = [slice(None)] * dimensions
             slices[axis] = boundary
             mass[tuple(slices)] *= 0.5
     total = mass.sum()
@@ -67,8 +68,8 @@ def sample_density(density, count, rng):
         raise ValueError("Noise density must be finite, nonnegative and nonempty")
     selected = rng.choice(mass.size, size=count, p=mass.ravel() / total)
     indices = np.column_stack(np.unravel_index(selected, density.shape))
-    jitter = rng.random((count, 3)) - rng.random((count, 3))
-    for axis in range(3):
+    jitter = rng.random((count, dimensions)) - rng.random((count, dimensions))
+    for axis in range(dimensions):
         lower = indices[:, axis] == 0
         upper = indices[:, axis] == resolution - 1
         jitter[lower, axis] = 1 - np.sqrt(rng.random(np.count_nonzero(lower)))

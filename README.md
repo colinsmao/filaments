@@ -133,6 +133,29 @@ machine, one octave over 96³ points measured about 16 ms for compiled Perlin,
 22 ms for OpenSimplex2, and 25 ms for OpenSimplex2S, versus 299 ms for the earlier
 NumPy Perlin. Perlin is the current backend because it was fastest in this test.
 
+**layer_filaments.py** builds a separate pattern specifically for an XZ layer.
+It samples density along the boundaries of jittered Voronoi cells, with smooth
+2D noise distorting the coordinates to bend the strands. Sites start on a
+jittered lattice to limit unusually large empty cells. The network is built in
+XZ from the outset; it does not depend on slicing or compressing a 3D web.
+
+- **Cells across XZ** controls the number of cells across the square; more cells
+  make smaller voids. **Strand width / cell** and **XZ warp / cell** are relative
+  to cell spacing. **Clump contrast** adds density variation along the web.
+- **Y spread (std dev, units)** is Gaussian vertical scatter around the layer,
+  in world units. It has soft tails rather than a hard height cutoff.
+- **Layer waviness (units)** multiplies a separate smooth height field;
+  **Height frequency** controls its horizontal variation. Changing these or Y
+  spread leaves the XZ positions unchanged. Set spread and waviness to zero for
+  an exactly flat plane. Changing XZ extent does not scale the Y profile.
+- **Fade edges (0 off, 1 on)** tapers the planar density near a circular boundary,
+  preserving star count. Vertical density already falls off smoothly.
+
+This generator uses a 256² planar density grid with continuous bilinear sampling,
+then assigns each star a height. It uses the same compiled noise backend and
+saved parameter protocol as the other generators. It appears in the Script
+dropdown through the existing live reload mechanism, without a viewer restart.
+
 The panel reports generation/packing time, total worker/transfer time, CPU time
 spent uploading to OpenGL, and FPS. Timing varies with the algorithm; rendering
 is not necessarily the slowest operation. Python startup and file transfer are
