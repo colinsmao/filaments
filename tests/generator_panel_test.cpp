@@ -2,7 +2,7 @@
 #include <iostream>
 #include <thread>
 
-void checkStartup(const nlohmann::json& saved) {
+void checkStartup(const nlohmann::json& saved, bool lines = false) {
     GeneratorPanel panel(saved);
     const auto started = std::chrono::steady_clock::now();
     bool loaded = false;
@@ -19,6 +19,8 @@ void checkStartup(const nlohmann::json& saved) {
         ImGui::Render();
         if (!panel.lastError().empty()) throw std::runtime_error(panel.lastError());
         if (loaded) {
+            if (panel.drawsLines() != lines)
+                throw std::runtime_error("Wrong primitive for uploaded geometry");
             if (panel.settings().at("script").get<std::string>().empty())
                 throw std::runtime_error("Generator selection missing after startup");
             return;
@@ -45,6 +47,8 @@ int main() {
         saved["count"] = 1234;
         saved["parameters"] = {{"filaments", {{"nodes", 25}, {"star_size", 0.1}}}};
         checkStartup(saved);
+        saved["script"] = "grown_filaments";
+        checkStartup(saved, true);
         std::cout << "Default and restored generator startup/UI frames passed without a window\n";
     } catch (const std::exception& error) { std::cerr << error.what() << '\n'; result = 1; }
     ImGui::DestroyContext();

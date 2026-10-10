@@ -365,9 +365,37 @@ already declares `fade` handles it natively; it is never applied twice. Further
 point processors belong in `apply_to_stars`, with their schema added by the
 worker. Density-aware operations can reuse the same helpers before sampling.
 
-## Next experiments
+## Seed-grown curve preview (`grown_filaments.py`)
 
-Current direction: retain the noise-sampled cloud and gently align nearby stars
+Select **grown_filaments.py** and use **Fit cloud** to inspect the skeleton.
+This experiment draws continuous colored lines with small gold wire-sphere seed
+markers; it does not populate stars yet. The initial line-display integration
+requires a C++ rebuild. Subsequent Python growth/schema edits reload live.
+
+Seeds are spaced within a ball. Each launches several separated directions;
+tips advance with persistent headings, bent by a shared smooth 3D vector noise
+field. **Noise turning** controls curvature (zero makes straight rays), while
+**Noise scale** controls how quickly steering varies through space. **Filament
+length** and **Length variation** control path budgets before Y compression.
+**Y scale fraction** compresses the whole skeleton; seed markers remain spherical.
+
+**Branch spacing** defaults to zero/off. Positive values add branches with a
+one-unit minimum gap plus an exponentially distributed distance of that mean.
+Children start on a parent vertex at **Branch angle**, inherit 65% of its remaining
+length, and can branch through two generations, with a total limit of 256 paths.
+Existing trunks remain unchanged when branching is enabled. Paths do not yet
+seek other seeds, join, avoid collisions, or model a scalar density ridge. Crossings
+are simply crossings. Growth has no clipping box or edge fade.
+
+Colors identify the seed of origin. Color and marker controls do not change the
+grown curves. Curve resolution is independent of the saved star count; the star
+count and postprocessing controls are hidden for line previews. The renderer uses
+one-pixel OpenGL lines in either saved star display mode. Star size controls are
+disabled during the preview. Star population, width and density come later.
+
+## Other experiments
+
+An earlier direction retains the noise-sampled cloud and gently aligns nearby stars
 with guide curves in `noise_filaments_aligned.py`. The explicit-curve population
 and bundling experiment remains in `noise_filament_curves.py` for comparison.
 Further density cleanup or curve editing can be added as separate stages.
@@ -482,6 +510,13 @@ The GUI supports
 transfer; `src/generator_panel.h` handles discovery, sliders and file watching.
 `python/worker.py` loads the independent modules in `generators/`.
 Each star occupies 28 bytes on the GPU (two vec3s and one float).
+Generators may declare `PRIMITIVE = "lines"` to return independent endpoint pairs
+in the same buffer format. Their output has a geometry-controlled even vertex
+count (2 to 1,000,000); `count` remains the requested star budget and can be ignored.
+The worker validates each vertex, omits shared star postprocessing, and returns
+`primitive: "lines"` in the catalog and successful response metadata. The viewer
+uses `GL_LINES` for that uploaded buffer, preserving separate curve boundaries.
+Omitting `PRIMITIVE` retains the existing point/count contract and legacy returns.
 Data uploads happen only when replaced. The entire cloud uses one instanced cube
 draw call or one GL_POINTS draw call per frame, with depth testing and no per-star
 CPU work during drawing. Both modes share the same star buffer, so switching

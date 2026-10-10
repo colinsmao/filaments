@@ -53,6 +53,15 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Current math experiments
 
+- `grown_filaments.py`: seed-grown skeleton preview, before star population.
+  Persistent tips bend through shared vector noise; optional bounded branching
+  starts on parent vertices. No joining/attraction/collision handling yet.
+  `PRIMITIVE = "lines"` makes the worker accept geometry-controlled endpoint pairs
+  using the existing FSTAR002 buffer and `primitive` response/catalog metadata.
+  The GUI hides star count/postprocessing and draws GL_LINES regardless of saved
+  star display mode. Last-successful primitive survives errors with the old cloud.
+  Line previews bypass shared star processors. Missing PRIMITIVE means points.
+
 - `galaxy.py`, `filaments.py`: original procedural spiral galaxy and manually
   constructed bent links between junctions. Kept as simple references.
 - `_noise.py`: compiled FastNoiseLite Perlin/fBm batches and continuous sampling

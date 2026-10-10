@@ -112,13 +112,17 @@ int render(GLFWwindow* window, bool smoke) {
         ImGui::SliderFloat("Move speed", &controls.speed, 0.1f, 50.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
         ImGui::SliderFloat("Right-click zoom", &controls.zoomFactor, 1.0f, 10.0f, "%.1fx", ImGuiSliderFlags_AlwaysClamp);
         ImGui::Separator();
-        ImGui::Text("%d points | %.1f FPS", pointCount, io.Framerate);
+        if (generator.drawsLines()) ImGui::Text("%d line segments | %.1f FPS", pointCount / 2, io.Framerate);
+        else ImGui::Text("%d points | %.1f FPS", pointCount, io.Framerate);
         ImGui::Text("GPU point buffer: %.1f MiB", pointCount * sizeof(Point) / (1024.0 * 1024.0));
         ImGui::Text("Upload (CPU): %.1f ms", uploadMs);
         if (ImGui::CollapsingHeader("Display")) {
+            if (generator.drawsLines()) ImGui::TextUnformatted("Skeleton shown as continuous lines");
+            ImGui::BeginDisabled(generator.drawsLines());
             ImGui::Combo("Draw as", &plot.renderMode, "Shaded cubes\0Points (fast)\0");
             ImGui::SliderFloat("Star size scale", &size, 0.05f, 20.0f, "%.2fx", ImGuiSliderFlags_Logarithmic);
             if (plot.renderMode == 1) ImGui::Checkbox("Round points", &round);
+            ImGui::EndDisabled();
             ImGui::Checkbox("Axes", &showAxes);
             if (ImGui::Checkbox("VSync", &vsync)) glfwSwapInterval(vsync ? 1 : 0);
             ImGui::ColorEdit3("Background", background);
@@ -197,7 +201,8 @@ int render(GLFWwindow* window, bool smoke) {
         const auto projection = camera.projection(float(width) / float(height), controls.zoomMultiplier());
         const auto matrix = projection * camera.view();
         const float projectionScale = 0.5f * float(height) * projection[1][1];
-        if (plot.renderMode == 0) cloud.drawCubes(matrix, size);
+        if (generator.drawsLines()) cloud.draw(matrix, size, projectionScale, false, GL_LINES);
+        else if (plot.renderMode == 0) cloud.drawCubes(matrix, size);
         else cloud.draw(matrix, size, projectionScale, round);
         if (showAxes) axes.draw(matrix, size, projectionScale, false, GL_LINES);
         if (smoke && pointCount > 0 && frame == 3) {

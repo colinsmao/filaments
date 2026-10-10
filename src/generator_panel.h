@@ -51,6 +51,7 @@ public:
             }
             mathMs = result->metadata.at("generation_ms").get<double>();
             totalMs = result->elapsedMs;
+            lines = result->metadata.value("primitive", std::string("points")) == "lines";
             return std::move(result->points);
         }
         return {};
@@ -70,7 +71,12 @@ public:
             }
             ImGui::EndCombo();
         }
-        bool edited = ImGui::SliderInt("Stars", &count, 1000, 1000000, "%d", ImGuiSliderFlags_Logarithmic);
+        bool selectedLines = false;
+        for (const auto& item : catalog)
+            if (item.at("id") == selected) selectedLines = item.value("primitive", std::string("points")) == "lines";
+        bool edited = false;
+        if (selectedLines) ImGui::TextUnformatted("Curve preview - no stars yet");
+        else edited = ImGui::SliderInt("Stars", &count, 1000, 1000000, "%d", ImGuiSliderFlags_Logarithmic);
         edited |= ImGui::InputInt("Seed", &seed);
         seed = std::max(seed, 0);
         for (const auto& item : catalog) {
@@ -108,7 +114,7 @@ public:
             };
             for (const auto& entry : item.at("parameters"))
                 if (entry.value("group", std::string{}).empty()) drawParameter(entry);
-            if (ImGui::CollapsingHeader("Postprocessing", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (!selectedLines && ImGui::CollapsingHeader("Postprocessing", ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::Indent();
                 std::vector<std::string> groups;
                 for (const auto& entry : item.at("parameters")) {
@@ -152,6 +158,7 @@ public:
     }
 
     bool busy() const { return service.busy() || dirty; }
+    bool drawsLines() const { return lines; }
     void handleShortcuts(bool cameraCaptured) {
         const auto& io = ImGui::GetIO();
         if ((cameraCaptured || (!io.WantCaptureKeyboard && !io.WantTextInput)) &&
@@ -168,6 +175,7 @@ private:
     std::string selected, fingerprint, error, warnings;
     int count = 100000, seed = 42;
     bool watchFiles = true, autoApply = true, dirty = false;
+    bool lines = false; // Describes the last successful buffer, not the pending selection.
     double lastScan = 0, lastEdit = 0;
     unsigned long long editRevision = 0;
     std::mt19937 random{std::random_device{}()};

@@ -14,6 +14,60 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_grown_curve_geometry_and_branch_attachments(self):
+        worker.load_catalog(ROOT / "generators")
+        from grown_filaments import grow, generate
+        params = dict(seed_count=2, arms=3, length=5., length_variation=0., y_scale=1.)
+        straight, owners, centers = grow(42, turning=0, **params)
+        self.assertEqual(len(straight), 6)
+        for path, owner in zip(straight, owners):
+            np.testing.assert_array_equal(path[0], centers[owner])
+            steps = np.diff(path, axis=0)
+            self.assertAlmostEqual(np.linalg.norm(steps, axis=1).sum(), 5.)
+            np.testing.assert_allclose(np.cross(steps, steps[0]), 0, atol=1e-12)
+        curved, _, _ = grow(42, **params)
+        branched, _, _ = grow(42, branch_spacing=.1, **params)
+        self.assertGreater(len(branched), len(curved))
+        for a, b in zip(curved, branched):
+            np.testing.assert_array_equal(a, b)  # Enabling branches preserves trunks.
+        for i, child in enumerate(branched[len(curved):], len(curved)):
+            self.assertTrue(any(np.any(np.all(parent == child[0], axis=1)) for parent in branched[:i]))
+        flat, _, _ = grow(42, **dict(params, y_scale=0))
+        for path, flattened in zip(curved, flat):
+            np.testing.assert_array_equal(path[:, [0, 2]], flattened[:, [0, 2]])
+            np.testing.assert_array_equal(flattened[:, 1], 0)
+        a = generate(1, 42)
+        b = generate(1000000, 42)
+        for first, second in zip(a, b):
+            np.testing.assert_array_equal(first, second)
+        recolored = generate(100, 42, color_paths=0)
+        np.testing.assert_array_equal(a[0], recolored[0])
+        self.assertFalse(np.array_equal(a[1], recolored[1]))
+
+    def test_line_preview_protocol_and_validation(self):
+        import struct
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "lines.bin"
+            response = worker.generate_request(dict(generator="grown_filaments", count=1, seed=42,
+                params=dict(fade=1, pp_merge=1)), ROOT / "generators", output)
+            self.assertTrue(response["ok"], response)
+            self.assertEqual(response["primitive"], "lines")
+            self.assertEqual(response["requested_count"], 1)
+            self.assertEqual(response["count"] % 2, 0)
+            self.assertNotIn("fade", response["params"])
+            self.assertNotIn("pp_merge", response["params"])
+            self.assertEqual(struct.unpack("<8sQ", output.read_bytes()[:16]), (b"FSTAR002", response["count"]))
+            data = np.frombuffer(output.read_bytes()[16:], dtype="<f4").reshape(-1, 7)
+            self.assertEqual(len(data), response["count"])
+            self.assertTrue((np.linalg.norm(data[::2, :3] - data[1::2, :3], axis=1) < .1).all())
+            root = Path(temp)
+            for n in (0, 1, 3):
+                (root / "invalid.py").write_text("import numpy as np\nPRIMITIVE = 'lines'\n"
+                    f"def generate(count, seed):\n    return np.zeros(({n},3)), np.ones(({n},3))\n")
+                result = worker.generate_request(dict(generator="invalid", count=10), root, output)
+                self.assertFalse(result["ok"])
+                self.assertIn("even vertex count", result["error"])
+
     def test_density_aware_fade_limits_edge_knots(self):
         from _postprocess import density_fade_weights, apply_to_stars
         rho = np.array([.1, 1., 100., 10000.])
@@ -188,7 +242,8 @@ class Generators(unittest.TestCase):
         catalog, modules, errors = worker.load_catalog(ROOT / "generators")
         self.assertFalse(errors)
         for entry in catalog:
-            self.assertEqual(sum(p["key"] == "fade" for p in entry["parameters"]), 1)
+            self.assertEqual(sum(p["key"] == "fade" for p in entry["parameters"]),
+                             0 if entry["primitive"] == "lines" else 1)
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / "stars.bin"
             for name in ("galaxy", "filaments", "zeldovich", "noise_filament_curves"):
@@ -458,6 +513,8 @@ class Generators(unittest.TestCase):
         self.assertFalse(errors)
         for entry in catalog:
             module = modules[entry["id"]]
+            if entry["primitive"] == "lines":
+                continue  # Geometry-controlled counts covered by the line preview tests.
             for count in (1, 10000):
                 a, color, sizes = module.generate(count, 42)
                 b, _, repeated_sizes = module.generate(count, 42)

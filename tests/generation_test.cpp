@@ -44,6 +44,10 @@ int main(int argc, char** argv) {
                 "Fixed seed should reproduce point bytes");
         auto filaments = run(runtime, "filaments");
         require(filaments.error.empty() && filaments.points.size() == 1000, "Filament generation failed: " + filaments.error);
+        auto curves = run(runtime, "grown_filaments", 1);
+        require(curves.error.empty(), curves.error);
+        require(curves.metadata.at("primitive") == "lines" && curves.points.size() > 2 && curves.points.size() % 2 == 0,
+                "Curve preview must transfer complete endpoint pairs independently of star count");
         const auto before = runtime.sourceFingerprint();
         const auto hot = root / "hot.py";
         const std::string prefix = "import numpy as np\ndef generate(count, seed):\n    return np.full((count,3), ";

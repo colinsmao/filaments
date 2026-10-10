@@ -33,6 +33,9 @@ def load_catalog(directory):
             exec(compile(path.read_text(encoding="utf-8-sig"), str(path), "exec"), module.__dict__)
             if not callable(getattr(module, "generate", None)):
                 raise ValueError("Missing generate(count, seed, **params) function")
+            primitive = getattr(module, "PRIMITIVE", "points")
+            if primitive not in ("points", "lines"):
+                raise ValueError("PRIMITIVE must be 'points' or 'lines'")
             parameters, keys = [], set()
             for entry in getattr(module, "PARAMETERS", []):
                 key, kind = entry["key"], entry["type"]
@@ -68,9 +71,14 @@ def load_catalog(directory):
                         if entry["key"] == shared["key"]:
                             entry.update(group="Edge fade", enabled_if="fade")
             parameters.extend(dict(entry) for entry in APPEARANCE_PARAMETERS)
+            # Independent line endpoint pairs cannot be thinned, merged or moved
+            # by star postprocessors without breaking the skeleton topology.
+            if primitive == "lines":
+                parameters = [p for p in parameters if p["key"] in keys]
             if len(parameters) > 64:
                 raise ValueError("Maximum 64 parameters per generator")
-            catalog.append(dict(id=path.stem, name=str(getattr(module, "NAME", path.stem)), parameters=parameters))
+            catalog.append(dict(id=path.stem, name=str(getattr(module, "NAME", path.stem)),
+                                primitive=primitive, parameters=parameters))
             modules[path.stem] = module
         except Exception:
             errors.append(f"{path.name}:\n{traceback.format_exc(limit=5)}")
@@ -107,6 +115,8 @@ def generate_request(request, directory, output):
             params[entry["key"]] = int(value) if entry["type"] == "int" else float(value)
         started = time.perf_counter()
         module = modules[selected]
+        primitive = schema["primitive"]
+        requested_count = count
         native_keys = {entry["key"] for entry in getattr(module, "PARAMETERS", [])}
         # Existing density generators own their fade stage; all others receive
         # the shared point-stage fallback without changing their signatures.
@@ -115,6 +125,13 @@ def generate_request(request, directory, output):
         if not isinstance(generated, (tuple, list)) or len(generated) not in (2, 3):
             raise ValueError("generate must return (positions, colors) or (positions, colors, sizes)")
         positions, colors = generated[:2]
+        positions = np.asarray(positions, dtype=np.float32)
+        if primitive == "lines":
+            if positions.ndim != 2 or positions.shape[1] != 3:
+                raise ValueError("Line positions must have shape (N, 3)")
+            count = len(positions)
+            if not 2 <= count <= MAX_POINTS or count % 2:
+                raise ValueError("Lines require an even vertex count in [2, 1000000]")
         sizes = np.asarray(generated[2] if len(generated) == 3 else 0.04, dtype=np.float32)
         if sizes.ndim == 0:
             sizes = np.full(count, sizes, dtype=np.float32)
@@ -130,7 +147,7 @@ def generate_request(request, directory, output):
             raise ValueError("Position magnitude exceeds 1,000,000 units")
         if ((colors < 0) | (colors > 1)).any():
             raise ValueError("RGB colors must be in [0, 1]")
-        if params.get("fade", 0) or any(params.get(key, 0) for key in ("pp_curves", "pp_merge", "pp_warp")):
+        if primitive == "points" and (params.get("fade", 0) or any(params.get(key, 0) for key in ("pp_curves", "pp_merge", "pp_warp"))):
             bounds_function = getattr(module, "postprocess_bounds", None)
             bounds = bounds_function(**native_params) if callable(bounds_function) else None
             post_params = dict(params)
@@ -141,14 +158,14 @@ def generate_request(request, directory, output):
                     or not np.isfinite(sizes).all() or (np.abs(positions) > 1e6).any()
                     or ((colors < 0) | (colors > 1)).any() or ((sizes <= 0) | (sizes > 1000)).any()):
                 raise ValueError("Postprocessing produced invalid star attributes")
-        requested_count = count
         count = len(positions)
         points = np.empty((count, 7), dtype="<f4")
         points[:, :3], points[:, 3:6], points[:, 6] = positions, colors, sizes
         with output.open("wb") as stream:
             stream.write(struct.pack("<8sQ", b"FSTAR002", count))
             stream.write(points.tobytes())
-        response.update(ok=True, generator=selected, params=params, count=count, requested_count=requested_count,
+        response.update(ok=True, generator=selected, params=params, primitive=primitive,
+                        count=count, requested_count=requested_count,
                         generation_ms=(time.perf_counter() - started) * 1000)
     except Exception:
         response.update(ok=False, error=traceback.format_exc(limit=8))

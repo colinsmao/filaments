@@ -182,6 +182,11 @@ GenerationResult runGeneration(const GeneratorRuntime& runtime, const nlohmann::
         result.metadata = nlohmann::json::parse(file);
         if (!result.metadata.value("ok", false)) throw std::runtime_error(result.metadata.value("error", "Generation failed"));
         result.points = readPointFile(directory.path / "points.bin");
+        const auto primitive = result.metadata.value("primitive", std::string("points"));
+        if (primitive != "points" && primitive != "lines")
+            throw std::runtime_error("Unknown geometry primitive");
+        if (primitive == "lines" && result.points.size() % 2 != 0)
+            throw std::runtime_error("Line buffer must contain endpoint pairs");
     } catch (const std::exception& error) { result.error = error.what(); }
     result.cancelled = *cancel;
     result.elapsedMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
