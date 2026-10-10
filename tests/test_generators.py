@@ -14,6 +14,40 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_curve_extraction_and_regular_population(self):
+        worker.load_catalog(ROOT / "generators")
+        from _curves import intersect_fields, resample, bundle, allocate_counts
+        axis = np.linspace(-1, 1, 32)
+        x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
+        curves = intersect_fields(x - 0.123, y + 0.177, np.ones(3))
+        self.assertEqual(len(curves), 1)  # Shared tetrahedral faces stitch one whole line.
+        stars = resample(curves[0], 101)
+        np.testing.assert_allclose(stars[:, 0], 0.123, atol=1e-8)
+        np.testing.assert_allclose(stars[:, 1], -0.177, atol=1e-8)
+        np.testing.assert_allclose(np.abs(np.diff(stars[:, 2])), 0.02, atol=1e-8)
+        circle = intersect_fields(x*x + y*y + z*z - 0.6**2, y - 0.017, np.ones(3))
+        self.assertEqual(len(circle), 1)
+        np.testing.assert_allclose(circle[0][0], circle[0][-1], atol=1e-8)
+        for path in bundle(circle[0], 4, 0.03):
+            np.testing.assert_allclose(path[0], path[-1], atol=1e-8)
+            self.assertTrue(np.isfinite(path).all())
+        counts = allocate_counts([10, 1, 0.1], 100, 20)
+        self.assertEqual(counts.sum(), 100)
+        self.assertTrue((counts >= 20).all())
+        self.assertEqual(len(allocate_counts([10, 1, 0.1], 39, 20)), 1)
+        np.testing.assert_array_equal(allocate_counts([10, 1], 1, 20), [1])
+
+    def test_curve_colors_do_not_rearrange_stars(self):
+        _, modules, errors = worker.load_catalog(ROOT / "generators")
+        self.assertFalse(errors)
+        module = modules["noise_filament_curves"]
+        a, colors, sizes = module.generate(3000, 42)
+        b, plain, sizes_b = module.generate(3000, 42, color_curves=0)
+        np.testing.assert_array_equal(a, b)
+        np.testing.assert_array_equal(sizes, sizes_b)
+        self.assertGreater(len(np.unique(colors, axis=0)), 1)
+        self.assertEqual(len(np.unique(plain, axis=0)), 1)
+
     def test_strand_continuity_limits_clump_gaps(self):
         _, modules, errors = worker.load_catalog(ROOT / "generators")
         self.assertFalse(errors)

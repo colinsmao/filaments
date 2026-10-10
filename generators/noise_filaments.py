@@ -35,6 +35,13 @@ def _clump_log_weight(knots, clumping, continuity):
                         np.log(continuity) + log_weight.max())
 
 
+def build_strand_fields(points, seed, frequency=2.0, octaves=2, roughness=0.22):
+    """Shared implicit geometry for density sampling and curve extraction."""
+    a = fractal_noise(points, np.random.SeedSequence([seed, 101]), frequency, octaves, roughness)
+    b = fractal_noise(points, np.random.SeedSequence([seed, 202]), frequency, octaves, roughness)
+    return a, b
+
+
 def build_density(seed, frequency=2.0, width=0.065, octaves=2, roughness=0.22,
                   clumping=3.0, y_scale=1.0, layer_continuity=1.0,
                   strand_continuity=0.5, resolution=96):
@@ -46,8 +53,7 @@ def build_density(seed, frequency=2.0, width=0.065, octaves=2, roughness=0.22,
     nonnegative values and leave nonzero total density for the sampler.
     """
     points = grid(resolution, y_scale)
-    a = fractal_noise(points, np.random.SeedSequence([seed, 101]), frequency, octaves, roughness)
-    b = fractal_noise(points, np.random.SeedSequence([seed, 202]), frequency, octaves, roughness)
+    a, b = build_strand_fields(points, seed, frequency, octaves, roughness)
     knots = fractal_noise(points, np.random.SeedSequence([seed, 303]), frequency * 0.6, 2)
     # A literal thin slice cuts 3D strands into isolated spots. Relaxing B's
     # constraint approaches A=0 contours across the layer without stretching

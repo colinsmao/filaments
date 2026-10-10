@@ -159,12 +159,49 @@ spent uploading to OpenGL, and FPS. Timing varies with the algorithm; rendering
 is not necessarily the slowest operation. Python startup and file transfer are
 paid only on regeneration, not on every rendered frame.
 
+### Curve postprocessing experiment
+
+**noise_filament_curves.py** uses this pipeline, entirely in live Python scripts:
+
+1. Evaluate the same two strand noise fields as `noise_filaments.py`.
+2. Extract their shared zero contours as explicit paths on a tetrahedral grid.
+   Shared faces stitch segments into open curves and closed loops.
+3. Optionally smooth those paths and form bundles of nearby curves.
+4. Allocate a minimum star count per retained curve, then distribute the remaining
+   stars in proportion to curve length. Place stars at regular arc-length
+   intervals, preserving endpoints and avoiding duplicate loop seams.
+
+This samples the curve geometry itself instead of randomly sampling a density.
+Faint clump modulation cannot erase a stretch of an extracted path. It does not
+connect separate paths, and the 96³ field grid can still miss unresolved features.
+The prototype uses a literal Y slice; it does not apply the older layer-continuity
+relaxation or an edge fade. Bundles may extend beyond the sampling box by their
+radius. Star count alone does not guarantee touching rendered cubes: a long curve
+with too few stars can still have visible spaces between regularly placed stars.
+
+- **Minimum stars per curve** reserves a floor for each retained path, including
+  bundle curves. If the total budget is insufficient, longest centerlines take
+  priority, then their satellite curves. Fewer paths are retained; the total star
+  count remains exact. A total count below the minimum places all stars on one path.
+- **Curves per filament** and **Bundle radius** make thick filaments from multiple
+  coherent offset curves, with no independent random scatter per star. A zero
+  radius uses just the centerline rather than creating coincident duplicates.
+- **Curve smoothing** reduces grid-scale corners; **Ignore curves shorter than**
+  removes tiny fragments. Both affect extracted geometry explicitly.
+- **Color by curve (0 off, 1 on)** assigns each path a stable color for a fixed
+  seed and configuration, useful for inspecting the bundles. Color and star-size
+  edits do not rearrange positions.
+
+Shared extraction, bundling and allocation helpers live in `generators/_curves.py`;
+noise construction remains separate. Other generators stay available, and no
+renderer or worker-protocol change is required.
+
 ## Next experiments
 
-Current direction: separate noise-density construction from postprocessing and
-star sampling. Explore cleanup of the density field or adjustments to sampled
-stars; the specific operation is still to be decided. Keep existing generators
-available for comparison. Artistic appearance takes priority over physical realism.
+Current direction: explicit curve postprocessing, minimum populations and bundles
+in `noise_filament_curves.py`. Further density cleanup or curve editing can be
+added as separate stages. Keep existing generators available for comparison.
+Artistic appearance takes priority over physical realism.
 
 Next alternative to try: a Zel'dovich-style displacement generator. Start from
 uniform particles, derive a displacement field from a smooth random potential,
