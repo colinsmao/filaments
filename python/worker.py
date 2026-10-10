@@ -14,6 +14,10 @@ MAX_POINTS = 1_000_000
 
 def load_catalog(directory):
     catalog, modules, errors = [], {}, []
+    # Keep compiled dependencies available when generators are copied or overridden.
+    local_packages = Path(__file__).resolve().parents[1] / ".tools" / "noise-python"
+    if local_packages.is_dir() and str(local_packages) not in sys.path:
+        sys.path.insert(0, str(local_packages))
     sys.path.insert(0, str(directory))
     for path in sorted(directory.glob("*.py")):
         if path.name.startswith("_"):

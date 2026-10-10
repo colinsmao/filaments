@@ -1,1 +1,2 @@
 numpy>=1.24,<3
+pyfastnoiselite==0.0.7

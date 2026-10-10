@@ -14,6 +14,27 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_continuous_noise_density_sampling(self):
+        worker.load_catalog(ROOT / "generators")  # Also enables shared generator imports.
+        from _noise import sample_density, fractal_noise
+        rng = np.random.default_rng(91)
+        points, _ = sample_density(np.ones((9, 9, 9)), 100000, rng)
+        self.assertTrue((np.abs(points) < 1).all())
+        np.testing.assert_allclose(points.mean(axis=0), 0, atol=0.01)
+        np.testing.assert_allclose((points * points).mean(axis=0), 1 / 3, atol=0.01)
+        # Linear density rho(x)=x+1 has mean x=1/3; trilinear interpolation is exact.
+        linear = np.broadcast_to(np.linspace(0, 2, 9)[:, None, None], (9, 9, 9))
+        points, _ = sample_density(linear, 100000, rng)
+        self.assertAlmostEqual(float(points[:, 0].mean()), 1 / 3, delta=0.01)
+        with self.assertRaises(ValueError):
+            sample_density(np.zeros((3, 3, 3)), 10, rng)
+        boundary = rng.random((1000, 3)).astype(np.float32)
+        boundary[:, 0] = 1
+        left, right = boundary.copy(), boundary.copy()
+        left[:, 0] -= 0.0001
+        right[:, 0] += 0.0001
+        self.assertLess(float(np.abs(fractal_noise(left, 42, 1, 1) - fractal_noise(right, 42, 1, 1)).max()), 0.001)
+
     def test_seed_shapes_ranges_and_parameter_effect(self):
         catalog, modules, errors = worker.load_catalog(ROOT / "generators")
         self.assertFalse(errors)

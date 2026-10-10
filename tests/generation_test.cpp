@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
         runtime.generators = root;
         auto galaxy = run(runtime, "galaxy");
         require(galaxy.error.empty(), galaxy.error);
-        require(galaxy.points.size() == 1000 && galaxy.metadata.at("catalog").size() == 2, "Galaxy or catalog missing");
+        require(galaxy.points.size() == 1000 && galaxy.metadata.at("catalog").size() >= 2, "Galaxy or catalog missing");
         auto repeated = run(runtime, "galaxy");
         require(repeated.error.empty() && repeated.points.size() == galaxy.points.size() &&
                 std::memcmp(repeated.points.data(), galaxy.points.data(), galaxy.points.size() * sizeof(Point)) == 0,

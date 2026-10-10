@@ -26,12 +26,17 @@ and pinned library sources. Git and curl must be available. Tools are kept in
 global PATH change or Visual Studio workload is needed.
 ExecutionPolicy Bypass applies only to that PowerShell process.
 
-Python 3.10+ and NumPy are now required for generation. The current setup uses the
-existing `py310` Conda interpreter with NumPy 1.24.3; no Python packages were
-changed. On a new machine, use `python -m pip install -r python/requirements.txt`
+Python 3.10+, NumPy, and pyfastnoiselite are required for the noise generators.
+The current setup uses the existing `py310` Conda interpreter with NumPy 1.24.3;
+pyfastnoiselite 0.0.7 is installed separately in `.tools/noise-python` and loaded
+automatically by the worker. The Conda environment is unchanged.
+On a new machine, use `python -m pip install -r python/requirements.txt`
 in your chosen environment. The build discovers and remembers the interpreter;
 to select another one, pass `-PythonExecutable C:\path\to\python.exe` to the build
 script. This selects an executable, not a Python DLL linked into the viewer.
+To install only the compiled noise wheel locally with that interpreter, use
+`python -m pip install --only-binary=:all: --no-deps --target .tools/noise-python pyfastnoiselite==0.0.7`.
+The local wheel must match the selected Python version and architecture.
 
 Subsequent builds reuse these downloads. Release is the default:
 
@@ -77,8 +82,37 @@ selected script, star count, seed, each script's parameters, auto-apply/file-wat
 preferences, rendering mode, size scale, round points, axes, background, VSync,
 and camera position/direction. The selected plot regenerates from those settings
 on the next launch. Point buffers and transient performance statistics are not
-saved. The current spatial algorithms are unchanged; noise-based distributions
-are planned for later.
+saved. The original spatial algorithms are preserved in `galaxy.py` and
+`filaments.py` for comparison with the noise-based patterns.
+
+Two additional scripts explore noise-driven densities:
+
+- **noise_clouds.py** samples a density derived from several scales of smooth
+  gradient noise. Increase **Density contrast** for stronger clumps and emptier
+  voids; at zero contrast the distribution is uniform.
+- **noise_filaments.py** concentrates stars where two independent noise fields
+  are both near zero, forming winding strands. **Strand thickness** widens their
+  density profile; **Clump contrast** varies density along them.
+
+In both, **Noise frequency** changes how many structures fit inside the volume;
+**Detail octaves** and **Detail strength** add finer features. **Extent** scales
+the volume without changing the underlying normalized pattern. FastNoiseLite's
+compiled Perlin/fBm implementation fills a 96³ density grid in native code;
+NumPy handles continuous trilinear density sampling, so stars
+do not sit on a lattice. The grid limits the finest resolvable detail. Counts,
+colors, and per-star sizes use the same protocol as the original scripts.
+Adding these scripts requires no viewer rebuild or restart: the file watcher
+refreshes the Script dropdown. If watching is disabled, click **Generate / reload**.
+Switching from the earlier NumPy noise backend changes the patterns for a given
+seed; seeds remain reproducible within this backend. The two-field intersection
+is an artistic implicit-curve construction, not a model of gravitational cosmic
+structure formation.
+
+Run `python -B scripts/benchmark_noise.py` to compare the compiled 3D algorithms
+and full in-process filament generation without opening the viewer. On this
+machine, one octave over 96³ points measured about 16 ms for compiled Perlin,
+22 ms for OpenSimplex2, and 25 ms for OpenSimplex2S, versus 299 ms for the earlier
+NumPy Perlin. Perlin is the current backend because it was fastest in this test.
 
 The panel reports generation/packing time, total worker/transfer time, CPU time
 spent uploading to OpenGL, and FPS. Timing varies with the algorithm; rendering
