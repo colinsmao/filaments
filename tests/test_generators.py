@@ -14,6 +14,60 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_triple_zero_graph_and_probabilistic_branches(self):
+        worker.load_catalog(ROOT / "generators")
+        from _branch_curves import intersection_graph, trace_graph
+        axis = np.linspace(-1, 1, 9)
+        x, y, z = np.meshgrid(axis, axis, axis, indexing="ij")
+        fields = [x - .13, y + .17, z - .23]
+        graph = intersection_graph(fields)
+        vertices, edges, families, junctions = graph
+        np.testing.assert_allclose(vertices[junctions], [[.13, -.17, .23]], atol=1e-12)
+        joint = np.flatnonzero(junctions)[0]
+        self.assertEqual(np.count_nonzero(edges == joint), 6)
+        for family, pair in enumerate(((0, 1), (0, 2), (1, 2))):
+            coordinates = vertices[edges[families == family]]
+            for dimension in pair:
+                np.testing.assert_allclose(coordinates[..., dimension], [.13, -.17, .23][dimension], atol=1e-12)
+        plain = trace_graph(graph, 42, seed_count=1, length=8., branch_probability=0.)
+        branched = trace_graph(graph, 42, seed_count=1, length=8., branch_probability=1.)
+        self.assertEqual(set(plain[1]), {0})
+        self.assertEqual(set(branched[1]), {0, 1, 2})
+        for path in branched[0]:
+            np.testing.assert_allclose(path[0], vertices[joint], atol=1e-12)
+        for a, b in zip(plain[0], branched[0]):
+            np.testing.assert_array_equal(a, b)
+        # A fourth plane adds more triple crossings, not an imposed graph edge.
+        four = intersection_graph(fields + [x + y + z - .35])
+        self.assertEqual(four[3].sum(), 4)
+        self.assertTrue(all(np.count_nonzero(four[1] == i) == 6 for i in np.flatnonzero(four[3])))
+
+    def test_noise_branch_curve_preview(self):
+        worker.load_catalog(ROOT / "generators")
+        from noise_branch_curves import build_graph, generate
+        from _branch_curves import trace_graph
+        graph = build_graph(42)
+        self.assertGreater(graph[3].sum(), 0)
+        plain = trace_graph(graph, 42, branch_probability=0.)
+        branched = trace_graph(graph, 42, branch_probability=1.)
+        self.assertEqual(set(plain[1]), {0})
+        self.assertGreater(len(branched[0]), len(plain[0]))
+        self.assertEqual(set(branched[1]), {0, 1, 2})
+        original = generate(1, 42)
+        repeated = generate(1000000, 42)
+        for a, b in zip(original, repeated):
+            np.testing.assert_array_equal(a, b)
+        for kind in (0, 1):
+            result = generate(100, 42, noise_type=kind, field_count=4, y_scale=0, show_junctions=0)
+            self.assertTrue(all(np.isfinite(a).all() for a in result))
+            self.assertEqual(len(result[0]) % 2, 0)
+            np.testing.assert_array_equal(result[0][:, 1], 0)
+        with tempfile.TemporaryDirectory() as temp:
+            result = worker.generate_request(dict(generator="noise_branch_curves", count=1, seed=42),
+                                            ROOT / "generators", Path(temp) / "lines.bin")
+            self.assertTrue(result["ok"], result)
+            self.assertEqual(result["primitive"], "lines")
+
     def test_grown_curve_geometry_and_branch_attachments(self):
         worker.load_catalog(ROOT / "generators")
         from grown_filaments import grow, generate

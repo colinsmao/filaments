@@ -53,6 +53,16 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Current math experiments
 
+- `noise_branch_curves.py` / `_branch_curves.py`: line preview tracing 2-4 scalar
+  noise fields' pairwise zeros, with probabilistic branching at triple zeros.
+  Perlin/OpenSimplex2S is selectable. A fixed 48-cubed tetrahedral interpolation
+  gives exact shared junctions within that approximation; no proximity joins or
+  prescribed seed links. AB roots grow both ways; alternative families branch
+  with a per-junction/family probability and inherit remaining length. Visited
+  edges are deduplicated; path/length budgets bound growth. Y compresses the whole
+  result. This follows centerlines, not offset-trajectory attraction or star
+  sampling. Connectivity is not guaranteed; finite-box endpoints remain.
+
 - `grown_filaments.py`: seed-grown skeleton preview, before star population.
   Persistent tips bend through shared vector noise; optional bounded branching
   starts on parent vertices. No joining/attraction/collision handling yet.

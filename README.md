@@ -393,6 +393,44 @@ count and postprocessing controls are hidden for line previews. The renderer use
 one-pixel OpenGL lines in either saved star display mode. Star size controls are
 disabled during the preview. Star population, width and density come later.
 
+## Branching at noise-zero junctions (`noise_branch_curves.py`)
+
+This separate line preview follows pairwise zero intersections of two to four
+scalar noise fields. Select **noise_branch_curves.py**, then **Fit cloud**. Python
+changes reload live; it uses the line renderer already built for grown_filaments.
+**Noise** selects Perlin (0, default) or OpenSimplex2S (1).
+
+For three fields, blue curves follow A=B=0, orange follows A=C=0, and green
+follows B=C=0. When an AB curve encounters C=0, all three families meet at the
+same triple-zero point. **Branch probability** decides separately whether to
+launch a branch into each alternative family, choosing one outgoing direction
+that favors continuation of the arriving heading. At starting junctions the
+alternative direction is selected deterministically. Probability zero follows
+only AB; adding fields supplies more possible junctions, not guaranteed global
+connectivity. Four fields have six pair families and four possible triple types.
+
+The implementation samples the fields on a fixed 48-cubed grid and uses linear
+interpolation within a consistent tetrahedral mesh. It solves pairwise zeros on
+tetrahedron faces and triple zeros inside tetrahedra, splitting the pair segments
+at those shared points. Thus junctions come from the noise itself, without
+nearest-seed links, proximity joins, or bridges across empty regions. This is
+tracing the zero centerlines of a field approximation, not an attraction model
+for offset trajectories. Small features below the grid resolution may be lost.
+
+**Starting junctions** chooses spatially separated AB triple zeros, falling back
+to ordinary AB vertices when no triple zeros exist. Yellow rings mark these
+roots; white crosses mark reached triple zeros. Curves initially grow along both
+AB directions. **Growth length** limits each root's travel before Y compression;
+children inherit the parent's remaining travel budget. Branches start exactly on
+the parent. Already traversed segments are not redrawn, and **Maximum curves**
+bounds the number of paths. Length/curve budgets, closed loops, previously visited
+edges, and the finite field boundary can stop growth. This preview does not add
+scattered stars, smooth away junctions, or promise that every component connects.
+
+**Y scale fraction** compresses the completed geometry, preserving its topology.
+Star count has no effect on the skeleton. Star placement and filament widths are
+still deferred. The earlier free vector-steered growth remains in grown_filaments.
+
 ## Other experiments
 
 An earlier direction retains the noise-sampled cloud and gently aligns nearby stars
