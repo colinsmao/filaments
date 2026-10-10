@@ -26,7 +26,7 @@ and pinned library sources. Git and curl must be available. Tools are kept in
 global PATH change or Visual Studio workload is needed.
 ExecutionPolicy Bypass applies only to that PowerShell process.
 
-Python 3.10+, NumPy, and pyfastnoiselite are required for the noise generators.
+Python 3.10+, NumPy, SciPy, and pyfastnoiselite are required for the noise generators.
 The current setup uses the existing `py310` Conda interpreter with NumPy 1.24.3;
 pyfastnoiselite 0.0.7 is installed separately in `.tools/noise-python` and loaded
 automatically by the worker. The Conda environment is unchanged.
@@ -93,6 +93,17 @@ Two additional scripts explore noise-driven densities:
 - **noise_filaments.py** concentrates stars where two independent noise fields
   are both near zero, forming winding strands. **Strand thickness** widens their
   density profile; **Clump contrast** varies density along them.
+  **Strand continuity** (default 0.5) adds a floor to the clump modulation along
+  the existing strands. At 0, the original clump modulation is unchanged; at 1,
+  it is uniform. At 0.5, clump modulation alone can vary density by at most 2:1.
+  This reduces faint stretches without introducing more strands or changing
+  their widths or wavelengths. It cannot join genuinely separate loops.
+
+**noise_filaments_branches.py** preserves the three-field experiment. Its
+**Connectivity** slider adds the A/C and B/C strand families to A/B; these
+meet at triple-zero junctions but can produce a much busier pattern. At 0 it
+reproduces the original two-field method. **layer_filaments.py** also remains
+available as the separate cellular experiment.
 
 Both noise scripts have **Y thickness fraction**: 1 uses the full volume, 0.1
 samples Y between `-0.1 * extent` and `+0.1 * extent`, and 0 makes a flat layer.
@@ -104,12 +115,12 @@ redistributed toward the interior rather than made transparent or smaller.
 The toggle uses an integer 0/1 control supported by the running viewer.
 
 In **noise_filaments.py**, **Layer continuity** defaults to 1 to reduce isolated
-patches caused by slicing across 3D strands. The density uses
-`exp(-(a*a + beta*b*b)/(2*width*width) + clumping*knots)`, where
+patches caused by slicing across 3D strands. The base strand family uses
+`exp(-(a*a + beta*b*b)/(2*width*width))`, multiplied by the clump modulation, where
 `beta = (1-continuity) + continuity*y_thickness**2`.
 As the layer narrows, relaxing the second field constraint favors curves across
 the layer. The noise wavelengths remain unchanged. Set continuity to 0 for a
-literal slice of the original 3D density. Full thickness is unchanged either way.
+literal slice of the 3D density. Full thickness is unchanged either way.
 This is an artistic heuristic: natural voids remain, and connected strands are
 not guaranteed for every seed.
 
@@ -133,28 +144,15 @@ machine, one octave over 96³ points measured about 16 ms for compiled Perlin,
 22 ms for OpenSimplex2, and 25 ms for OpenSimplex2S, versus 299 ms for the earlier
 NumPy Perlin. Perlin is the current backend because it was fastest in this test.
 
-**layer_filaments.py** builds a separate pattern specifically for an XZ layer.
-It samples density along the boundaries of jittered Voronoi cells, with smooth
-2D noise distorting the coordinates to bend the strands. Sites start on a
-jittered lattice to limit unusually large empty cells. The network is built in
-XZ from the outset; it does not depend on slicing or compressing a 3D web.
-
-- **Cells across XZ** controls the number of cells across the square; more cells
-  make smaller voids. **Strand width / cell** and **XZ warp / cell** are relative
-  to cell spacing. **Clump contrast** adds density variation along the web.
-- **Y spread (std dev, units)** is Gaussian vertical scatter around the layer,
-  in world units. It has soft tails rather than a hard height cutoff.
-- **Layer waviness (units)** multiplies a separate smooth height field;
-  **Height frequency** controls its horizontal variation. Changing these or Y
-  spread leaves the XZ positions unchanged. Set spread and waviness to zero for
-  an exactly flat plane. Changing XZ extent does not scale the Y profile.
-- **Fade edges (0 off, 1 on)** tapers the planar density near a circular boundary,
-  preserving star count. Vertical density already falls off smoothly.
-
-This generator uses a 256² planar density grid with continuous bilinear sampling,
-then assigns each star a height. It uses the same compiled noise backend and
-saved parameter protocol as the other generators. It appears in the Script
-dropdown through the existing live reload mechanism, without a viewer restart.
+**layer_filaments.py** remains available as a separate cellular experiment.
+It uses a full 3D web of noise-warped Voronoi edges: density peaks where the
+three nearest jittered sites are nearly equidistant. Cells change through Y.
+**XZ scale (units)** and **Y scale (units)** set the axis half-extents and scale
+the cell wavelengths with them; equal values give a roughly isotropic web.
+**Cells across each axis**, **Strand width / cell**, **3D warp / cell**, and
+**Clump contrast** control the structure. **Fade edges** tapers an ellipsoidal
+boundary. It uses a 96³ density grid and SciPy's compiled spatial index;
+SciPy 1.10.1 is already present in the configured Python environment.
 
 The panel reports generation/packing time, total worker/transfer time, CPU time
 spent uploading to OpenGL, and FPS. Timing varies with the algorithm; rendering

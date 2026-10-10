@@ -1,8 +1,7 @@
-"""Organic strands from the intersection of two independent noise zero-surfaces.
+"""Two-field noise strands with a density floor along existing strands.
 
-Density = exp(-(a*a + beta*b*b)/(2*width*width)), modulated by a third noise field.
-Layer continuity reduces beta in thin Y bands, transitioning toward 2D strands.
-There are no junction lists, line segments, or precomputed curve paths.
+Strand continuity reduces gaps caused by clump modulation without introducing
+extra strand families. Layer continuity adapts the field to thin Y regions.
 """
 import numpy as np
 from _noise import fractal_noise, grid, sample_density, star_appearance, fade_density
@@ -15,6 +14,7 @@ PARAMETERS = [
     dict(key="fade", label="Fade edges (0 off, 1 on)", type="int", default=0, min=0, max=1),
     dict(key="frequency", label="Noise frequency", type="float", default=2.0, min=0.5, max=6.0),
     dict(key="width", label="Strand thickness", type="float", default=0.065, min=0.025, max=0.25),
+    dict(key="strand_continuity", label="Strand continuity", type="float", default=0.5, min=0.0, max=1.0),
     dict(key="octaves", label="Detail octaves", type="int", default=2, min=1, max=4),
     dict(key="roughness", label="Detail strength", type="float", default=0.22, min=0.0, max=0.6),
     dict(key="clumping", label="Clump contrast", type="float", default=3.0, min=0.0, max=12.0),
@@ -23,9 +23,21 @@ PARAMETERS = [
 ]
 
 
+def _clump_log_weight(knots, clumping, continuity):
+    log_weight = clumping * knots
+    if continuity <= 0:
+        return log_weight
+    if continuity >= 1:
+        return np.zeros_like(log_weight)
+    # Blend clump modulation with a constant floor, measured relative to its
+    # peak. This changes density along existing strands, not their geometry.
+    return np.logaddexp(np.log1p(-continuity) + log_weight,
+                        np.log(continuity) + log_weight.max())
+
+
 def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
              octaves=2, roughness=0.22, clumping=3.0, star_size=0.04, size_variation=0.4,
-             y_scale=1.0, fade=0, layer_continuity=1.0):
+             y_scale=1.0, fade=0, layer_continuity=1.0, strand_continuity=0.5):
     resolution = 96
     points = grid(resolution, y_scale)
     a = fractal_noise(points, np.random.SeedSequence([seed, 101]), frequency, octaves, roughness)
@@ -35,7 +47,8 @@ def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
     # constraint approaches A=0 contours across the layer without stretching
     # either noise field. At full thickness the original density is unchanged.
     beta = (1 - layer_continuity) + layer_continuity * y_scale * y_scale
-    log_density = -(a * a + beta * b * b) / (2 * width * width) + clumping * knots
+    log_density = -(a * a + beta * b * b) / (2 * width * width)
+    log_density += _clump_log_weight(knots, clumping, strand_continuity)
     density = np.exp(log_density - log_density.max()).reshape((resolution,) * 3)
     if fade:
         density = fade_density(density)

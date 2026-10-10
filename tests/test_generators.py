@@ -14,19 +14,53 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
-    def test_layer_filaments_independent_vertical_profile(self):
+    def test_strand_continuity_limits_clump_gaps(self):
+        _, modules, errors = worker.load_catalog(ROOT / "generators")
+        self.assertFalse(errors)
+        module = modules["noise_filaments"]
+        knots = np.linspace(-1, 1, 100)
+        original = np.exp(module._clump_log_weight(knots, 12, 0))
+        filled = np.exp(module._clump_log_weight(knots, 12, 0.5))
+        self.assertGreater(original.max() / original.min(), 1e6)
+        self.assertLessEqual(filled.max() / filled.min(), 2.000001)
+        np.testing.assert_array_equal(module._clump_log_weight(knots, 12, 1), np.zeros(100))
+        # At full continuity, changing clump contrast cannot create new gaps.
+        a = module.generate(1000, 42, strand_continuity=1, clumping=0)
+        b = module.generate(1000, 42, strand_continuity=1, clumping=12)
+        for x, y in zip(a, b):
+            np.testing.assert_array_equal(x, y)
+
+    def test_noise_strands_share_junctions(self):
+        _, modules, errors = worker.load_catalog(ROOT / "generators")
+        self.assertFalse(errors)
+        module = modules["noise_filaments_branches"]
+        # Linear fields x/y/z have three perpendicular zero-intersection axes.
+        # The added families must connect at the origin, without filling a void.
+        t = np.linspace(-1, 1, 101)
+        zero = np.zeros_like(t)
+        for a, b, c in ((t, zero, zero), (zero, t, zero), (zero, zero, t)):
+            density = np.exp(module._strand_log_density(a, b, c, 0.065, 1, 1))
+            self.assertTrue((density >= 0.99).all())
+        isolated = np.exp(module._strand_log_density(t, zero, zero, 0.065, 1, 0))
+        self.assertLess(isolated[0], 1e-20)
+        void = np.exp(module._strand_log_density(t * 0 + 1, t * 0 + 1,
+                                                t * 0 + 1, 0.065, 1, 1))
+        self.assertTrue((void < 1e-20).all())
+
+    def test_layer_filaments_3d_structure_and_axis_scaling(self):
         _, modules, errors = worker.load_catalog(ROOT / "generators")
         self.assertFalse(errors)
         module = modules["layer_filaments"]
-        flat, colors, sizes = module.generate(30000, 42, height=0, y_spread=0)
-        thick, _, _ = module.generate(30000, 42, height=0, y_spread=0.4)
-        wavy, _, _ = module.generate(30000, 42, height=2, y_spread=0.4)
-        np.testing.assert_array_equal(flat[:, [0, 2]], thick[:, [0, 2]])
-        np.testing.assert_array_equal(flat[:, [0, 2]], wavy[:, [0, 2]])
-        self.assertTrue((flat[:, 1] == 0).all())
-        self.assertAlmostEqual(float(thick[:, 1].std()), 0.4, delta=0.01)
-        self.assertGreater(float(np.std(wavy[:, 1] - thick[:, 1])), 0.05)
-        self.assertTrue((np.abs(flat[:, [0, 2]]) <= 6).all())
+        thin, _, _ = module.generate(30000, 42, y_scale=0.6)
+        isotropic, _, _ = module.generate(30000, 42, y_scale=6)
+        np.testing.assert_array_equal(thin[:, [0, 2]], isotropic[:, [0, 2]])
+        np.testing.assert_allclose(thin[:, 1] * 10, isotropic[:, 1], atol=1e-6)
+        self.assertTrue((np.abs(thin) <= [6, 0.6, 6]).all())
+        deviations = isotropic.std(axis=0)
+        self.assertLess(deviations.max() / deviations.min(), 1.15)
+        density = module._cellular_density(42, 6, 0.065, 0.65, 1.5, 0, resolution=48)
+        a, b = density[:, 16, :].ravel(), density[:, 32, :].ravel()
+        self.assertLess(abs(float(np.corrcoef(a, b)[0, 1])), 0.5)
 
     def test_thin_region_preserves_noise_wavelength_and_fade_envelope(self):
         worker.load_catalog(ROOT / "generators")
