@@ -14,6 +14,68 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_soft_cutoff_preserves_peak_contrast(self):
+        from _postprocess import suppress_voids
+        # Mean exactly 1: compare dilute voids with two well-above-threshold peaks.
+        density = np.array([0.1] * 100 + [10., 20.] + [63.])
+        self.assertEqual(density.mean(), 1)
+        filtered = suppress_voids(density, 1)
+        self.assertLess(filtered[0] / density[0], .01)
+        self.assertGreater(filtered[-3] / density[-3], .99)
+        # A 2:1 peak ratio remains about 2:1, rather than becoming 4:1.
+        self.assertAlmostEqual(filtered[-2] / filtered[-3], 2, delta=.02)
+        self.assertTrue((filtered <= density).all())
+        self.assertIs(suppress_voids(density, 0), density)
+        np.testing.assert_array_equal(suppress_voids(np.zeros(3), 1), np.zeros(3))
+
+    def test_shared_edge_fade_preserves_survivors(self):
+        from _postprocess import apply_to_stars, edge_envelope
+        np.testing.assert_allclose(edge_envelope(np.array([0, .7, .85, 1, 2])), [1, 1, .5, 0, 0])
+        rng = np.random.default_rng(42)
+        positions = rng.uniform(-1, 1, (20000, 3)).astype(np.float32)
+        colors = rng.random((20000, 3)).astype(np.float32)
+        sizes = np.arange(20000, dtype=np.float32) + 1
+        disabled = apply_to_stars(positions, colors, sizes, 42, {"fade": 0})
+        self.assertIs(disabled[0], positions)
+        bounds = ((0, 0, 0), (1, 1, 1))
+        a = apply_to_stars(positions, colors, sizes, 42, {"fade": 1}, bounds)
+        b = apply_to_stars(positions, colors, sizes, 42, {"fade": 1}, bounds)
+        ids = a[2].astype(int) - 1
+        self.assertGreater(len(ids), 1000)
+        self.assertLess(len(ids), len(positions))
+        self.assertTrue((np.linalg.norm(a[0], axis=1) < 1).all())
+        for actual, original, repeat in zip(a, (positions, colors, sizes), b):
+            np.testing.assert_array_equal(actual, original[ids])
+            np.testing.assert_array_equal(actual, repeat)
+        core = np.flatnonzero(np.linalg.norm(positions, axis=1) <= .7)
+        self.assertTrue(np.isin(core, ids).all())
+
+    def test_shared_edge_fade_worker_and_native_delegation(self):
+        import struct
+        catalog, modules, errors = worker.load_catalog(ROOT / "generators")
+        self.assertFalse(errors)
+        for entry in catalog:
+            self.assertEqual(sum(p["key"] == "fade" for p in entry["parameters"]), 1)
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "stars.bin"
+            for name in ("galaxy", "filaments", "zeldovich", "noise_filament_curves"):
+                result = worker.generate_request(dict(generator=name, count=5000, seed=42,
+                    params={"fade": 1}), ROOT / "generators", output)
+                self.assertTrue(result["ok"], result)
+                self.assertEqual(result["requested_count"], 5000)
+                self.assertGreater(result["count"], 0)
+                self.assertLess(result["count"], 5000)
+                self.assertEqual(struct.unpack('<8sQ', output.read_bytes()[:16]),
+                                 (b'FSTAR002', result["count"]))
+                self.assertEqual(output.stat().st_size, 16 + 28 * result["count"])
+            # A density generator retains its own sampling and is not faded twice.
+            result = worker.generate_request(dict(generator="noise_clouds", count=5000,
+                seed=42, params={"fade": 1}), ROOT / "generators", output)
+            self.assertTrue(result["ok"], result)
+            expected = modules["noise_clouds"].generate(5000, 42, fade=1)
+            actual = np.frombuffer(output.read_bytes()[16:], dtype='<f4').reshape(-1, 7)
+            np.testing.assert_array_equal(actual, np.column_stack(expected).astype(np.float32))
+
     def test_zeldovich_single_mode_displacement(self):
         _, modules, errors = worker.load_catalog(ROOT / "generators")
         self.assertFalse(errors)
@@ -33,27 +95,27 @@ class Generators(unittest.TestCase):
     def test_zeldovich_evolution_and_y_scaling(self):
         _, modules, _ = worker.load_catalog(ROOT / "generators")
         module = modules["zeldovich"]
-        initial, _, _ = module.generate(50000, 42, evolution=0, density_power=1)
+        initial, _, _ = module.generate(50000, 42, evolution=0, void_threshold=0)
         np.testing.assert_allclose(initial.mean(axis=0), 0, atol=0.02)
         np.testing.assert_allclose((initial * initial).mean(axis=0), 12, atol=0.05)
-        middle, colors, sizes = module.generate(50000, 42, evolution=0.5, density_power=1)
-        later, _, _ = module.generate(50000, 42, evolution=1, density_power=1)
+        middle, colors, sizes = module.generate(50000, 42, evolution=0.5, void_threshold=0)
+        later, _, _ = module.generate(50000, 42, evolution=1, void_threshold=0)
         # q + D*s(q) is linear in D, accounting for periodic box crossings.
         residual = (later - 2*middle + initial + 6) % 12 - 6
         np.testing.assert_allclose(residual, 0, atol=4e-6)
-        thin, thin_colors, thin_sizes = module.generate(50000, 42, evolution=0.5, y_scale=0.1, density_power=1)
+        thin, thin_colors, thin_sizes = module.generate(50000, 42, evolution=0.5, y_scale=0.1, void_threshold=0)
         np.testing.assert_array_equal(thin[:, [0, 2]], middle[:, [0, 2]])
         np.testing.assert_allclose(thin[:, 1], middle[:, 1] * 0.1)
         np.testing.assert_array_equal(thin_colors, colors)
         np.testing.assert_array_equal(thin_sizes, sizes)
         self.assertTrue((np.abs(later) <= 6).all())
 
-    def test_zeldovich_density_power_suppresses_voids(self):
+    def test_zeldovich_soft_cutoff_suppresses_voids(self):
         _, modules, _ = worker.load_catalog(ROOT / "generators")
         module = modules["zeldovich"]
-        base, _, sizes = module.generate(100000, 42, density_power=1)
-        concentrated, colors, concentrated_sizes = module.generate(100000, 42, density_power=2)
-        strong, _, _ = module.generate(100000, 42, density_power=4)
+        base, _, sizes = module.generate(100000, 42, void_threshold=0)
+        concentrated, colors, concentrated_sizes = module.generate(100000, 42, void_threshold=1)
+        strong, _, _ = module.generate(100000, 42, void_threshold=2)
         # Measure against one common base-density estimate, not each output's own.
         from scipy.ndimage import gaussian_filter
         mass, _ = np.histogramdd(base, bins=32, range=[(-6, 6)] * 3)
@@ -67,7 +129,7 @@ class Generators(unittest.TestCase):
         self.assertLess(fractions[2], fractions[1] * 0.6)
         self.assertEqual(len(np.unique(concentrated, axis=0)), len(concentrated))
         np.testing.assert_array_equal(sizes, concentrated_sizes)
-        thin, thin_colors, _ = module.generate(100000, 42, density_power=2, y_scale=0.1)
+        thin, thin_colors, _ = module.generate(100000, 42, void_threshold=1, y_scale=0.1)
         np.testing.assert_array_equal(thin[:, [0, 2]], concentrated[:, [0, 2]])
         np.testing.assert_allclose(thin[:, 1], concentrated[:, 1] * 0.1)
         np.testing.assert_array_equal(colors, thin_colors)

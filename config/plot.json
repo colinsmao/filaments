@@ -7,17 +7,17 @@
   ],
   "camera": {
     "distance": 18.0,
-    "pitch": 41.959434509277344,
+    "pitch": 37.63960647583008,
     "target": [
-      2.1001546382904053,
-      -7.357190132141113,
-      6.39651346206665
+      4.735019207000732,
+      -5.029077053070068,
+      -2.4188547134399414
     ],
-    "yaw": -4847.04833984375
+    "yaw": -6526.33984375
   },
   "generator": {
     "auto_apply": true,
-    "count": 2838,
+    "count": 6731,
     "parameters": {
       "filaments": {
         "clusters": 0.20000000298023224,
@@ -121,9 +121,20 @@
         "star_size": 0.03999999910593033,
         "width": 0.02500000037252903,
         "y_scale": 0.515999972820282
+      },
+      "zeldovich": {
+        "detail": 0.33899998664855957,
+        "evolution": 1.187999963760376,
+        "extent": 6.0,
+        "fade": 1,
+        "size_variation": 0.4000000059604645,
+        "star_size": 0.03999999910593033,
+        "structure_scale": 6.968999862670898,
+        "void_threshold": 3.7920000553131104,
+        "y_scale": 0.23899999260902405
       }
     },
-    "script": "noise_filaments_aligned",
+    "script": "zeldovich",
     "seed": 817983802,
     "watch_files": true
   },

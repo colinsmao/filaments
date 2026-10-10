@@ -29,6 +29,10 @@ PARAMETERS = [
 ]
 
 
+def postprocess_bounds(extent=6.0, y_scale=0.3, **params):
+    return (0, 0, 0), (extent, extent * y_scale, extent)
+
+
 def build_curves(seed, extent=6.0, y_scale=0.3, frequency=2.0, octaves=2,
                  roughness=0.22, min_length=0.15, smoothing=1.0, resolution=96,
                  guide_continuity=0.0, guide_offset=0.0):

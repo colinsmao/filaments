@@ -9,13 +9,14 @@ import numpy as np
 from scipy import fft
 from scipy.ndimage import gaussian_filter, map_coordinates
 from scipy.stats import qmc
+from _postprocess import suppress_voids
 
 NAME = "Zeldovich displacement"
 PARAMETERS = [
     dict(key="extent", label="Extent", type="float", default=6.0, min=1.0, max=30.0),
     dict(key="structure_scale", label="Structure scale (units)", type="float", default=3.0, min=0.5, max=12.0),
     dict(key="evolution", label="Evolution strength", type="float", default=1.8, min=0.0, max=4.0),
-    dict(key="density_power", label="Density power", type="float", default=2.0, min=1.0, max=6.0),
+    dict(key="void_threshold", label="Void threshold (mean density)", type="float", default=1.0, min=0.0, max=4.0),
     dict(key="detail", label="Small-scale detail", type="float", default=0.25, min=0.0, max=1.0),
     dict(key="y_scale", label="Y scale fraction", type="float", default=1.0, min=0.02, max=1.0),
     dict(key="star_size", label="Star size (units)", type="float", default=0.04, min=0.002, max=0.5),
@@ -82,8 +83,12 @@ def _sample_periodic(field, positions):
                            mode="grid-wrap", prefilter=False)
 
 
-def _concentrate(positions, count, seed, power, resolution=64):
-    """Sample the powered, smoothed final density using periodic linear tents.
+def postprocess_bounds(extent=6.0, y_scale=1.0, **params):
+    return (0, 0, 0), (extent, extent * y_scale, extent)
+
+
+def _concentrate(positions, count, seed, threshold, resolution=64):
+    """Sample the soft-filtered final density using periodic linear tents.
 
     Fresh continuous samples avoid duplicate particles and block-shaped cells.
     This is an artistic density postprocess, not additional gravitational motion.
@@ -92,7 +97,7 @@ def _concentrate(positions, count, seed, power, resolution=64):
     flat = (indices[:, 0] * resolution + indices[:, 1]) * resolution + indices[:, 2]
     mass = np.bincount(flat, minlength=resolution**3).reshape((resolution,) * 3)
     density = gaussian_filter(mass.astype(np.float64), 1.0, mode="wrap")
-    weights = (density / density.max()) ** power
+    weights = suppress_voids(density, threshold)
     rng = np.random.default_rng(np.random.SeedSequence([seed, 803]))
     selected = rng.choice(weights.size, size=count, p=weights.ravel() / weights.sum())
     centers = np.column_stack(np.unravel_index(selected, weights.shape)) + 0.5
@@ -102,10 +107,10 @@ def _concentrate(positions, count, seed, power, resolution=64):
 
 def generate(count, seed, extent=6.0, structure_scale=3.0, evolution=1.8,
              detail=0.25, y_scale=1.0, star_size=0.04, size_variation=0.4,
-             density_power=2.0):
+             void_threshold=1.0):
     # A minimum pilot population avoids amplifying shot noise at small counts.
-    # Power 1 bypasses postprocessing and exactly preserves the original output.
-    population = max(count, 262144) if density_power != 1 else count
+    # Threshold 0 bypasses postprocessing and preserves the original output.
+    population = max(count, 262144) if void_threshold > 0 else count
     q = initial_particles(population, seed)
     positions = q.copy()
     if evolution != 0:
@@ -114,8 +119,8 @@ def generate(count, seed, extent=6.0, structure_scale=3.0, evolution=1.8,
             positions[:, axis] += evolution * _sample_periodic(displacement[axis], q)
         positions %= 1
 
-    if density_power != 1:
-        positions = _concentrate(positions, count, seed, density_power)
+    if void_threshold > 0:
+        positions = _concentrate(positions, count, seed, void_threshold)
 
     # Color by the actual final concentration, including overlapping streams.
     # This is display-only: it does not move stars or alter their sizes.

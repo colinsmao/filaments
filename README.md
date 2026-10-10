@@ -261,20 +261,45 @@ no viewer rebuild or additional dependency is required.
   through the same values only animate the same trajectories; there is no
   iterative solver to converge. After trajectories cross, stars pass through
   concentrations rather than binding into stable structures.
-- **Density power** suppresses void stars by resampling the final density in
-  proportion to `density^power` (default 2, range 1–6). At 1 it bypasses this
-  stage and returns the original particles exactly. Above 1, a periodic 64³
-  smoothed density estimate is powered and sampled continuously, retaining the
-  requested star count without duplicate particles. This changes positions;
-  it is not an opacity control or further evolution. At least 262,144 pilot
-  particles estimate density to reduce sampling noise for small star counts.
-  Higher values increasingly favor knots and can thin out weaker connections.
+- **Void threshold (mean density)** replaces the former density-power control.
+  It multiplies density by `rho² / (rho² + threshold²)`, where `rho` is relative
+  to the volume-mean density. The default threshold is 1 (range 0–4). The
+  multiplier is half at the threshold, tiny in voids, and approaches 1 in
+  peaks, avoiding the peak amplification of a power law. Threshold 0 returns
+  the original particles exactly. Otherwise a periodic 64³ smoothed density
+  estimate is filtered and sampled continuously, retaining the requested count
+  without duplicate particles. Renormalization still reallocates removed void
+  mass across surviving regions; it does not cap existing peaks. At least
+  262,144 pilot particles reduce density-estimation noise at small star counts.
+  The density helper lives in `_postprocess.py` for reuse by other methods.
 - **Y scale fraction** compresses the complete result vertically, including
   its features. It does not slice a thin region out of the field. At 1 the
   construction is statistically isotropic.
 - Colors run from blue to warm as the final local particle concentration rises.
   Coloring does not change positions. Star size and size variation remain
   independent per-star attributes.
+
+## Shared postprocessing
+
+Every generator in the viewer has **Fade edges (0 off, 1 on)**. The common
+envelope in `generators/_postprocess.py` is full strength inside 70% of an
+ellipsoid and smoothly reaches zero at its surface. Existing density generators
+apply it before sampling and keep their requested star count. Other generators
+use the worker's shared postprocessing stage: each sampled star survives with
+the envelope's probability. Surviving positions, colors and sizes are unchanged;
+the displayed count decreases. Disabling fade restores the original output.
+
+The fallback uses the cloud's bounding box unless the generator supplies
+`postprocess_bounds(**params)`, returning `(center, half_extents)` in world
+coordinates. Zel'dovich and explicit noise curves supply their known box bounds,
+including Y thickness. A degenerate axis is ignored. If fading removes every
+star, generation reports an error because the viewer requires a nonempty cloud.
+
+The worker appends shared controls to each script's catalog, so they use the
+existing GUI and autosave system without a renderer rebuild. A script that
+already declares `fade` handles it natively; it is never applied twice. Further
+point processors belong in `apply_to_stars`, with their schema added by the
+worker. Density-aware operations can reuse the same helpers before sampling.
 
 ## Next experiments
 

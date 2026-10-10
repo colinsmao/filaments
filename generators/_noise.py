@@ -6,6 +6,7 @@ approximates a continuous density; stars are not restricted to grid vertices.
 from pathlib import Path
 import sys
 import numpy as np
+from _postprocess import fade_density
 
 # A project-local wheel keeps the existing Conda environment unchanged. A normal
 # installation from python/requirements.txt works too, including custom script dirs.
@@ -34,18 +35,6 @@ def grid(resolution=96, y_scale=1.0):
     """Evaluate the same noise in a thinner region, preserving spatial wavelengths."""
     axis = np.linspace(-1, 1, resolution, dtype=np.float32)
     return np.stack(np.meshgrid(axis, axis * y_scale, axis, indexing="ij"), axis=-1).reshape(-1, 3)
-
-
-def fade_density(density):
-    """Ellipsoidal envelope: full density to 70% radius, smooth fade to zero at 100%.
-
-    Radius is measured in local grid coordinates, so its Y radius follows the
-    selected sampling thickness. It changes star density, not star opacity/size.
-    """
-    axis2 = np.linspace(-1, 1, density.shape[0], dtype=np.float32) ** 2
-    radius = np.sqrt(axis2[:, None, None] + axis2[None, :, None] + axis2[None, None, :])
-    t = np.clip((1 - radius) / 0.3, 0, 1)
-    return density * (t * t * (3 - 2 * t))
 
 
 def sample_density(density, count, rng):

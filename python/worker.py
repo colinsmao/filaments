@@ -11,6 +11,10 @@ import types
 
 MAX_POINTS = 1_000_000
 
+# Bundled shared processors are available even for external generator folders.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "generators"))
+from _postprocess import FADE_PARAMETER, apply_to_stars
+
 
 def load_catalog(directory):
     catalog, modules, errors = [], {}, []
@@ -48,6 +52,8 @@ def load_catalog(directory):
                 keys.add(key)
                 parameters.append(dict(key=key, label=str(entry.get("label", key)), type=kind,
                                        min=lo, max=hi, default=default))
+            if "fade" not in keys:
+                parameters.append(dict(FADE_PARAMETER))
             if len(parameters) > 64:
                 raise ValueError("Maximum 64 parameters per generator")
             catalog.append(dict(id=path.stem, name=str(getattr(module, "NAME", path.stem)), parameters=parameters))
@@ -86,7 +92,12 @@ def generate_request(request, directory, output):
             value = max(entry["min"], min(entry["max"], value))
             params[entry["key"]] = int(value) if entry["type"] == "int" else float(value)
         started = time.perf_counter()
-        generated = modules[selected].generate(count=count, seed=seed, **params)
+        module = modules[selected]
+        native_keys = {entry["key"] for entry in getattr(module, "PARAMETERS", [])}
+        # Existing density generators own their fade stage; all others receive
+        # the shared point-stage fallback without changing their signatures.
+        native_params = {key: value for key, value in params.items() if key in native_keys}
+        generated = module.generate(count=count, seed=seed, **native_params)
         if not isinstance(generated, (tuple, list)) or len(generated) not in (2, 3):
             raise ValueError("generate must return (positions, colors) or (positions, colors, sizes)")
         positions, colors = generated[:2]
@@ -105,12 +116,18 @@ def generate_request(request, directory, output):
             raise ValueError("Position magnitude exceeds 1,000,000 units")
         if ((colors < 0) | (colors > 1)).any():
             raise ValueError("RGB colors must be in [0, 1]")
+        if "fade" not in native_keys and params.get("fade", 0):
+            bounds_function = getattr(module, "postprocess_bounds", None)
+            bounds = bounds_function(**native_params) if callable(bounds_function) else None
+            positions, colors, sizes = apply_to_stars(positions, colors, sizes, seed, params, bounds)
+        requested_count = count
+        count = len(positions)
         points = np.empty((count, 7), dtype="<f4")
         points[:, :3], points[:, 3:6], points[:, 6] = positions, colors, sizes
         with output.open("wb") as stream:
             stream.write(struct.pack("<8sQ", b"FSTAR002", count))
             stream.write(points.tobytes())
-        response.update(ok=True, generator=selected, params=params, count=count,
+        response.update(ok=True, generator=selected, params=params, count=count, requested_count=requested_count,
                         generation_ms=(time.perf_counter() - started) * 1000)
     except Exception:
         response.update(ok=False, error=traceback.format_exc(limit=8))
