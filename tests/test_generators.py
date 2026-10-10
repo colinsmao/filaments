@@ -14,6 +14,42 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_thin_region_preserves_noise_wavelength_and_fade_envelope(self):
+        worker.load_catalog(ROOT / "generators")
+        from _noise import grid, fractal_noise, fade_density
+        full = fractal_noise(grid(9), 42, 2, 3).reshape(9, 9, 9)
+        thin = fractal_noise(grid(9, 0.5), 42, 2, 3).reshape(9, 9, 9)
+        # Shared spatial coordinates must have identical noise, unlike squashing.
+        np.testing.assert_array_equal(full[:, 2:7, :], thin[:, ::2, :])
+        envelope = fade_density(np.ones((21, 21, 21)))
+        self.assertEqual(envelope[10, 10, 10], 1)
+        self.assertEqual(envelope[10, 10, 0], 0)
+        self.assertTrue(((envelope >= 0) & (envelope <= 1)).all())
+        self.assertTrue(0 < envelope[10, 10, 18] < 1)
+        self.assertTrue((envelope[0] == 0).all())
+
+    def test_thin_region_and_fade_outputs(self):
+        _, modules, errors = worker.load_catalog(ROOT / "generators")
+        self.assertFalse(errors)
+        for name in ("noise_clouds", "noise_filaments"):
+            module = modules[name]
+            plain, _, _ = module.generate(20000, 42, y_scale=0.1)
+            faded, colors, sizes = module.generate(20000, 42, y_scale=0.1, fade=1)
+            repeated, _, _ = module.generate(20000, 42, y_scale=0.1, fade=1)
+            np.testing.assert_array_equal(faded, repeated)
+            self.assertEqual(faded.shape, (20000, 3))
+            self.assertTrue((np.abs(faded[:, 1]) <= 0.6).all())
+            self.assertTrue(np.isfinite(faded).all() and np.isfinite(colors).all() and (sizes > 0).all())
+            scale = np.array([6, 0.6, 6])
+            plain_radius = np.linalg.norm(plain / scale, axis=1)
+            faded_radius = np.linalg.norm(faded / scale, axis=1)
+            self.assertLess(np.mean(faded_radius > 0.9), np.mean(plain_radius > 0.9) * 0.5)
+            flat, _, _ = module.generate(100, 42, y_scale=0, fade=1)
+            self.assertTrue((flat[:, 1] == 0).all())
+        original, _, _ = modules["noise_filaments"].generate(1000, 42, layer_continuity=0)
+        adaptive, _, _ = modules["noise_filaments"].generate(1000, 42, layer_continuity=1)
+        np.testing.assert_array_equal(original, adaptive)  # Full-depth mode is unchanged.
+
     def test_continuous_noise_density_sampling(self):
         worker.load_catalog(ROOT / "generators")  # Also enables shared generator imports.
         from _noise import sample_density, fractal_noise

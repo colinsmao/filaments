@@ -4,11 +4,13 @@ Frequency changes the size/number of clouds, contrast deepens the voids, and
 octaves/roughness add small-scale detail. FastNoiseLite computes the noise in C++.
 """
 import numpy as np
-from _noise import fractal_noise, grid, sample_density, star_appearance
+from _noise import fractal_noise, grid, sample_density, star_appearance, fade_density
 
 NAME = "Noise clouds"
 PARAMETERS = [
     dict(key="extent", label="Extent", type="float", default=6.0, min=1.0, max=30.0),
+    dict(key="y_scale", label="Y thickness fraction", type="float", default=1.0, min=0.0, max=1.0),
+    dict(key="fade", label="Fade edges (0 off, 1 on)", type="int", default=0, min=0, max=1),
     dict(key="frequency", label="Noise frequency", type="float", default=2.0, min=0.5, max=6.0),
     dict(key="contrast", label="Density contrast", type="float", default=12.0, min=0.0, max=24.0),
     dict(key="octaves", label="Detail octaves", type="int", default=3, min=1, max=5),
@@ -19,11 +21,15 @@ PARAMETERS = [
 
 
 def generate(count, seed, extent=6.0, frequency=2.0, contrast=12.0,
-             octaves=3, roughness=0.4, star_size=0.04, size_variation=0.4):
+             octaves=3, roughness=0.4, star_size=0.04, size_variation=0.4,
+             y_scale=1.0, fade=0):
     resolution = 96
-    field = fractal_noise(grid(resolution), seed, frequency, octaves, roughness)
+    field = fractal_noise(grid(resolution, y_scale), seed, frequency, octaves, roughness)
     # Subtracting the maximum keeps exponentials bounded without changing the PDF.
     density = np.exp((field - field.max()) * contrast).reshape((resolution,) * 3)
+    if fade:
+        density = fade_density(density)
     positions, selected = sample_density(density, count, np.random.default_rng(seed))
     colors, sizes = star_appearance(count, seed, density, selected, star_size, size_variation)
+    positions[:, 1] *= y_scale
     return positions * extent, colors, sizes

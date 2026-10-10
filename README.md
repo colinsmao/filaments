@@ -94,6 +94,25 @@ Two additional scripts explore noise-driven densities:
   are both near zero, forming winding strands. **Strand thickness** widens their
   density profile; **Clump contrast** varies density along them.
 
+Both noise scripts have **Y thickness fraction**: 1 uses the full volume, 0.1
+samples Y between `-0.1 * extent` and `+0.1 * extent`, and 0 makes a flat layer.
+Noise is evaluated at those actual coordinates, so its wavelengths stay unchanged;
+this selects a thinner region rather than compressing the noise features.
+**Fade edges (0 off, 1 on)** optionally tapers density over the outer 30% of an
+ellipsoid fitted to the region. The total star count stays fixed; stars are
+redistributed toward the interior rather than made transparent or smaller.
+The toggle uses an integer 0/1 control supported by the running viewer.
+
+In **noise_filaments.py**, **Layer continuity** defaults to 1 to reduce isolated
+patches caused by slicing across 3D strands. The density uses
+`exp(-(a*a + beta*b*b)/(2*width*width) + clumping*knots)`, where
+`beta = (1-continuity) + continuity*y_thickness**2`.
+As the layer narrows, relaxing the second field constraint favors curves across
+the layer. The noise wavelengths remain unchanged. Set continuity to 0 for a
+literal slice of the original 3D density. Full thickness is unchanged either way.
+This is an artistic heuristic: natural voids remain, and connected strands are
+not guaranteed for every seed.
+
 In both, **Noise frequency** changes how many structures fit inside the volume;
 **Detail octaves** and **Detail strength** add finer features. **Extent** scales
 the volume without changing the underlying normalized pattern. FastNoiseLite's

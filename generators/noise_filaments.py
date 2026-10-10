@@ -1,14 +1,18 @@
 """Organic strands from the intersection of two independent noise zero-surfaces.
 
-Density = exp(-(a*a + b*b)/(2*width*width)), modulated by a third noise field.
+Density = exp(-(a*a + beta*b*b)/(2*width*width)), modulated by a third noise field.
+Layer continuity reduces beta in thin Y bands, transitioning toward 2D strands.
 There are no junction lists, line segments, or precomputed curve paths.
 """
 import numpy as np
-from _noise import fractal_noise, grid, sample_density, star_appearance
+from _noise import fractal_noise, grid, sample_density, star_appearance, fade_density
 
 NAME = "Noise filaments"
 PARAMETERS = [
     dict(key="extent", label="Extent", type="float", default=6.0, min=1.0, max=30.0),
+    dict(key="y_scale", label="Y thickness fraction", type="float", default=1.0, min=0.0, max=1.0),
+    dict(key="layer_continuity", label="Layer continuity", type="float", default=1.0, min=0.0, max=1.0),
+    dict(key="fade", label="Fade edges (0 off, 1 on)", type="int", default=0, min=0, max=1),
     dict(key="frequency", label="Noise frequency", type="float", default=2.0, min=0.5, max=6.0),
     dict(key="width", label="Strand thickness", type="float", default=0.065, min=0.025, max=0.25),
     dict(key="octaves", label="Detail octaves", type="int", default=2, min=1, max=4),
@@ -20,14 +24,22 @@ PARAMETERS = [
 
 
 def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
-             octaves=2, roughness=0.22, clumping=3.0, star_size=0.04, size_variation=0.4):
+             octaves=2, roughness=0.22, clumping=3.0, star_size=0.04, size_variation=0.4,
+             y_scale=1.0, fade=0, layer_continuity=1.0):
     resolution = 96
-    points = grid(resolution)
+    points = grid(resolution, y_scale)
     a = fractal_noise(points, np.random.SeedSequence([seed, 101]), frequency, octaves, roughness)
     b = fractal_noise(points, np.random.SeedSequence([seed, 202]), frequency, octaves, roughness)
     knots = fractal_noise(points, np.random.SeedSequence([seed, 303]), frequency * 0.6, 2)
-    log_density = -(a * a + b * b) / (2 * width * width) + clumping * knots
+    # A literal thin slice cuts 3D strands into isolated spots. Relaxing B's
+    # constraint approaches A=0 contours across the layer without stretching
+    # either noise field. At full thickness the original density is unchanged.
+    beta = (1 - layer_continuity) + layer_continuity * y_scale * y_scale
+    log_density = -(a * a + beta * b * b) / (2 * width * width) + clumping * knots
     density = np.exp(log_density - log_density.max()).reshape((resolution,) * 3)
+    if fade:
+        density = fade_density(density)
     positions, selected = sample_density(density, count, np.random.default_rng(seed))
     colors, sizes = star_appearance(count, seed, density, selected, star_size, size_variation)
+    positions[:, 1] *= y_scale
     return positions * extent, colors, sizes
