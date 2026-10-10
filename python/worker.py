@@ -1,0 +1,124 @@
+"""One-shot, renderer-independent generation protocol. No OpenGL imports."""
+import argparse
+import json
+import math
+from pathlib import Path
+import struct
+import sys
+import time
+import traceback
+import types
+
+MAX_POINTS = 1_000_000
+
+
+def load_catalog(directory):
+    catalog, modules, errors = [], {}, []
+    sys.path.insert(0, str(directory))
+    for path in sorted(directory.glob("*.py")):
+        if path.name.startswith("_"):
+            continue
+        try:
+            module = types.ModuleType(path.stem)
+            module.__file__ = str(path)
+            # Compile actual source every time, including same-second saves.
+            exec(compile(path.read_text(encoding="utf-8-sig"), str(path), "exec"), module.__dict__)
+            if not callable(getattr(module, "generate", None)):
+                raise ValueError("Missing generate(count, seed, **params) function")
+            parameters, keys = [], set()
+            for entry in getattr(module, "PARAMETERS", []):
+                key, kind = entry["key"], entry["type"]
+                if not isinstance(key, str) or not key.isidentifier() or key in keys or key in ("count", "seed"):
+                    raise ValueError(f"Invalid or duplicate parameter key: {key}")
+                if kind not in ("int", "float"):
+                    raise ValueError(f"Unsupported parameter type: {kind}")
+                lo, hi, default = entry["min"], entry["max"], entry["default"]
+                if not all(isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+                           for v in (lo, hi, default)) or not lo <= default <= hi:
+                    raise ValueError(f"Invalid range/default for {key}")
+                if kind == "int" and (any(int(v) != v for v in (lo, hi, default))
+                                      or lo < -2147483648 or hi > 2147483647):
+                    raise ValueError(f"Integer parameter out of range: {key}")
+                if max(abs(lo), abs(hi)) > 1e20:
+                    raise ValueError(f"Parameter range too large: {key}")
+                keys.add(key)
+                parameters.append(dict(key=key, label=str(entry.get("label", key)), type=kind,
+                                       min=lo, max=hi, default=default))
+            if len(parameters) > 64:
+                raise ValueError("Maximum 64 parameters per generator")
+            catalog.append(dict(id=path.stem, name=str(getattr(module, "NAME", path.stem)), parameters=parameters))
+            modules[path.stem] = module
+        except Exception:
+            errors.append(f"{path.name}:\n{traceback.format_exc(limit=5)}")
+    return catalog, modules, errors
+
+
+def generate_request(request, directory, output):
+    import numpy as np
+
+    catalog, modules, errors = load_catalog(directory)
+    response = dict(catalog=catalog, warnings=errors)
+    selected = request.get("generator", "")
+    if not selected and catalog:
+        selected = next((item["id"] for item in catalog if item["id"] == "galaxy"), catalog[0]["id"])
+    if selected not in modules:
+        response.update(ok=False, error="Generator unavailable: " + selected + "\n" + "\n".join(errors))
+        return response
+    try:
+        count, seed = request.get("count", 100000), request.get("seed", 42)
+        if type(count) is not int or not 1 <= count <= MAX_POINTS:
+            raise ValueError(f"count must be an integer in [1, {MAX_POINTS}]")
+        if type(seed) is not int or not 0 <= seed <= 2147483647:
+            raise ValueError("seed must be an integer in [0, 2147483647]")
+        schema = next(item for item in catalog if item["id"] == selected)
+        supplied = request.get("params", {})
+        if not isinstance(supplied, dict):
+            raise ValueError("params must be an object")
+        params = {}
+        for entry in schema["parameters"]:
+            value = supplied.get(entry["key"], entry["default"])
+            if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value):
+                raise ValueError(f"Invalid value for {entry['key']}")
+            value = max(entry["min"], min(entry["max"], value))
+            params[entry["key"]] = int(value) if entry["type"] == "int" else float(value)
+        started = time.perf_counter()
+        positions, colors = modules[selected].generate(count=count, seed=seed, **params)
+        positions = np.asarray(positions, dtype=np.float32)
+        colors = np.asarray(colors, dtype=np.float32)
+        if positions.shape != (count, 3) or colors.shape != (count, 3):
+            raise ValueError(f"Expected two ({count}, 3) arrays; got {positions.shape} and {colors.shape}")
+        if not np.isfinite(positions).all() or not np.isfinite(colors).all():
+            raise ValueError("Positions and colors must be finite")
+        if (np.abs(positions) > 1e6).any():
+            raise ValueError("Position magnitude exceeds 1,000,000 units")
+        if ((colors < 0) | (colors > 1)).any():
+            raise ValueError("RGB colors must be in [0, 1]")
+        points = np.empty((count, 6), dtype="<f4")
+        points[:, :3], points[:, 3:] = positions, colors
+        with output.open("wb") as stream:
+            stream.write(struct.pack("<8sQ", b"FSTAR001", count))
+            stream.write(points.tobytes())
+        response.update(ok=True, generator=selected, params=params, count=count,
+                        generation_ms=(time.perf_counter() - started) * 1000)
+    except Exception:
+        response.update(ok=False, error=traceback.format_exc(limit=8))
+    return response
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--request", type=Path, required=True)
+    parser.add_argument("--response", type=Path, required=True)
+    parser.add_argument("--points", type=Path, required=True)
+    parser.add_argument("--generators", type=Path, required=True)
+    args = parser.parse_args()
+    try:
+        request = json.loads(args.request.read_text(encoding="utf-8"))
+        response = generate_request(request, args.generators.resolve(), args.points)
+    except Exception:
+        response = dict(ok=False, error=traceback.format_exc(limit=8), catalog=[], warnings=[])
+    args.response.write_text(json.dumps(response, allow_nan=False), encoding="utf-8")
+
+
+if __name__ == "__main__":
+    main()

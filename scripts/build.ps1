@@ -1,7 +1,8 @@
 param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Release',
     [switch]$Run,
-    [switch]$Test
+    [switch]$Test,
+    [string]$PythonExecutable = ''
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -13,7 +14,9 @@ $build = "$root/build/$Configuration"
 $originalPath = $env:PATH
 try {
     $env:PATH = "$toolBin;$env:PATH"
-    & $cmake -S $root -B $build -G Ninja "-DCMAKE_MAKE_PROGRAM=$ninja" "-DCMAKE_C_COMPILER=$toolBin/clang.exe" "-DCMAKE_CXX_COMPILER=$toolBin/clang++.exe" "-DCMAKE_BUILD_TYPE=$Configuration"
+    $pythonArgs = @()
+    if ($PythonExecutable) { $pythonArgs += "-DPython3_EXECUTABLE=$PythonExecutable" }
+    & $cmake -S $root -B $build -G Ninja "-DCMAKE_MAKE_PROGRAM=$ninja" "-DCMAKE_C_COMPILER=$toolBin/clang.exe" "-DCMAKE_CXX_COMPILER=$toolBin/clang++.exe" "-DCMAKE_BUILD_TYPE=$Configuration" @pythonArgs
     if ($LASTEXITCODE -ne 0) { throw 'CMake configure failed' }
     & $cmake --build $build --parallel
     if ($LASTEXITCODE -ne 0) { throw 'Build failed' }

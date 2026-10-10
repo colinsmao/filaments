@@ -3,3 +3,5 @@
 build/
 imgui.ini
 *.ppm
+__pycache__/
+*.pyc

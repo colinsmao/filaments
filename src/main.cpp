@@ -10,129 +10,21 @@
 #include <cstddef>
 #include <cstdio>
 #include <fstream>
-#include <random>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-struct Point { glm::vec3 position; glm::vec3 color; };
-
-GLuint shader(GLenum type, const char* source) {
-    const GLuint id = glCreateShader(type);
-    glShaderSource(id, 1, &source, nullptr);
-    glCompileShader(id);
-    GLint ok = 0;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &ok);
-    if (!ok) {
-        char log[4096]{};
-        glGetShaderInfoLog(id, sizeof(log), nullptr, log);
-        glDeleteShader(id);
-        throw std::runtime_error(log);
-    }
-    return id;
-}
-
-// One position/color buffer and one draw call, independent of point count.
-class PointRenderer {
-    GLuint vao = 0, vbo = 0, program = 0;
-    GLint matrixLocation = -1, sizeLocation = -1, roundLocation = -1;
-    GLsizei count = 0;
-public:
-    PointRenderer() {
-        const char* vs = R"(#version 330 core
-layout(location=0) in vec3 position;
-layout(location=1) in vec3 color;
-uniform mat4 viewProjection;
-uniform float pointSize;
-out vec3 vertexColor;
-void main() {
-    gl_Position = viewProjection * vec4(position, 1.0);
-    gl_PointSize = pointSize;
-    vertexColor = color;
-})";
-        const char* fs = R"(#version 330 core
-in vec3 vertexColor;
-uniform bool roundPoints;
-out vec4 fragColor;
-void main() {
-    if (roundPoints) {
-        vec2 p = gl_PointCoord * 2.0 - 1.0;
-        if (dot(p, p) > 1.0) discard;
-    }
-    fragColor = vec4(vertexColor, 1.0);
-})";
-        const GLuint vertex = shader(GL_VERTEX_SHADER, vs);
-        const GLuint fragment = shader(GL_FRAGMENT_SHADER, fs);
-        program = glCreateProgram();
-        glAttachShader(program, vertex);
-        glAttachShader(program, fragment);
-        glLinkProgram(program);
-        glDeleteShader(vertex);
-        glDeleteShader(fragment);
-        GLint ok = 0;
-        glGetProgramiv(program, GL_LINK_STATUS, &ok);
-        if (!ok) {
-            char log[4096]{};
-            glGetProgramInfoLog(program, sizeof(log), nullptr, log);
-            glDeleteProgram(program);
-            throw std::runtime_error(log);
-        }
-        matrixLocation = glGetUniformLocation(program, "viewProjection");
-        sizeLocation = glGetUniformLocation(program, "pointSize");
-        roundLocation = glGetUniformLocation(program, "roundPoints");
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Point), reinterpret_cast<void*>(offsetof(Point, position)));
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Point), reinterpret_cast<void*>(offsetof(Point, color)));
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glBindVertexArray(0);
-    }
-    ~PointRenderer() {
-        glDeleteBuffers(1, &vbo);
-        glDeleteVertexArrays(1, &vao);
-        glDeleteProgram(program);
-    }
-    PointRenderer(const PointRenderer&) = delete;
-    PointRenderer& operator=(const PointRenderer&) = delete;
-    void setPoints(const std::vector<Point>& points) {
-        count = static_cast<GLsizei>(points.size());
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(points.size() * sizeof(Point)), points.data(), GL_STATIC_DRAW);
-    }
-    void draw(const glm::mat4& matrix, float size, bool round = true, GLenum mode = GL_POINTS) const {
-        glUseProgram(program);
-        glUniformMatrix4fv(matrixLocation, 1, GL_FALSE, glm::value_ptr(matrix));
-        glUniform1f(sizeLocation, size);
-        glUniform1i(roundLocation, round);
-        glBindVertexArray(vao);
-        glDrawArrays(mode, 0, count);
-        glBindVertexArray(0);
-    }
-};
-
-std::vector<Point> makeCloud(int count) {
-    std::vector<Point> points;
-    points.reserve(count);
-    std::mt19937 rng(42);
-    std::uniform_real_distribution<float> uniform(0.0f, 1.0f);
-    std::normal_distribution<float> noise(0.0f, 0.14f);
-    for (int i = 0; i < count; ++i) {
-        const float t = uniform(rng), angle = t * 28.0f + float(i % 3) * 2.0944f;
-        const float radius = 2.2f + 0.8f * std::sin(t * 10.0f);
-        const glm::vec3 p(radius * std::cos(angle) + noise(rng), (t - 0.5f) * 10.0f + noise(rng), radius * std::sin(angle) + noise(rng));
-        const glm::vec3 c = glm::mix(glm::vec3(0.2f, 0.75f, 1.0f), glm::vec3(1.0f, 0.48f, 0.2f), t);
-        points.push_back({p, c});
-    }
-    return points;
-}
+#include "point_renderer.h"
+#include "generation.h"
+#include "generator_panel.h"
 
 int render(GLFWwindow* window, bool smoke) {
     PointRenderer cloud, axes;
-    int requestedCount = 100000, pointCount = requestedCount;
-    cloud.setPoints(makeCloud(pointCount));
+    int pointCount = 0;
+    GeneratorPanel generator;
+    glm::vec3 cloudCenter(0.0f);
+    float cloudRadius = 5.0f;
+    double uploadMs = 0;
     axes.setPoints({{{0,0,0},{1,0.3f,0.3f}},{{5,0,0},{1,0.3f,0.3f}},
                     {{0,0,0},{0.3f,1,0.5f}},{{0,5,0},{0.3f,1,0.5f}},
                     {{0,0,0},{0.4f,0.5f,1}},{{0,0,5},{0.4f,0.5f,1}}});
@@ -147,17 +39,33 @@ int render(GLFWwindow* window, bool smoke) {
         controls.speed = saved.moveSpeed;
         // A restored first-person mode starts with the mouse free for the GUI.
     }
-    float size = 2.0f;
+    float size = 0.04f;
     bool showAxes = true, round = true, vsync = true;
     float background[3] = {0.025f, 0.035f, 0.055f};
-    float sizeRange[2]{};
-    glGetFloatv(GL_POINT_SIZE_RANGE, sizeRange);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_PROGRAM_POINT_SIZE);
     int frame = 0;
+    const double started = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         controls.checkFocus(window);
+        if (auto points = generator.tick(glfwGetTime())) {
+            const bool firstCloud = pointCount == 0;
+            glm::vec3 low = points->front().position, high = low;
+            for (const auto& point : *points) {
+                low = glm::min(low, point.position);
+                high = glm::max(high, point.position);
+            }
+            cloudCenter = (low + high) * 0.5f;
+            cloudRadius = std::max(glm::length(high - low) * 0.5f, 0.1f);
+            const double uploadStart = glfwGetTime();
+            cloud.setPoints(*points);
+            uploadMs = (glfwGetTime() - uploadStart) * 1000;
+            pointCount = static_cast<int>(points->size());
+            if (firstCloud) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 2000.0f); }
+        }
+        if (smoke && !generator.lastError().empty()) throw std::runtime_error(generator.lastError());
+        if (smoke && glfwGetTime() - started > 30.0) throw std::runtime_error("Generator smoke test timed out");
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         if (width == 0 || height == 0) { glfwWaitEventsTimeout(0.1); continue; }
@@ -166,12 +74,15 @@ int render(GLFWwindow* window, bool smoke) {
         ImGui::NewFrame();
         auto& io = ImGui::GetIO();
         ImGui::SetNextWindowPos(ImVec2(16, 16), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowSize(ImVec2(300, 0), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(380, 0), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSizeConstraints(ImVec2(330, 100), ImVec2(440, std::max(100.0f, io.DisplaySize.y - 32)));
         ImGui::Begin("Filaments", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::Text("%s", "3D point viewer / OpenGL 3.3");
         ImGui::Separator();
         const bool wasCaptured = controls.captured();
         ImGui::BeginDisabled(wasCaptured);
+        generator.draw(glfwGetTime());
+        ImGui::Separator();
         int mode = controls.mode;
         if (ImGui::Combo("Camera (F)", &mode, "Drag / orbit\0First person\0"))
             controls.setMode(window, static_cast<CameraControls::Mode>(mode));
@@ -180,29 +91,33 @@ int render(GLFWwindow* window, bool smoke) {
         ImGui::Separator();
         ImGui::Text("%d points | %.1f FPS", pointCount, io.Framerate);
         ImGui::Text("GPU point buffer: %.1f MiB", pointCount * sizeof(Point) / (1024.0 * 1024.0));
-        ImGui::SliderInt("Points", &requestedCount, 1000, 1000000, "%d", ImGuiSliderFlags_Logarithmic);
-        if (ImGui::Button("Generate sample")) {
-            cloud.setPoints(makeCloud(requestedCount));
-            pointCount = requestedCount;
+        ImGui::Text("Upload (CPU): %.1f ms", uploadMs);
+        if (ImGui::CollapsingHeader("Display")) {
+            ImGui::SliderFloat("Star diameter", &size, 0.002f, 0.5f, "%.3f units", ImGuiSliderFlags_Logarithmic);
+            ImGui::Checkbox("Round points", &round);
+            ImGui::Checkbox("Axes", &showAxes);
+            if (ImGui::Checkbox("VSync", &vsync)) glfwSwapInterval(vsync ? 1 : 0);
+            ImGui::ColorEdit3("Background", background);
         }
-        ImGui::SliderFloat("Point size", &size, std::max(1.0f, sizeRange[0]), std::min(12.0f, sizeRange[1]), "%.1f px");
-        ImGui::Checkbox("Round points", &round);
-        ImGui::Checkbox("Axes", &showAxes);
-        if (ImGui::Checkbox("VSync", &vsync)) glfwSwapInterval(vsync ? 1 : 0);
-        ImGui::ColorEdit3("Background", background);
         if (ImGui::Button("Reset camera (R)")) camera = Camera{};
+        ImGui::SameLine();
+        if (ImGui::Button("Fit cloud")) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 2000.0f); }
         ImGui::EndDisabled();
         ImGui::Separator();
+        if (controls.captured()) ImGui::TextUnformatted("Tab / Esc: release | G: new seed");
+        if (ImGui::CollapsingHeader("Controls")) {
         if (controls.mode == CameraControls::FirstPerson) {
             ImGui::TextUnformatted(controls.captured() ? "Mouse captured: move to look" : "Mouse free: click scene to look");
             ImGui::TextUnformatted("Tab: capture / release\nEsc: release mouse\nF: switch to drag controls");
         } else {
             ImGui::TextUnformatted("Left drag: orbit\nMiddle drag: pan\nRight drag: look\nWheel: zoom\nF: switch to first person\nEsc: quit");
         }
-        ImGui::TextUnformatted("WASD: move | R: reset\nSpace / E: up | Shift / Q: down");
+        ImGui::TextUnformatted("WASD: move | R: reset\nSpace / E: up | Shift / Q: down\nG: random seed + regenerate");
+        }
         ImGui::End();
+        if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) generator.handleShortcuts(controls.captured());
         controls.update(window, camera, io);
-        if (smoke && frame == 1) {
+        if (smoke && pointCount > 0 && frame == 1) {
             // Verify capture flags, initial mouse rebasing, rotation and release.
             // The hidden test window is not focused, so explicitly exercise capture.
             Camera probe;
@@ -242,10 +157,12 @@ int render(GLFWwindow* window, bool smoke) {
         glViewport(0, 0, width, height);
         glClearColor(background[0], background[1], background[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        const auto matrix = camera.projection(float(width) / float(height)) * camera.view();
-        cloud.draw(matrix, size, round);
-        if (showAxes) axes.draw(matrix, 1.0f, false, GL_LINES);
-        if (smoke && frame == 3) {
+        const auto projection = camera.projection(float(width) / float(height));
+        const auto matrix = projection * camera.view();
+        const float projectionScale = 0.5f * float(height) * projection[1][1];
+        cloud.draw(matrix, size, projectionScale, round);
+        if (showAxes) axes.draw(matrix, size, projectionScale, false, GL_LINES);
+        if (smoke && pointCount > 0 && frame == 3) {
             // Read before the GUI so a blank 3D scene cannot pass the smoke test.
             std::vector<unsigned char> pixels(static_cast<size_t>(width) * height * 3);
             glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -258,7 +175,7 @@ int render(GLFWwindow* window, bool smoke) {
         }
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        if (smoke && frame == 3) {
+        if (smoke && pointCount > 0 && frame == 3) {
             std::vector<unsigned char> pixels(static_cast<size_t>(width) * height * 3);
             glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
             std::ofstream image("smoke.ppm", std::ios::binary);
@@ -269,7 +186,7 @@ int render(GLFWwindow* window, bool smoke) {
             glfwSetWindowShouldClose(window, true);
         }
         glfwSwapBuffers(window);
-        ++frame;
+        if (pointCount > 0) ++frame;
     }
     controls.capture(window, false);
     if (!smoke && !saveControlSettings(settingsPath, {controls.mode, controls.sensitivity, controls.speed}))

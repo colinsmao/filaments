@@ -1,0 +1,4 @@
+#pragma once
+#define FILAMENTS_PYTHON R"(@Python3_EXECUTABLE@)"
+#define FILAMENTS_WORKER R"(@CMAKE_CURRENT_SOURCE_DIR@/python/worker.py)"
+#define FILAMENTS_GENERATORS R"(@CMAKE_CURRENT_SOURCE_DIR@/generators)"
