@@ -119,7 +119,9 @@ patches caused by slicing across 3D strands. The base strand family uses
 `exp(-(a*a + beta*b*b)/(2*width*width))`, multiplied by the clump modulation, where
 `beta = (1-continuity) + continuity*y_thickness**2`.
 As the layer narrows, relaxing the second field constraint favors curves across
-the layer. The noise wavelengths remain unchanged. Set continuity to 0 for a
+the layer's horizontal sections, but actually broadens the 3D density into sheets
+around A=0. The name does not imply a guarantee of connected strands. The noise
+wavelengths remain unchanged. Set continuity to 0 for a
 literal slice of the 3D density. Full thickness is unchanged either way.
 This is an artistic heuristic: natural voids remain, and connected strands are
 not guaranteed for every seed.
@@ -159,7 +161,38 @@ spent uploading to OpenGL, and FPS. Timing varies with the algorithm; rendering
 is not necessarily the slowest operation. Python startup and file transfer are
 paid only on regeneration, not on every rendered frame.
 
-### Curve postprocessing experiment
+### Soft alignment postprocessing
+
+**noise_filaments_aligned.py** samples `noise_filaments.py` unchanged, then nudges
+the resulting stars toward smooth guide curves from the same A/B noise fields.
+It preserves the random cloud, star count, point order, clumps, sizes and default
+colors. It neither replaces the cloud with paths nor distributes stars evenly
+along a guide. It increases local concentration around guides but does not
+guarantee a population per curve or fill gaps along their length.
+
+- **Alignment strength** (default 0.6) controls the pull. At zero, positions,
+  colors and sizes exactly match the base generator. Its maximum is 0.95 so
+  influenced stars retain scatter instead of snapping completely onto a curve.
+- **Alignment reach (units)** (default 0.35) defines a local influence radius.
+  The pull tapers smoothly to zero at its edge. Stars beyond reach stay fixed.
+- **Guide smoothing** removes grid-scale corners from the attracting paths.
+- **Guides across Y layer** adds multiple internal paths when Layer continuity
+  relaxes the density in a thin region. The guide constraint blends B with a
+  horizontal plane: `sqrt(beta)*B + sqrt(1-beta)*frequency*(Y-anchor) = 0`,
+  intersected with A=0. These are heuristic paths through the broadened density,
+  not exact density ridges. Full-depth mode retains the original A=B=0 guides.
+- **Color alignment (0 off, 1 on)** blends affected stars toward per-guide colors
+  in proportion to the pull, without changing their positions.
+
+Short guides below twice Alignment reach are excluded, and open endpoints do not
+attract stars beyond their ends, avoiding compact endpoint piles. A region with
+no useful guides is returned unchanged. Regions far from guides remain diffuse.
+Base edge fade is applied during sampling;
+the subsequent small nudges can slightly change that profile. The nearest of
+eight nearby polyline segments is used for the projection, in bounded batches.
+All earlier generators remain available. This requires no viewer changes.
+
+### Explicit curve sampling experiment
 
 **noise_filament_curves.py** uses this pipeline, entirely in live Python scripts:
 
@@ -198,9 +231,10 @@ renderer or worker-protocol change is required.
 
 ## Next experiments
 
-Current direction: explicit curve postprocessing, minimum populations and bundles
-in `noise_filament_curves.py`. Further density cleanup or curve editing can be
-added as separate stages. Keep existing generators available for comparison.
+Current direction: retain the noise-sampled cloud and gently align nearby stars
+with guide curves in `noise_filaments_aligned.py`. The explicit-curve population
+and bundling experiment remains in `noise_filament_curves.py` for comparison.
+Further density cleanup or curve editing can be added as separate stages.
 Artistic appearance takes priority over physical realism.
 
 Next alternative to try: a Zel'dovich-style displacement generator. Start from

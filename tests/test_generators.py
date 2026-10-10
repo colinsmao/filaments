@@ -14,6 +14,49 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_local_alignment_preserves_noise_and_untouched_stars(self):
+        _, modules, errors = worker.load_catalog(ROOT / "generators")
+        self.assertFalse(errors)
+        from _alignment import attract_to_curves
+        points = np.array([[0, 0.1, 0], [0, 0.5, 0], [0, 2, 0], [1.2, 0.1, 0]], dtype=np.float32)
+        guide = np.array([[-1., 0, 0], [1., 0, 0]])
+        moved, weights, _ = attract_to_curves(points, [guide], 0.6, 1)
+        self.assertTrue((moved[:2, 1] < points[:2, 1]).all())
+        self.assertTrue((moved[:2, 1] > 0).all())  # Retains scatter, never snaps.
+        np.testing.assert_array_equal(moved[:, [0, 2]], points[:, [0, 2]])
+        np.testing.assert_array_equal(moved[2], points[2])
+        self.assertEqual(weights[2], 0)
+        np.testing.assert_array_equal(moved[3], points[3])  # No endpoint pile-up.
+        self.assertEqual(weights[3], 0)
+        original = modules["noise_filaments"].generate(5000, 42)
+        disabled = modules["noise_filaments_aligned"].generate(5000, 42, alignment=0)
+        for a, b in zip(original, disabled):
+            np.testing.assert_array_equal(a, b)
+        aligned = modules["noise_filaments_aligned"].generate(5000, 42)
+        np.testing.assert_array_equal(original[1], aligned[1])
+        np.testing.assert_array_equal(original[2], aligned[2])
+        distance = np.linalg.norm(original[0] - aligned[0], axis=1)
+        self.assertGreater(np.count_nonzero(distance > 1e-6), 0)
+        self.assertLessEqual(float(distance.max()), 0.6 * 0.35 + 1e-6)
+        colored = modules["noise_filaments_aligned"].generate(5000, 42, color_alignment=1)
+        np.testing.assert_array_equal(aligned[0], colored[0])
+        np.testing.assert_array_equal(aligned[2], colored[2])
+
+    def test_alignment_guides_follow_thin_layer_blend(self):
+        worker.load_catalog(ROOT / "generators")
+        from noise_filament_curves import build_curves
+        from _curves import curve_length
+        strict = build_curves(42, y_scale=0.1, min_length=0.7)
+        layered = build_curves(42, y_scale=0.1, min_length=0.7, guide_continuity=1)
+        # Regression for short B=0 cuts being used to align a relaxed A=0 layer.
+        self.assertGreater(max(map(curve_length, layered)), 2 * max(map(curve_length, strict)))
+        self.assertTrue(all(np.isfinite(curve).all() for curve in layered))
+        full = build_curves(42, y_scale=1, guide_continuity=0)
+        full_blend = build_curves(42, y_scale=1, guide_continuity=1)
+        self.assertEqual(len(full), len(full_blend))
+        for a, b in zip(full, full_blend):
+            np.testing.assert_array_equal(a, b)
+
     def test_curve_extraction_and_regular_population(self):
         worker.load_catalog(ROOT / "generators")
         from _curves import intersect_fields, resample, bundle, allocate_counts

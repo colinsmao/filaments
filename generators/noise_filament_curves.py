@@ -30,9 +30,19 @@ PARAMETERS = [
 
 
 def build_curves(seed, extent=6.0, y_scale=0.3, frequency=2.0, octaves=2,
-                 roughness=0.22, min_length=0.15, smoothing=1.0, resolution=96):
+                 roughness=0.22, min_length=0.15, smoothing=1.0, resolution=96,
+                 guide_continuity=0.0, guide_offset=0.0):
     points = grid(resolution, y_scale)
     a, b = build_strand_fields(points, seed, frequency, octaves, roughness)
+    beta = (1 - guide_continuity) + guide_continuity * y_scale * y_scale
+    if beta < 1:
+        # In a thin layer, density relaxes B and follows the A=0 surface.
+        # Trace long contours across that surface instead of short B=0 cuts.
+        # A tilted/noisy horizontal slice provides multiple internal guides.
+        local_y = np.broadcast_to(np.linspace(-1, 1, resolution)[None, :, None],
+                                  (resolution,) * 3).ravel()
+        plane = (local_y - guide_offset) * max(y_scale, 0.02) * frequency
+        b = np.sqrt(beta) * b + np.sqrt(1 - beta) * plane
     curves = intersect_fields(a.reshape((resolution,) * 3), b.reshape((resolution,) * 3),
                               np.array([extent, extent * y_scale, extent]))
     result = []
