@@ -24,10 +24,10 @@ def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
              octaves=2, roughness=0.22, clumping=3.0, star_size=0.04, size_variation=0.4,
              y_scale=1.0, fade=0, layer_continuity=1.0, strand_continuity=0.5,
              alignment=0.6, alignment_radius=0.35, curve_smoothing=1.0, color_alignment=0,
-             guide_layers=3):
+             guide_layers=3, fade_width=0.8, fade_density_strength=1.0):
     positions, colors, sizes = base.generate(count, seed, extent, frequency, width,
         octaves, roughness, clumping, star_size, size_variation, y_scale, fade,
-        layer_continuity, strand_continuity)
+        layer_continuity, strand_continuity, fade_width=fade_width, fade_density_strength=fade_density_strength)
     if alignment <= 0:
         return positions, colors, sizes
     beta = (1 - layer_continuity) + layer_continuity * y_scale * y_scale

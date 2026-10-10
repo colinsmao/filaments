@@ -4,6 +4,7 @@ Strand continuity reduces gaps caused by clump modulation without introducing
 extra strand families. Layer continuity adapts the field to thin Y regions.
 """
 import numpy as np
+from _postprocess import FADE_WIDTH_PARAMETER, FADE_DENSITY_PARAMETER
 from _noise import fractal_noise, grid, sample_density, star_appearance, fade_density
 
 NAME = "Noise filaments"
@@ -20,6 +21,8 @@ PARAMETERS = [
     dict(key="clumping", label="Clump contrast", type="float", default=3.0, min=0.0, max=12.0),
     dict(key="star_size", label="Star size (units)", type="float", default=0.04, min=0.002, max=0.5),
     dict(key="size_variation", label="Size variation", type="float", default=0.4, min=0.0, max=0.9),
+    dict(FADE_WIDTH_PARAMETER),
+    dict(FADE_DENSITY_PARAMETER),
 ]
 
 
@@ -66,11 +69,11 @@ def build_density(seed, frequency=2.0, width=0.065, octaves=2, roughness=0.22,
 
 def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
              octaves=2, roughness=0.22, clumping=3.0, star_size=0.04, size_variation=0.4,
-             y_scale=1.0, fade=0, layer_continuity=1.0, strand_continuity=0.5):
+             y_scale=1.0, fade=0, layer_continuity=1.0, strand_continuity=0.5, fade_width=0.8, fade_density_strength=1.0):
     density = build_density(seed, frequency, width, octaves, roughness, clumping,
                             y_scale, layer_continuity, strand_continuity)
     if fade:
-        density = fade_density(density)
+        density = fade_density(density, fade_width, fade_density_strength)
     positions, selected = sample_density(density, count, np.random.default_rng(seed))
     colors, sizes = star_appearance(count, seed, density, selected, star_size, size_variation)
     positions[:, 1] *= y_scale

@@ -5,6 +5,8 @@
 #include <map>
 #include <limits>
 #include <random>
+#include <algorithm>
+#include <vector>
 
 class GeneratorPanel {
 public:
@@ -74,13 +76,22 @@ public:
         for (const auto& item : catalog) {
             if (item.at("id") != selected) continue;
             auto& params = parameters[selected];
-            for (const auto& entry : item.at("parameters")) {
+            const auto drawParameter = [&](const nlohmann::json& entry) {
                 const auto key = entry.at("key").get<std::string>();
                 const auto label = entry.at("label").get<std::string>() + "##" + key;
                 // Saved values may predate edits to a script's parameter schema.
                 const double bounded = plotNumber(params, key.c_str(), entry.at("default").get<double>(),
                                                    entry.at("min").get<double>(), entry.at("max").get<double>());
-                if (entry.at("type") == "int") {
+                const auto enabledBy = entry.value("enabled_if", std::string{});
+                const bool enabled = enabledBy.empty() || plotNumber(params, enabledBy.c_str(), 0, 0, 1) != 0;
+                ImGui::BeginDisabled(!enabled);
+                if (entry.value("toggle", false)) {
+                    bool value = bounded != 0;
+                    params[key] = value ? 1 : 0;
+                    if (ImGui::Checkbox(label.c_str(), &value)) {
+                        params[key] = value ? 1 : 0; edited = true;
+                    }
+                } else if (entry.at("type") == "int") {
                     int value = static_cast<int>(bounded);
                     params[key] = value;
                     if (ImGui::SliderInt(label.c_str(), &value, entry.at("min").get<int>(), entry.at("max").get<int>())) {
@@ -93,6 +104,26 @@ public:
                         params[key] = value; edited = true;
                     }
                 }
+                ImGui::EndDisabled();
+            };
+            for (const auto& entry : item.at("parameters"))
+                if (entry.value("group", std::string{}).empty()) drawParameter(entry);
+            if (ImGui::CollapsingHeader("Postprocessing", ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::Indent();
+                std::vector<std::string> groups;
+                for (const auto& entry : item.at("parameters")) {
+                    const auto group = entry.value("group", std::string{});
+                    if (!group.empty() && std::find(groups.begin(), groups.end(), group) == groups.end())
+                        groups.push_back(group);
+                }
+                for (const auto& group : groups) {
+                    if (ImGui::TreeNodeEx(group.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                        for (const auto& entry : item.at("parameters"))
+                            if (entry.value("group", std::string{}) == group) drawParameter(entry);
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::Unindent();
             }
         }
         if (edited) {

@@ -14,6 +14,139 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_density_aware_fade_limits_edge_knots(self):
+        from _postprocess import density_fade_weights, apply_to_stars
+        rho = np.array([.1, 1., 100., 10000.])
+        np.testing.assert_array_equal(density_fade_weights(1., rho), np.ones(4))
+        np.testing.assert_array_equal(density_fade_weights(.2, rho, 0), np.full(4, .2))
+        output = rho * density_fade_weights(.2, rho)
+        self.assertTrue((output <= .2 / .8).all())
+        self.assertTrue((np.diff(output) > 0).all())  # No inverted dense/sparse ordering.
+        self.assertLess(output[-1] / output[-2], 1.02)  # Edge peaks saturate.
+        self.assertLess((rho * density_fade_weights(.02, rho)).max(), output.max() / 8)
+
+        rng = np.random.default_rng(12)
+        dense = rng.normal(0, .015, (6000, 3)); dense[:, 0] = .8
+        sparse = rng.uniform(-.6, .6, (3000, 3)); sparse[:, 0] = -.8
+        center = rng.uniform(-.1, .1, (1000, 3))
+        positions = np.vstack((dense, sparse, center)).astype(np.float32)
+        colors = np.ones_like(positions)
+        ids = np.arange(len(positions))
+        bounds = ((0, 0, 0), (1, 1, 1))
+        old = apply_to_stars(positions, colors, ids, 42,
+                            dict(fade=1, fade_density_strength=0), bounds)[2]
+        new = apply_to_stars(positions, colors, ids, 42,
+                            dict(fade=1, fade_density_strength=1), bounds)[2]
+        self.assertLess(np.count_nonzero(new < 6000), np.count_nonzero(old < 6000) * .1)
+        self.assertGreater(np.count_nonzero((new >= 6000) & (new < 9000)), np.count_nonzero(new < 6000))
+        np.testing.assert_array_equal(new[new >= 9000], np.arange(9000, 10000))
+        # With a shared random stream, the new fade only removes more stars.
+        self.assertTrue(np.isin(new, old).all())
+
+    def test_swirl_flow_and_stable_guide_assignments(self):
+        from _appearance import apply_appearance, swirl_warp, coherent_warp
+        rng = np.random.default_rng(19)
+        positions = rng.uniform(-4, 4, (4000, 3)).astype(np.float32)
+        colors = rng.random(positions.shape).astype(np.float32)
+        sizes = np.full(4000, .04, dtype=np.float32)
+        self.assertIs(swirl_warp(positions, 0, 6), positions)
+        twisted = swirl_warp(positions, 120, 6)
+        np.testing.assert_array_equal(twisted[:, 1], positions[:, 1])
+        np.testing.assert_allclose((twisted[:, [0, 2]]**2).sum(axis=1),
+                                   (positions[:, [0, 2]]**2).sum(axis=1), rtol=3e-7)
+        self.assertTrue((np.linalg.norm(twisted - positions, axis=1) > 0).all())
+        np.testing.assert_allclose(swirl_warp(twisted, -120, 6), positions, atol=1e-6)
+        params = dict(pp_curves=1, pp_curve_colors=1, pp_merge=1)
+        base = apply_appearance(positions, colors, sizes, 42, params)
+        for mode in (0, 1):
+            result = apply_appearance(positions, colors, sizes, 42, dict(params, pp_warp=1, pp_flow_mode=mode))
+            np.testing.assert_array_equal(result[1], base[1])
+            np.testing.assert_array_equal(result[2], base[2])
+            expected = swirl_warp(base[0], 120, 6) if mode == 0 else coherent_warp(base[0], 42, .2, 3.)
+            np.testing.assert_array_equal(result[0], expected)
+
+    def test_box_fade_width_and_native_control(self):
+        from _postprocess import fade_density, edge_envelope
+        density = np.ones((21, 21, 21))
+        soft = fade_density(density, .8)
+        narrow = fade_density(density, .2)
+        # Equal distance to the nearest face, including outside the old sphere.
+        self.assertAlmostEqual(soft[16, 16, 16], soft[16, 10, 10])
+        self.assertGreater(soft[16, 16, 16], 0)
+        self.assertLess(soft.sum(), narrow.sum())
+        self.assertAlmostEqual(float(edge_envelope(.6, .8)), .5)
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "stars.bin"
+            for name in ("noise_clouds", "zeldovich"):
+                a = worker.generate_request(dict(generator=name, count=5000, seed=42,
+                    params=dict(fade=1, fade_width=.8)), ROOT / "generators", output)
+                self.assertTrue(a["ok"], a)
+                first = output.read_bytes()
+                b = worker.generate_request(dict(generator=name, count=5000, seed=42,
+                    params=dict(fade=1, fade_width=.2)), ROOT / "generators", output)
+                self.assertTrue(b["ok"], b)
+                self.assertNotEqual(first, output.read_bytes())
+                self.assertEqual(b["params"]["fade_width"], .2)
+
+    def test_appearance_toggles_and_sparse_alignment(self):
+        from _appearance import apply_appearance, neighbor_spacing
+        rng = np.random.default_rng(21)
+        positions = np.vstack((rng.normal(0, .03, (500, 3)), rng.uniform(-2, 2, (4000, 3)))).astype(np.float32)
+        colors = rng.random(positions.shape).astype(np.float32)
+        sizes = np.full(len(positions), .04, dtype=np.float32)
+        original = (positions, colors, sizes)
+        for a, b in zip(original, apply_appearance(*original, 42, {})):
+            self.assertIs(a, b)
+        params = dict(pp_curves=1, pp_curve_reach=.5, pp_curve_strength=.9, pp_sparse_fraction=.7)
+        moved = apply_appearance(*original, 42, params)
+        spacing = neighbor_spacing(positions)[1]
+        dense = spacing < np.quantile(spacing, .3)
+        np.testing.assert_array_equal(moved[0][dense], positions[dense])
+        distance = np.linalg.norm(moved[0] - positions, axis=1)
+        self.assertGreater(np.count_nonzero(distance > .001), 200)
+        self.assertLessEqual(distance.max(), .5 * .9 + 1e-6)
+        np.testing.assert_array_equal(moved[1], colors)
+        np.testing.assert_array_equal(moved[2], sizes)
+        colored = apply_appearance(*original, 42, dict(params, pp_curve_colors=1))
+        np.testing.assert_array_equal(moved[0], colored[0])
+        self.assertGreater(np.count_nonzero(colored[1] != colors), 100)
+
+    def test_dense_merge_conserves_volume_and_centroid(self):
+        from _appearance import apply_appearance
+        rng = np.random.default_rng(51)
+        positions = rng.normal(0, .08, (2000, 3)).astype(np.float32)
+        colors = rng.random(positions.shape).astype(np.float32)
+        sizes = rng.uniform(.02, .06, len(positions)).astype(np.float32)
+        p, c, s = apply_appearance(positions, colors, sizes, 42,
+                                  dict(pp_merge=1, pp_merge_distance=.15, pp_dense_fraction=1))
+        self.assertLess(len(p), len(positions) // 2)
+        self.assertGreater(s.max(), sizes.max())
+        before, after = sizes.astype(float)**3, s.astype(float)**3
+        np.testing.assert_allclose(before.sum(), after.sum(), rtol=1e-6)
+        np.testing.assert_allclose((positions * before[:, None]).sum(axis=0),
+                                   (p * after[:, None]).sum(axis=0), atol=1e-8)
+        np.testing.assert_allclose((colors * before[:, None]).sum(axis=0),
+                                   (c * after[:, None]).sum(axis=0), atol=1e-8)
+
+    def test_combined_appearance_worker_and_tiny_clouds(self):
+        from _appearance import apply_appearance
+        params = dict(pp_curves=1, pp_curve_colors=1, pp_merge=1, pp_warp=1)
+        for count in (1, 2, 10):
+            p = np.zeros((count, 3), dtype=np.float32)
+            result = apply_appearance(p, np.ones_like(p), np.full(count, .04), 42, params)
+            self.assertGreater(len(result[0]), 0)
+            self.assertTrue(all(np.isfinite(a).all() for a in result))
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "stars.bin"
+            request = dict(generator="zeldovich", count=10000, seed=42, params=dict(params, fade=1))
+            result = worker.generate_request(request, ROOT / "generators", output)
+            self.assertTrue(result["ok"], result)
+            first = output.read_bytes()
+            repeated = worker.generate_request(request, ROOT / "generators", output)
+            self.assertTrue(repeated["ok"], repeated)
+            self.assertEqual(first, output.read_bytes())
+            self.assertLess(result["count"], 10000)
+
     def test_soft_cutoff_preserves_peak_contrast(self):
         from _postprocess import suppress_voids
         # Mean exactly 1: compare dilute voids with two well-above-threshold peaks.
@@ -30,7 +163,7 @@ class Generators(unittest.TestCase):
 
     def test_shared_edge_fade_preserves_survivors(self):
         from _postprocess import apply_to_stars, edge_envelope
-        np.testing.assert_allclose(edge_envelope(np.array([0, .7, .85, 1, 2])), [1, 1, .5, 0, 0])
+        np.testing.assert_allclose(edge_envelope(np.array([0, .7, .85, 1, 2]), width=.3), [1, 1, .5, 0, 0])
         rng = np.random.default_rng(42)
         positions = rng.uniform(-1, 1, (20000, 3)).astype(np.float32)
         colors = rng.random((20000, 3)).astype(np.float32)
@@ -43,11 +176,11 @@ class Generators(unittest.TestCase):
         ids = a[2].astype(int) - 1
         self.assertGreater(len(ids), 1000)
         self.assertLess(len(ids), len(positions))
-        self.assertTrue((np.linalg.norm(a[0], axis=1) < 1).all())
+        self.assertTrue((np.max(np.abs(a[0]), axis=1) < 1).all())
         for actual, original, repeat in zip(a, (positions, colors, sizes), b):
             np.testing.assert_array_equal(actual, original[ids])
             np.testing.assert_array_equal(actual, repeat)
-        core = np.flatnonzero(np.linalg.norm(positions, axis=1) <= .7)
+        core = np.flatnonzero(np.max(np.abs(positions), axis=1) <= .2)
         self.assertTrue(np.isin(core, ids).all())
 
     def test_shared_edge_fade_worker_and_native_delegation(self):
@@ -286,8 +419,8 @@ class Generators(unittest.TestCase):
             self.assertTrue((np.abs(faded[:, 1]) <= 0.6).all())
             self.assertTrue(np.isfinite(faded).all() and np.isfinite(colors).all() and (sizes > 0).all())
             scale = np.array([6, 0.6, 6])
-            plain_radius = np.linalg.norm(plain / scale, axis=1)
-            faded_radius = np.linalg.norm(faded / scale, axis=1)
+            plain_radius = np.max(np.abs(plain / scale), axis=1)
+            faded_radius = np.max(np.abs(faded / scale), axis=1)
             self.assertLess(np.mean(faded_radius > 0.9), np.mean(plain_radius > 0.9) * 0.5)
             flat, _, _ = module.generate(100, 42, y_scale=0, fade=1)
             self.assertTrue((flat[:, 1] == 0).all())

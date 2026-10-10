@@ -6,6 +6,7 @@ the edges of 3D Voronoi cells, rather than their sheet-like faces. Independent
 and cell wavelengths; equal scales restore the isotropic construction.
 """
 import numpy as np
+from _postprocess import FADE_WIDTH_PARAMETER, FADE_DENSITY_PARAMETER
 from scipy.spatial import cKDTree
 from _noise import fractal_noise, grid, fade_density, sample_density, star_appearance
 
@@ -20,10 +21,12 @@ PARAMETERS = [
     dict(key="fade", label="Fade edges (0 off, 1 on)", type="int", default=1, min=0, max=1),
     dict(key="star_size", label="Star size (units)", type="float", default=0.04, min=0.002, max=0.5),
     dict(key="size_variation", label="Size variation", type="float", default=0.4, min=0.0, max=0.9),
+    dict(FADE_WIDTH_PARAMETER),
+    dict(FADE_DENSITY_PARAMETER),
 ]
 
 
-def _cellular_density(seed, cells, width, warp, clumping, fade, resolution=96):
+def _cellular_density(seed, cells, width, warp, clumping, fade, resolution=96, fade_width=0.8, fade_density_strength=1.0):
     # Coordinates measured in cell spacings make all three axes interchangeable.
     points = grid(resolution) * (cells * 0.5)
     displacement = np.column_stack([
@@ -43,12 +46,12 @@ def _cellular_density(seed, cells, width, warp, clumping, fade, resolution=96):
     knots = fractal_noise(points, np.random.SeedSequence([seed, 404]), 0.7, 2)
     log_density = -0.5 * (edge_gap / width) ** 2 + clumping * knots
     density = np.exp(log_density - log_density.max()).astype(np.float32).reshape((resolution,) * 3)
-    return fade_density(density) if fade else density
+    return fade_density(density, fade_width, fade_density_strength) if fade else density
 
 
 def generate(count, seed, extent=6.0, y_scale=0.9, cells=6, width=0.065,
-             warp=0.65, clumping=1.5, fade=1, star_size=0.04, size_variation=0.4):
-    density = _cellular_density(seed, cells, width, warp, clumping, fade)
+             warp=0.65, clumping=1.5, fade=1, star_size=0.04, size_variation=0.4, fade_width=0.8, fade_density_strength=1.0):
+    density = _cellular_density(seed, cells, width, warp, clumping, fade, fade_width=fade_width, fade_density_strength=fade_density_strength)
     positions, selected = sample_density(density, count, np.random.default_rng(seed))
     positions *= np.array([extent, y_scale, extent], dtype=np.float32)
     colors, sizes = star_appearance(count, seed, density, selected, star_size, size_variation)

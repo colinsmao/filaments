@@ -3,6 +3,8 @@
 A native C++17 / OpenGL 3.3 star-distribution viewer with live Python/NumPy generators.
 Windows runs directly against the installed graphics driver; WSL is not required.
 
+For development context and workflow preferences, read [AGENTS.md](AGENTS.md).
+
 ## Build and run on Windows
 
 From this directory in PowerShell:
@@ -124,8 +126,9 @@ Both noise scripts have **Y thickness fraction**: 1 uses the full volume, 0.1
 samples Y between `-0.1 * extent` and `+0.1 * extent`, and 0 makes a flat layer.
 Noise is evaluated at those actual coordinates, so its wavelengths stay unchanged;
 this selects a thinner region rather than compressing the noise features.
-**Fade edges (0 off, 1 on)** optionally tapers density over the outer 30% of an
-ellipsoid fitted to the region. The total star count stays fixed; stars are
+**Fade edges (0 off, 1 on)** optionally tapers density toward the box faces.
+**Fade width** controls the taper, defaulting to 80% of each half-extent.
+The total star count stays fixed; stars are
 redistributed toward the interior rather than made transparent or smaller.
 The toggle uses an integer 0/1 control supported by the running viewer.
 
@@ -167,8 +170,8 @@ three nearest jittered sites are nearly equidistant. Cells change through Y.
 **XZ scale (units)** and **Y scale (units)** set the axis half-extents and scale
 the cell wavelengths with them; equal values give a roughly isotropic web.
 **Cells across each axis**, **Strand width / cell**, **3D warp / cell**, and
-**Clump contrast** control the structure. **Fade edges** tapers an ellipsoidal
-boundary. It uses a 96³ density grid and SciPy's compiled spatial index;
+**Clump contrast** control the structure. **Fade edges** tapers the rectangular
+boundary with adjustable **Fade width**. It uses a 96³ density grid and SciPy's compiled spatial index;
 SciPy 1.10.1 is already present in the configured Python environment.
 
 The panel reports generation/packing time, total worker/transfer time, CPU time
@@ -281,12 +284,73 @@ no viewer rebuild or additional dependency is required.
 
 ## Shared postprocessing
 
+The collapsible **Postprocessing** panel offers three independent appearance
+experiments for every generator, all off by default. Controls and algorithms live
+in `generators/_appearance.py`; changes to those Python files reload live. The
+C++ panel reads section names, checkbox hints, ranges, and dependent controls
+from the worker schema. Adding a new section using these widget types does not
+require another rebuild. A new widget type or C++ layout change does.
+
+- **Sparse curves** selects low-density stars using eighth-neighbor distance.
+  Random anchors are spaced across the cloud; each short sinusoidal guide follows
+  its anchor neighborhood's principal direction and bends in its local plane.
+  Nearby sparse stars are gently attracted to the guides, with smooth distance
+  and density falloff. Dense knots remain untouched. **Attraction reach**,
+  **Guide length**, **Alignment strength** and **Sparse fraction** control the
+  effect. **Color by guide** is an optional visual diagnostic; it doesn't change
+  positions. This is a local heuristic, not a connected filament skeleton or
+  a minimum-population guarantee for every guide.
+- **Merge dense stars** groups stars from the chosen dense fraction in randomly
+  oriented spatial bins. Each bin's diameter is at most **Merge distance**;
+  close stars across bin boundaries may remain separate. Merged positions and
+  colors use volume-weighted averages, and size is `cbrt(sum(size³))`. The result
+  has fewer, larger stars, preserving total cube volume without chaining a whole
+  filament into one object. Groups exceeding the renderer's size limit remain
+  unmerged.
+- **Coherent warp** offers **Flow (0 swirl, 1 waves)**. Swirl, the default,
+  applies a large-scale differential rotation around the world Y axis:
+  `theta = angle / (1 + (horizontal_radius / swirl_radius)^2)`.
+  **Swirl angle** sets rotation near the center (negative reverses direction),
+  and **Swirl radius** is where that angle halves. All stars participate, keeping
+  their Y coordinate and horizontal distance from the axis. This bends existing
+  structures into a swirl; it does not attract stars to a spiral-shaped ridge.
+  The original four-sine-wave displacement remains under mode 1, with separate
+  **Wave amount** and **Wave wavelength** controls. Its short-axis displacements
+  are reduced for thin clouds. Either warp preserves colors, sizes, and count.
+
+The order is sparse alignment, merging, warp, then point-stage edge fade.
+Alignment and merging classify density before alignment so newly aligned strands
+are not mistaken for original dense knots. Each experiment has a separate random
+stream; toggles are deterministic for a fixed seed and configuration. Warp runs
+after guide assignment and merging so changing its strength deforms the same
+stars instead of rebuilding a different set of guides. Point-stage fade can
+still remove different stars as they cross the boundary. All values
+autosave per generator. Merging and point-stage fading reduce the displayed count.
+
 Every generator in the viewer has **Fade edges (0 off, 1 on)**. The common
-envelope in `generators/_postprocess.py` is full strength inside 70% of an
-ellipsoid and smoothly reaches zero at its surface. Existing density generators
+envelope in `generators/_postprocess.py` follows the rectangular bounds using
+`max(abs(normalized_position))`, preserving the square outline rather than cutting
+off its corners with a sphere. **Fade width** ranges from 0.05 to 1 and measures
+the taper as a fraction of each half-extent. The default 0.8 starts fading at
+20% of the half-extent and smoothly reaches zero at the face. Smaller widths
+make a narrower edge transition; 1 fades across the entire half-extent.
+**Edge clump suppression** (default 1, range 0–4) additionally suppresses dense
+edge regions. With positional envelope `e`, relative density `rho` (density
+divided by the volume mean), and strength `s`, the survival multiplier is
+`e / (1 + s*(1-e)*rho)`. The full-strength interior (`e=1`) is unchanged; toward
+the boundary, dense regions approach an output-density ceiling of
+`e / (s*(1-e))` times the original mean. This ceiling drops to zero at the face,
+preventing a very dense knot from overpowering the taper. Strength 0 restores
+the position-only fade. This thins existing structures; it does not extend them
+or create new outward-reaching branches.
+
+Existing density generators
 apply it before sampling and keep their requested star count. Other generators
 use the worker's shared postprocessing stage: each sampled star survives with
-the envelope's probability. Surviving positions, colors and sizes are unchanged;
+the density-aware probability. Their density estimate uses a smoothed 48-cell
+grid per active axis, compensating smoothing at the boundaries and ignoring
+collapsed axes; opposite edges never wrap into each other. Surviving positions,
+colors and sizes are unchanged;
 the displayed count decreases. Disabling fade restores the original output.
 
 The fallback uses the cloud's bounding box unless the generator supplies

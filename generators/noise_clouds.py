@@ -4,6 +4,7 @@ Frequency changes the size/number of clouds, contrast deepens the voids, and
 octaves/roughness add small-scale detail. FastNoiseLite computes the noise in C++.
 """
 import numpy as np
+from _postprocess import FADE_WIDTH_PARAMETER, FADE_DENSITY_PARAMETER
 from _noise import fractal_noise, grid, sample_density, star_appearance, fade_density
 
 NAME = "Noise clouds"
@@ -17,18 +18,20 @@ PARAMETERS = [
     dict(key="roughness", label="Detail strength", type="float", default=0.4, min=0.0, max=0.7),
     dict(key="star_size", label="Star size (units)", type="float", default=0.04, min=0.002, max=0.5),
     dict(key="size_variation", label="Size variation", type="float", default=0.4, min=0.0, max=0.9),
+    dict(FADE_WIDTH_PARAMETER),
+    dict(FADE_DENSITY_PARAMETER),
 ]
 
 
 def generate(count, seed, extent=6.0, frequency=2.0, contrast=12.0,
              octaves=3, roughness=0.4, star_size=0.04, size_variation=0.4,
-             y_scale=1.0, fade=0):
+             y_scale=1.0, fade=0, fade_width=0.8, fade_density_strength=1.0):
     resolution = 96
     field = fractal_noise(grid(resolution, y_scale), seed, frequency, octaves, roughness)
     # Subtracting the maximum keeps exponentials bounded without changing the PDF.
     density = np.exp((field - field.max()) * contrast).reshape((resolution,) * 3)
     if fade:
-        density = fade_density(density)
+        density = fade_density(density, fade_width, fade_density_strength)
     positions, selected = sample_density(density, count, np.random.default_rng(seed))
     colors, sizes = star_appearance(count, seed, density, selected, star_size, size_variation)
     positions[:, 1] *= y_scale

@@ -6,6 +6,7 @@ Layer continuity reduces beta in thin Y bands, transitioning toward 2D strands.
 There are no junction lists, line segments, or precomputed curve paths.
 """
 import numpy as np
+from _postprocess import FADE_WIDTH_PARAMETER, FADE_DENSITY_PARAMETER
 from _noise import fractal_noise, grid, sample_density, star_appearance, fade_density
 
 NAME = "Noise filaments with branches"
@@ -22,6 +23,8 @@ PARAMETERS = [
     dict(key="clumping", label="Clump contrast", type="float", default=3.0, min=0.0, max=12.0),
     dict(key="star_size", label="Star size (units)", type="float", default=0.04, min=0.002, max=0.5),
     dict(key="size_variation", label="Size variation", type="float", default=0.4, min=0.0, max=0.9),
+    dict(FADE_WIDTH_PARAMETER),
+    dict(FADE_DENSITY_PARAMETER),
 ]
 
 
@@ -39,7 +42,7 @@ def _strand_log_density(a, b, c, width, beta, connectivity):
 
 def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
              octaves=2, roughness=0.22, clumping=3.0, star_size=0.04, size_variation=0.4,
-             y_scale=1.0, fade=0, layer_continuity=1.0, connectivity=1.0):
+             y_scale=1.0, fade=0, layer_continuity=1.0, connectivity=1.0, fade_width=0.8, fade_density_strength=1.0):
     resolution = 96
     points = grid(resolution, y_scale)
     a = fractal_noise(points, np.random.SeedSequence([seed, 101]), frequency, octaves, roughness)
@@ -54,7 +57,7 @@ def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
     log_density = _strand_log_density(a, b, c, width, beta, connectivity) + clumping * knots
     density = np.exp(log_density - log_density.max()).reshape((resolution,) * 3)
     if fade:
-        density = fade_density(density)
+        density = fade_density(density, fade_width, fade_density_strength)
     positions, selected = sample_density(density, count, np.random.default_rng(seed))
     colors, sizes = star_appearance(count, seed, density, selected, star_size, size_variation)
     positions[:, 1] *= y_scale

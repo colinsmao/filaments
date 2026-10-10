@@ -13,7 +13,7 @@ MAX_POINTS = 1_000_000
 
 # Bundled shared processors are available even for external generator folders.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "generators"))
-from _postprocess import FADE_PARAMETER, apply_to_stars
+from _postprocess import FADE_PARAMETER, FADE_WIDTH_PARAMETER, FADE_DENSITY_PARAMETER, APPEARANCE_PARAMETERS, apply_to_stars
 
 
 def load_catalog(directory):
@@ -38,6 +38,8 @@ def load_catalog(directory):
                 key, kind = entry["key"], entry["type"]
                 if not isinstance(key, str) or not key.isidentifier() or key in keys or key in ("count", "seed"):
                     raise ValueError(f"Invalid or duplicate parameter key: {key}")
+                if key.startswith("pp_"):
+                    raise ValueError("Parameter prefix pp_ is reserved for shared postprocessing")
                 if kind not in ("int", "float"):
                     raise ValueError(f"Unsupported parameter type: {kind}")
                 lo, hi, default = entry["min"], entry["max"], entry["default"]
@@ -54,6 +56,18 @@ def load_catalog(directory):
                                        min=lo, max=hi, default=default))
             if "fade" not in keys:
                 parameters.append(dict(FADE_PARAMETER))
+            else:
+                for entry in parameters:
+                    if entry["key"] == "fade":
+                        entry.update(group="Edge fade", toggle=True)
+            for shared in (FADE_WIDTH_PARAMETER, FADE_DENSITY_PARAMETER):
+                if shared["key"] not in keys:
+                    parameters.append(dict(shared))
+                else:
+                    for entry in parameters:
+                        if entry["key"] == shared["key"]:
+                            entry.update(group="Edge fade", enabled_if="fade")
+            parameters.extend(dict(entry) for entry in APPEARANCE_PARAMETERS)
             if len(parameters) > 64:
                 raise ValueError("Maximum 64 parameters per generator")
             catalog.append(dict(id=path.stem, name=str(getattr(module, "NAME", path.stem)), parameters=parameters))
@@ -116,10 +130,17 @@ def generate_request(request, directory, output):
             raise ValueError("Position magnitude exceeds 1,000,000 units")
         if ((colors < 0) | (colors > 1)).any():
             raise ValueError("RGB colors must be in [0, 1]")
-        if "fade" not in native_keys and params.get("fade", 0):
+        if params.get("fade", 0) or any(params.get(key, 0) for key in ("pp_curves", "pp_merge", "pp_warp")):
             bounds_function = getattr(module, "postprocess_bounds", None)
             bounds = bounds_function(**native_params) if callable(bounds_function) else None
-            positions, colors, sizes = apply_to_stars(positions, colors, sizes, seed, params, bounds)
+            post_params = dict(params)
+            if "fade" in native_keys:
+                post_params["fade"] = 0
+            positions, colors, sizes = apply_to_stars(positions, colors, sizes, seed, post_params, bounds)
+            if (not np.isfinite(positions).all() or not np.isfinite(colors).all()
+                    or not np.isfinite(sizes).all() or (np.abs(positions) > 1e6).any()
+                    or ((colors < 0) | (colors > 1)).any() or ((sizes <= 0) | (sizes > 1000)).any()):
+                raise ValueError("Postprocessing produced invalid star attributes")
         requested_count = count
         count = len(positions)
         points = np.empty((count, 7), dtype="<f4")
