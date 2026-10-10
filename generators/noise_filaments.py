@@ -35,10 +35,16 @@ def _clump_log_weight(knots, clumping, continuity):
                         np.log(continuity) + log_weight.max())
 
 
-def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
-             octaves=2, roughness=0.22, clumping=3.0, star_size=0.04, size_variation=0.4,
-             y_scale=1.0, fade=0, layer_continuity=1.0, strand_continuity=0.5):
-    resolution = 96
+def build_density(seed, frequency=2.0, width=0.065, octaves=2, roughness=0.22,
+                  clumping=3.0, y_scale=1.0, layer_continuity=1.0,
+                  strand_continuity=0.5, resolution=96):
+    """Construct the density independently of edge fade and star sampling.
+
+    Grid axes are XYZ, spanning [-1, 1], [-y_scale, y_scale], [-1, 1].
+    Density postprocessing belongs after this stage and before edge fade, so
+    cleanup does not undo the final boundary envelope. It must preserve finite,
+    nonnegative values and leave nonzero total density for the sampler.
+    """
     points = grid(resolution, y_scale)
     a = fractal_noise(points, np.random.SeedSequence([seed, 101]), frequency, octaves, roughness)
     b = fractal_noise(points, np.random.SeedSequence([seed, 202]), frequency, octaves, roughness)
@@ -49,7 +55,14 @@ def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
     beta = (1 - layer_continuity) + layer_continuity * y_scale * y_scale
     log_density = -(a * a + beta * b * b) / (2 * width * width)
     log_density += _clump_log_weight(knots, clumping, strand_continuity)
-    density = np.exp(log_density - log_density.max()).reshape((resolution,) * 3)
+    return np.exp(log_density - log_density.max()).reshape((resolution,) * 3)
+
+
+def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
+             octaves=2, roughness=0.22, clumping=3.0, star_size=0.04, size_variation=0.4,
+             y_scale=1.0, fade=0, layer_continuity=1.0, strand_continuity=0.5):
+    density = build_density(seed, frequency, width, octaves, roughness, clumping,
+                            y_scale, layer_continuity, strand_continuity)
     if fade:
         density = fade_density(density)
     positions, selected = sample_density(density, count, np.random.default_rng(seed))

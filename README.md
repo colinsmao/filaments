@@ -159,6 +159,22 @@ spent uploading to OpenGL, and FPS. Timing varies with the algorithm; rendering
 is not necessarily the slowest operation. Python startup and file transfer are
 paid only on regeneration, not on every rendered frame.
 
+## Next experiments
+
+Current direction: separate noise-density construction from postprocessing and
+star sampling. Explore cleanup of the density field or adjustments to sampled
+stars; the specific operation is still to be decided. Keep existing generators
+available for comparison. Artistic appearance takes priority over physical realism.
+
+Next alternative to try: a Zel'dovich-style displacement generator. Start from
+uniform particles, derive a displacement field from a smooth random potential,
+and evaluate `x = q + D * s(q)` with an adjustable evolution parameter `D`.
+This directly approximates gravitational evolution rather than running repeated
+gravity timesteps. It is not a prediction of a settled final state; after
+trajectories cross, particles do not bind into stable structures. Evaluate whether
+its sheets, filaments, and knots look more coherent. This is recorded for later,
+not implemented yet, and should remain separate from the noise experiments.
+
 ## Writing a generator
 
 Edit `generators/galaxy.py` or `generators/filaments.py`, or add a new `.py` file:
