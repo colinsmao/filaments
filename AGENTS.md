@@ -53,6 +53,21 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Current math experiments
 
+- `stochastic_filaments.py` / `_stochastic_curves.py`: smooth stochastic line
+  bundles around 2-4 noise fields' pairwise zeros. Direct continuous noise and
+  finite-difference gradients replace grid tangents. Motion combines tangent,
+  finite regularized normal attraction, independent smooth random steering,
+  and gradual heading response. Multiple curves per seed remain separate and
+  are never deduplicated/snapped. The exact graph only initializes seed locations.
+  Soft third-field encounters can branch from the parent's position/heading;
+  hysteresis, travel cooldown, depth/curve/length budgets prevent explosions.
+  Seed-region bounds do not clip growth. Y compression happens afterward.
+  Independent Beta(2,2) lifetimes taper bundle populations; mean length and
+  variation bound root budgets, children use randomized fractions of remaining
+  parent travel. Length edits preserve earlier path prefixes. Zero variation
+  restores equal root lengths. Individual-tip star fading remains future work.
+  440,000 segments cap output below the binary vertex limit. Still no star stage.
+
 - `noise_branch_curves.py` / `_branch_curves.py`: line preview tracing 2-4 scalar
   noise fields' pairwise zeros, with probabilistic branching at triple zeros.
   Perlin/OpenSimplex2S is selectable. A fixed 48-cubed tetrahedral interpolation

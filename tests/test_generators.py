@@ -14,6 +14,104 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_stochastic_random_lifetimes_and_stable_prefixes(self):
+        worker.load_catalog(ROOT / "generators")
+        from _stochastic_curves import grow, lifetime
+        params = dict(seed_count=1, curves_per_seed=8, length=8., branch_probability=0., y_scale=1.)
+        fixed = grow(42, length_variation=0., **params)[0]
+        varied = grow(42, length_variation=.7, **params)[0]
+        lengths = np.array([np.linalg.norm(np.diff(p, axis=0), axis=1).sum() for p in varied])
+        self.assertTrue((lengths >= 8*.3 - 1e-8).all())
+        self.assertTrue((lengths <= 8*1.7 + 1e-8).all())
+        self.assertGreater(np.ptp(lengths), 4.)
+        self.assertTrue((lengths < 8).any() and (lengths > 8).any())
+        for a, b in zip(fixed, varied):
+            # The shorter path has a fractional final step; all earlier vertices match.
+            shared = min(len(a), len(b)) - 1
+            np.testing.assert_array_equal(a[:shared], b[:shared])
+        for i in range(32):
+            child = lifetime(42, (i,), 4., .7, child=True)
+            self.assertGreaterEqual(child, 4*.3)
+            self.assertLessEqual(child, 4.)
+            self.assertEqual(child, lifetime(42, (i,), 4., .7, child=True))
+            self.assertEqual(lifetime(42, (i,), 4., 0.), 4.)
+
+    def test_stochastic_guidance_is_soft_descent(self):
+        worker.load_catalog(ROOT / "generators")
+        from _stochastic_curves import guidance
+        values = np.array([[.3, -.2], [-.4, .1]])
+        gradients = np.broadcast_to([[1., 0., 0.], [0., 1., 0.]], (2, 2, 3))
+        headings = np.array([[0., 0., 1.], [0., 0., -1.]])
+        tangent, correction = guidance(values, gradients, np.array([[0, 1], [0, 1]]), headings)
+        np.testing.assert_array_equal(tangent, headings)
+        descent = (correction[:, :2] * values).sum(axis=1)
+        self.assertTrue((descent > 0).all())
+        # Finite motion toward the strand leaves a residual; it never projects to zero.
+        remaining = values - .1 * correction[:, :2]
+        self.assertTrue((np.linalg.norm(remaining, axis=1) < np.linalg.norm(values, axis=1)).all())
+        self.assertTrue((np.linalg.norm(remaining, axis=1) > 0).all())
+
+    def test_stochastic_bundles_density_attraction_and_smoothing(self):
+        worker.load_catalog(ROOT / "generators")
+        from _stochastic_curves import grow, NoiseLandscape
+        params = dict(seed_count=1, length=8., length_variation=0., branch_probability=0., y_scale=1.)
+        thin = grow(42, curves_per_seed=1, **params)
+        dense = grow(42, curves_per_seed=3, **params)
+        self.assertEqual(len(dense[0]), 6)
+        for a, b in zip(thin[0], dense[0]):
+            np.testing.assert_array_equal(a, b)
+        self.assertGreater(np.linalg.norm(dense[0][0] - dense[0][2]), .1)
+        for path in dense[0]:
+            steps = np.diff(path, axis=0)
+            distances = np.linalg.norm(steps, axis=1)
+            self.assertAlmostEqual(distances.sum(), 8., places=8)
+            directions = steps / distances[:, None]
+            angles = np.degrees(np.arccos(np.clip((directions[1:] * directions[:-1]).sum(axis=1), -1, 1)))
+            self.assertLess(angles.max(), 17.)  # .06-unit steps with .25-unit angular smoothing.
+        field = NoiseLandscape(42)
+        def residual(attraction):
+            paths = grow(42, curves_per_seed=3, attraction=attraction, **params)[0]
+            values, _ = field.sample(np.concatenate([p[len(p)//2:] for p in paths]))
+            return np.linalg.norm(values[:, :2], axis=1).mean()
+        self.assertLess(residual(4.), residual(0.) * .5)
+        values, _ = field.sample(np.concatenate(dense[0]))
+        self.assertGreater(np.median(np.linalg.norm(values[:, :2], axis=1)), 1e-4)
+
+    def test_stochastic_branch_attachment_and_protocol(self):
+        worker.load_catalog(ROOT / "generators")
+        from _stochastic_curves import grow
+        from stochastic_filaments import generate
+        params = dict(seed_count=2, curves_per_seed=2, length=12., y_scale=1.)
+        paths, families, roots, parents = grow(42, branch_probability=1., **params)
+        self.assertTrue((parents >= 0).any())
+        for i in np.flatnonzero(parents >= 0):
+            parent = paths[parents[i]]
+            self.assertLess(parents[i], i)
+            index = np.flatnonzero(np.all(parent == paths[i][0], axis=1))
+            self.assertTrue(len(index))
+            incoming = parent[index[0]] - parent[index[0]-1]
+            outgoing = paths[i][1] - paths[i][0]
+            cosine = np.dot(incoming, outgoing) / (np.linalg.norm(incoming) * np.linalg.norm(outgoing))
+            self.assertGreater(cosine, np.cos(np.deg2rad(17)))
+        plain = grow(42, branch_probability=0., **params)
+        for a, b in zip(plain[0], paths):
+            np.testing.assert_array_equal(a, b)
+        small = dict(seed_count=1, curves_per_seed=2, length=2.)
+        a = generate(1, 42, **small)
+        b = generate(1000000, 42, **small)
+        for first, second in zip(a, b):
+            np.testing.assert_array_equal(first, second)
+        for kind in (0, 1):
+            p, c, s = generate(1, 42, **small, field_count=4, noise_type=kind, y_scale=0, show_seeds=0)
+            self.assertTrue(np.isfinite(p).all())
+            self.assertEqual(len(p) % 2, 0)
+            np.testing.assert_array_equal(p[:, 1], 0)
+        with tempfile.TemporaryDirectory() as temp:
+            result = worker.generate_request(dict(generator="stochastic_filaments", count=1, seed=42, params=small),
+                                            ROOT / "generators", Path(temp) / "lines.bin")
+            self.assertTrue(result["ok"], result)
+            self.assertEqual(result["primitive"], "lines")
+
     def test_triple_zero_graph_and_probabilistic_branches(self):
         worker.load_catalog(ROOT / "generators")
         from _branch_curves import intersection_graph, trace_graph

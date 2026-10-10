@@ -7,13 +7,13 @@
   ],
   "camera": {
     "distance": 18.0,
-    "pitch": 35.83150100708008,
+    "pitch": -17.240385055541992,
     "target": [
-      -1.3893425464630127,
-      -0.6729869842529297,
-      0.7642965316772461
+      13.355260848999023,
+      -2.2266745567321777,
+      -2.8251514434814453
     ],
-    "yaw": -9891.05078125
+    "yaw": -12129.5224609375
   },
   "generator": {
     "auto_apply": true,
@@ -38,16 +38,61 @@
         "thickness": 0.11999999731779099,
         "turns": 1.2999999523162842
       },
+      "grown_filaments": {
+        "arms": 3,
+        "branch_angle": 35.0,
+        "branch_spacing": 0.0,
+        "color_paths": 1,
+        "length": 8.0,
+        "length_variation": 0.30000001192092896,
+        "noise_scale": 6.0,
+        "seed_count": 8,
+        "show_seeds": 1,
+        "spread": 6.0,
+        "turning": 35.0,
+        "y_scale": 0.3499999940395355
+      },
       "layer_filaments": {
         "cells": 6,
         "clumping": 2.5420000553131104,
         "extent": 6.0,
         "fade": 1,
+        "fade_density_strength": 1.0,
+        "fade_width": 0.800000011920929,
+        "pp_curve_colors": 0,
+        "pp_curve_length": 2.0,
+        "pp_curve_reach": 0.5,
+        "pp_curve_strength": 0.8500000238418579,
+        "pp_curves": 0,
+        "pp_dense_fraction": 0.30000001192092896,
+        "pp_flow_mode": 0,
+        "pp_merge": 0,
+        "pp_merge_distance": 0.18000000715255737,
+        "pp_sparse_fraction": 0.6499999761581421,
+        "pp_swirl_angle": 120.0,
+        "pp_swirl_radius": 6.0,
+        "pp_warp": 0,
+        "pp_warp_amount": 0.20000000298023224,
+        "pp_warp_scale": 3.0,
         "size_variation": 0.4000000059604645,
         "star_size": 0.03999999910593033,
         "warp": 0.6499999761581421,
         "width": 0.02500000037252903,
         "y_scale": 0.8999999761581421
+      },
+      "noise_branch_curves": {
+        "branch_probability": 0.5,
+        "extent": 6.0,
+        "field_count": 3,
+        "frequency": 1.5,
+        "length": 15.0,
+        "max_paths": 96,
+        "noise_type": 0,
+        "octaves": 1,
+        "roughness": 0.20000000298023224,
+        "seed_count": 4,
+        "show_junctions": 1,
+        "y_scale": 0.3499999940395355
       },
       "noise_clouds": {
         "contrast": 20.5,
@@ -156,6 +201,29 @@
         "width": 0.02500000037252903,
         "y_scale": 0.515999972820282
       },
+      "stochastic_filaments": {
+        "attraction": 0.18799999356269836,
+        "branch_probability": 0.6100000143051147,
+        "color_families": 1,
+        "curves_per_seed": 5,
+        "extent": 7.136000156402588,
+        "field_count": 3,
+        "frequency": 1.5,
+        "junction_width": 0.3479999899864197,
+        "length": 14.609000205993652,
+        "length_variation": 0.5,
+        "max_paths": 150,
+        "noise_type": 0,
+        "octaves": 2,
+        "persistence": 1.784000039100647,
+        "roughness": 0.20000000298023224,
+        "seed_count": 6,
+        "show_seeds": 1,
+        "smoothness": 0.44999998807907104,
+        "start_spread": 0.11999999731779099,
+        "wandering": 0.546999990940094,
+        "y_scale": 0.3499999940395355
+      },
       "zeldovich": {
         "detail": 0.3959999978542328,
         "evolution": 1.4170000553131104,
@@ -185,7 +253,7 @@
         "y_scale": 0.23399999737739563
       }
     },
-    "script": "noise_filaments",
+    "script": "stochastic_filaments",
     "seed": 1688781454,
     "watch_files": true
   },

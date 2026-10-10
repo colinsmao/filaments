@@ -431,6 +431,68 @@ scattered stars, smooth away junctions, or promise that every component connects
 Star count has no effect on the skeleton. Star placement and filament widths are
 still deferred. The earlier free vector-steered growth remains in grown_filaments.
 
+## Smooth stochastic bundles (`stochastic_filaments.py`)
+
+Select **stochastic_filaments.py** and **Fit cloud**. This is a separate line
+preview; the exact-intersection and original free-growth experiments remain.
+It needs no further C++ rebuild. There is still no star population stage.
+
+Each seed blob launches several independently perturbed trajectories in both AB
+directions. **Curves per seed / direction** increases bundle population without
+replacing the earlier trajectories (until the overall curve limit applies).
+Curves are retained even when they overlap. **Starting spread** offsets their
+birth positions in the normal plane around the seed. Roots are initialized from
+noise-zero junctions and refined against the continuous noise; the extracted
+graph is used only to locate roots, never to guide or connect paths.
+
+**Mean curve length** and **Length variation** give every trajectory its own finite
+travel budget. The default variation is 0.6: root lengths range from 40% to 160%
+of the mean, with more lengths near the middle. A bounded Beta(2,2) distribution
+gives the bundle a smoothstep-shaped expected falloff in surviving root curves,
+rather than a shared cutoff. Zero variation restores equal-length roots.
+Length randomness uses a separate stream, so changing these controls preserves
+the shared earlier portions of each trajectory. Branches get their own randomized
+fraction of the parent's remaining budget, never exceeding it. Branches can add
+local density along a bundle, so the complete branched network need not thin
+monotonically. This is a taper in curve population; a future star-placement fade
+can additionally soften each individual tip.
+
+At each step, direct Perlin or OpenSimplex2S samples give scalar values and
+central-difference gradients. The cross product of the active pair's gradients
+gives the local tangent. A regularized normal correction pulls toward its zero
+intersection: `J.T @ inverse(J @ J.T + lambda*I) @ (A, B)`, where J contains the
+two gradient rows. This scales the attraction to approximately world-space
+distance rather than making it depend strongly on noise-gradient magnitude.
+It is a finite steering influence, not a projection or exact zero constraint.
+
+The desired heading combines that tangent, negative **Attraction strength** times
+the correction, and each curve's smooth random steering. Random steering is a
+sum of three sine modes with independent random amplitudes/phases per curve.
+**Wandering strength** widens/deforms bundles; **Wandering length** makes those
+deviations persist over longer distances. **Turn smoothing** sets the distance
+over which the heading responds. Larger values soften turns but can make paths
+lag tight bends and drift farther from a strand. Default one-octave fields,
+continuous sampling, and gradual turning remove the old tetrahedral guide
+corners without smoothing away branch attachments afterward.
+
+**Branch encounter width** defines a neighborhood around a third zero surface,
+using `abs(C)/length(gradient(C))` as a local distance estimate. When a trajectory
+enters that band while near its current pair, **Branch probability / encounter**
+can create a child following one alternative pair. Hysteresis and a minimum
+travel cooldown prevent retriggering at every integration step. Children start
+at the parent's exact position and inherit its heading, then turn gradually
+toward their new pair. Their lengths are bounded by the parent's remaining travel;
+depth is limited to three
+branch generations. There is no forced snapping or guarantee of global joins.
+
+**Maximum curves** includes the initial trajectories and branches. A separate
+440,000-segment safety budget stops growth before the transfer limit; extreme
+settings can therefore stop short of the sampled length. **Mean curve length**,
+widths and smoothing are measured before the complete result is compressed by
+**Y scale fraction**. The seed-region box does not clip growing paths: the noise
+continues outside it. Field-pair coloring and seed-marker toggles leave the paths
+unchanged. The star count has no effect on this curve preview.
+
 ## Other experiments
 
 An earlier direction retains the noise-sampled cloud and gently aligns nearby stars
