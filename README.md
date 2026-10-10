@@ -244,6 +244,38 @@ Shared extraction, bundling and allocation helpers live in `generators/_curves.p
 noise construction remains separate. Other generators stay available, and no
 renderer or worker-protocol change is required.
 
+## Zel'dovich displacement (`zeldovich.py`)
+
+This separate generator starts with nearly uniform, jittered particles and a
+Gaussian random density field. FFTs turn that density into a displacement field
+with `divergence(s) = -density`. Each particle moves directly from its initial
+position `q` to `x = q + D * s(q)` in a periodic box. Increasing **Evolution
+strength** creates concentrations and voids; the default is 1.8. The spectrum is
+chosen for appearance, not calibrated cosmology. NumPy and SciPy handle the math;
+no viewer rebuild or additional dependency is required.
+
+- **Structure scale** sets the smoothing scale of the initial density, and
+  **Small-scale detail** adds finer structure. The field uses a fixed 96³ grid;
+  scales below one eighth of the box width are capped to limit aliasing.
+- **Evolution strength** is a one-shot displacement multiplier. Smaller steps
+  through the same values only animate the same trajectories; there is no
+  iterative solver to converge. After trajectories cross, stars pass through
+  concentrations rather than binding into stable structures.
+- **Density power** suppresses void stars by resampling the final density in
+  proportion to `density^power` (default 2, range 1–6). At 1 it bypasses this
+  stage and returns the original particles exactly. Above 1, a periodic 64³
+  smoothed density estimate is powered and sampled continuously, retaining the
+  requested star count without duplicate particles. This changes positions;
+  it is not an opacity control or further evolution. At least 262,144 pilot
+  particles estimate density to reduce sampling noise for small star counts.
+  Higher values increasingly favor knots and can thin out weaker connections.
+- **Y scale fraction** compresses the complete result vertically, including
+  its features. It does not slice a thin region out of the field. At 1 the
+  construction is statistically isotropic.
+- Colors run from blue to warm as the final local particle concentration rises.
+  Coloring does not change positions. Star size and size variation remain
+  independent per-star attributes.
+
 ## Next experiments
 
 Current direction: retain the noise-sampled cloud and gently align nearby stars
@@ -252,14 +284,11 @@ and bundling experiment remains in `noise_filament_curves.py` for comparison.
 Further density cleanup or curve editing can be added as separate stages.
 Artistic appearance takes priority over physical realism.
 
-Next alternative to try: a Zel'dovich-style displacement generator. Start from
-uniform particles, derive a displacement field from a smooth random potential,
-and evaluate `x = q + D * s(q)` with an adjustable evolution parameter `D`.
-This directly approximates gravitational evolution rather than running repeated
-gravity timesteps. It is not a prediction of a settled final state; after
-trajectories cross, particles do not bind into stable structures. Evaluate whether
-its sheets, filaments, and knots look more coherent. This is recorded for later,
-not implemented yet, and should remain separate from the noise experiments.
+Compare the Zel'dovich experiment with those noise-based approaches. Possible
+follow-ups are particle-mesh gravity, which recomputes forces as particles move,
+or adhesion-style evolution to retain converging structures. These require a
+different evolution model; subdividing the fixed Zel'dovich displacement will
+not provide that behavior. Neither follow-up is implemented yet.
 
 ## Writing a generator
 

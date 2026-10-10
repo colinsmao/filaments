@@ -14,6 +14,64 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_zeldovich_single_mode_displacement(self):
+        _, modules, errors = worker.load_catalog(ROOT / "generators")
+        self.assertFalse(errors)
+        module = modules["zeldovich"]
+        n = 32
+        x = np.arange(n, dtype=np.float32) / n
+        density = np.broadcast_to(np.cos(2*np.pi*x)[:, None, None], (n, n, n)).copy()
+        sx, sy, sz = module.displacement_from_density(density)
+        # Positive density at x=0 must attract particles toward it, not repel.
+        expected = np.broadcast_to((-np.sin(2*np.pi*x)/(2*np.pi))[:, None, None], sx.shape)
+        np.testing.assert_allclose(sx, expected, atol=1e-7)
+        np.testing.assert_allclose(sy, 0, atol=1e-7)
+        np.testing.assert_allclose(sz, 0, atol=1e-7)
+        periodic = module._sample_periodic(sx, np.array([[0.1, .2, .3], [1.1, .2, .3]]))
+        np.testing.assert_allclose(periodic[0], periodic[1], atol=1e-7)
+
+    def test_zeldovich_evolution_and_y_scaling(self):
+        _, modules, _ = worker.load_catalog(ROOT / "generators")
+        module = modules["zeldovich"]
+        initial, _, _ = module.generate(50000, 42, evolution=0, density_power=1)
+        np.testing.assert_allclose(initial.mean(axis=0), 0, atol=0.02)
+        np.testing.assert_allclose((initial * initial).mean(axis=0), 12, atol=0.05)
+        middle, colors, sizes = module.generate(50000, 42, evolution=0.5, density_power=1)
+        later, _, _ = module.generate(50000, 42, evolution=1, density_power=1)
+        # q + D*s(q) is linear in D, accounting for periodic box crossings.
+        residual = (later - 2*middle + initial + 6) % 12 - 6
+        np.testing.assert_allclose(residual, 0, atol=4e-6)
+        thin, thin_colors, thin_sizes = module.generate(50000, 42, evolution=0.5, y_scale=0.1, density_power=1)
+        np.testing.assert_array_equal(thin[:, [0, 2]], middle[:, [0, 2]])
+        np.testing.assert_allclose(thin[:, 1], middle[:, 1] * 0.1)
+        np.testing.assert_array_equal(thin_colors, colors)
+        np.testing.assert_array_equal(thin_sizes, sizes)
+        self.assertTrue((np.abs(later) <= 6).all())
+
+    def test_zeldovich_density_power_suppresses_voids(self):
+        _, modules, _ = worker.load_catalog(ROOT / "generators")
+        module = modules["zeldovich"]
+        base, _, sizes = module.generate(100000, 42, density_power=1)
+        concentrated, colors, concentrated_sizes = module.generate(100000, 42, density_power=2)
+        strong, _, _ = module.generate(100000, 42, density_power=4)
+        # Measure against one common base-density estimate, not each output's own.
+        from scipy.ndimage import gaussian_filter
+        mass, _ = np.histogramdd(base, bins=32, range=[(-6, 6)] * 3)
+        mass = gaussian_filter(mass, 1, mode="wrap")
+        threshold = np.median(mass)
+        fractions = []
+        for positions in (base, concentrated, strong):
+            cells = np.floor((positions + 6) / 12 * 32).astype(int) % 32
+            fractions.append(np.mean(mass[tuple(cells.T)] < threshold))
+        self.assertLess(fractions[1], fractions[0] * 0.6)
+        self.assertLess(fractions[2], fractions[1] * 0.6)
+        self.assertEqual(len(np.unique(concentrated, axis=0)), len(concentrated))
+        np.testing.assert_array_equal(sizes, concentrated_sizes)
+        thin, thin_colors, _ = module.generate(100000, 42, density_power=2, y_scale=0.1)
+        np.testing.assert_array_equal(thin[:, [0, 2]], concentrated[:, [0, 2]])
+        np.testing.assert_allclose(thin[:, 1], concentrated[:, 1] * 0.1)
+        np.testing.assert_array_equal(colors, thin_colors)
+
     def test_local_alignment_preserves_noise_and_untouched_stars(self):
         _, modules, errors = worker.load_catalog(ROOT / "generators")
         self.assertFalse(errors)
