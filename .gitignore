@@ -1,0 +1,5 @@
+.reference/
+.tools/
+build/
+imgui.ini
+*.ppm
