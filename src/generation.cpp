@@ -145,13 +145,15 @@ std::vector<Point> readPointFile(const std::filesystem::path& path) {
     std::uint64_t count = 0;
     stream.read(magic, sizeof(magic));
     stream.read(reinterpret_cast<char*>(&count), sizeof(count));
-    if (!stream || std::string(magic, 8) != "FSTAR001" || count == 0 || count > 1000000 ||
+    if (!stream || std::string(magic, 8) != "FSTAR002" || count == 0 || count > 1000000 ||
         size != std::streamoff(16 + count * sizeof(Point)))
         throw std::runtime_error("Invalid point buffer header, count or length");
     std::vector<Point> points(static_cast<size_t>(count));
     stream.read(reinterpret_cast<char*>(points.data()), static_cast<std::streamsize>(points.size() * sizeof(Point)));
     if (!stream) throw std::runtime_error("Incomplete point buffer");
     for (const auto& point : points) {
+        if (!std::isfinite(point.size) || point.size <= 0 || point.size > 1000)
+            throw std::runtime_error("Invalid star size");
         for (int i = 0; i < 3; ++i) {
             if (!std::isfinite(point.position[i]) || std::abs(point.position[i]) > 1e6f ||
                 !std::isfinite(point.color[i]) || point.color[i] < 0 || point.color[i] > 1)

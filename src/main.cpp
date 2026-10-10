@@ -19,16 +19,19 @@
 #include "generator_panel.h"
 
 int render(GLFWwindow* window, bool smoke) {
+    if (smoke) std::fprintf(stderr, "Smoke: initializing renderers\n");
     PointRenderer cloud, axes;
     int pointCount = 0;
-    GeneratorPanel generator;
+    auto plot = smoke ? PlotSettings{} : loadPlotSettings(plotSettingsPath());
+    GeneratorPanel generator(plot.generator);
+    if (smoke) std::fprintf(stderr, "Smoke: generator queued\n");
     glm::vec3 cloudCenter(0.0f);
     float cloudRadius = 5.0f;
     double uploadMs = 0;
     axes.setPoints({{{0,0,0},{1,0.3f,0.3f}},{{5,0,0},{1,0.3f,0.3f}},
                     {{0,0,0},{0.3f,1,0.5f}},{{0,5,0},{0.3f,1,0.5f}},
                     {{0,0,0},{0.4f,0.5f,1}},{{0,0,5},{0.4f,0.5f,1}}});
-    Camera camera;
+    Camera camera = plot.hasCamera ? plot.camera : Camera{};
     CameraControls controls;
     // Smoke tests use defaults and never read or overwrite personal preferences.
     const auto settingsPath = controlSettingsPath();
@@ -37,11 +40,15 @@ int render(GLFWwindow* window, bool smoke) {
         controls.mode = static_cast<CameraControls::Mode>(saved.cameraMode);
         controls.sensitivity = saved.sensitivity;
         controls.speed = saved.moveSpeed;
+        controls.zoomFactor = saved.zoomFactor;
         // A restored first-person mode starts with the mouse free for the GUI.
     }
-    float size = 0.04f;
-    bool showAxes = true, round = true, vsync = true;
-    float background[3] = {0.025f, 0.035f, 0.055f};
+    auto& size = plot.sizeScale;
+    auto& showAxes = plot.showAxes;
+    auto& round = plot.round;
+    auto& vsync = plot.vsync;
+    auto& background = plot.background;
+    glfwSwapInterval(!smoke && vsync ? 1 : 0);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_PROGRAM_POINT_SIZE);
     int frame = 0;
@@ -62,7 +69,8 @@ int render(GLFWwindow* window, bool smoke) {
             cloud.setPoints(*points);
             uploadMs = (glfwGetTime() - uploadStart) * 1000;
             pointCount = static_cast<int>(points->size());
-            if (firstCloud) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 2000.0f); }
+            if (smoke) std::fprintf(stderr, "Smoke: uploaded %d stars\n", pointCount);
+            if (firstCloud && !plot.hasCamera) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 2000.0f); }
         }
         if (smoke && !generator.lastError().empty()) throw std::runtime_error(generator.lastError());
         if (smoke && glfwGetTime() - started > 30.0) throw std::runtime_error("Generator smoke test timed out");
@@ -88,13 +96,15 @@ int render(GLFWwindow* window, bool smoke) {
             controls.setMode(window, static_cast<CameraControls::Mode>(mode));
         ImGui::SliderFloat("Sensitivity", &controls.sensitivity, 0.02f, 0.5f, "%.2f");
         ImGui::SliderFloat("Move speed", &controls.speed, 0.1f, 50.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
+        ImGui::SliderFloat("Right-click zoom", &controls.zoomFactor, 1.0f, 10.0f, "%.1fx", ImGuiSliderFlags_AlwaysClamp);
         ImGui::Separator();
         ImGui::Text("%d points | %.1f FPS", pointCount, io.Framerate);
         ImGui::Text("GPU point buffer: %.1f MiB", pointCount * sizeof(Point) / (1024.0 * 1024.0));
         ImGui::Text("Upload (CPU): %.1f ms", uploadMs);
         if (ImGui::CollapsingHeader("Display")) {
-            ImGui::SliderFloat("Star diameter", &size, 0.002f, 0.5f, "%.3f units", ImGuiSliderFlags_Logarithmic);
-            ImGui::Checkbox("Round points", &round);
+            ImGui::Combo("Draw as", &plot.renderMode, "Shaded cubes\0Points (fast)\0");
+            ImGui::SliderFloat("Star size scale", &size, 0.05f, 20.0f, "%.2fx", ImGuiSliderFlags_Logarithmic);
+            if (plot.renderMode == 1) ImGui::Checkbox("Round points", &round);
             ImGui::Checkbox("Axes", &showAxes);
             if (ImGui::Checkbox("VSync", &vsync)) glfwSwapInterval(vsync ? 1 : 0);
             ImGui::ColorEdit3("Background", background);
@@ -103,6 +113,7 @@ int render(GLFWwindow* window, bool smoke) {
         ImGui::SameLine();
         if (ImGui::Button("Fit cloud")) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 2000.0f); }
         ImGui::EndDisabled();
+        ImGui::TextDisabled("Plot and camera settings saved on exit");
         ImGui::Separator();
         if (controls.captured()) ImGui::TextUnformatted("Tab / Esc: release | G: new seed");
         if (ImGui::CollapsingHeader("Controls")) {
@@ -110,11 +121,22 @@ int render(GLFWwindow* window, bool smoke) {
             ImGui::TextUnformatted(controls.captured() ? "Mouse captured: move to look" : "Mouse free: click scene to look");
             ImGui::TextUnformatted("Tab: capture / release\nEsc: release mouse\nF: switch to drag controls");
         } else {
-            ImGui::TextUnformatted("Left drag: orbit\nMiddle drag: pan\nRight drag: look\nWheel: zoom\nF: switch to first person\nEsc: quit");
+            ImGui::TextUnformatted("Left drag: orbit\nMiddle drag: pan\nWheel: move closer / farther\nF: switch to first person\nEsc: quit");
         }
-        ImGui::TextUnformatted("WASD: move | R: reset\nSpace / E: up | Shift / Q: down\nG: random seed + regenerate");
+        ImGui::TextUnformatted("Hold right mouse: zoom in\nWASD: move | R: reset\nSpace / E: up | Shift / Q: down\nG: random seed + regenerate");
         }
         ImGui::End();
+        // Draw over the scene, underneath GUI panels, in logical viewport pixels.
+        const auto* viewport = ImGui::GetMainViewport();
+        const ImVec2 center(std::floor(viewport->Pos.x + viewport->Size.x * 0.5f) + 0.5f,
+                            std::floor(viewport->Pos.y + viewport->Size.y * 0.5f) + 0.5f);
+        auto* overlay = ImGui::GetBackgroundDrawList();
+        for (int outline = 1; outline >= 0; --outline) {
+            const auto color = outline ? IM_COL32(0, 0, 0, 170) : IM_COL32(240, 240, 240, 230);
+            const float thickness = outline ? 3.0f : 1.0f;
+            overlay->AddLine(ImVec2(center.x - 5, center.y), ImVec2(center.x + 5, center.y), color, thickness);
+            overlay->AddLine(ImVec2(center.x, center.y - 5), ImVec2(center.x, center.y + 5), color, thickness);
+        }
         if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) generator.handleShortcuts(controls.captured());
         controls.update(window, camera, io);
         if (smoke && pointCount > 0 && frame == 1) {
@@ -157,10 +179,11 @@ int render(GLFWwindow* window, bool smoke) {
         glViewport(0, 0, width, height);
         glClearColor(background[0], background[1], background[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        const auto projection = camera.projection(float(width) / float(height));
+        const auto projection = camera.projection(float(width) / float(height), controls.zoomMultiplier());
         const auto matrix = projection * camera.view();
         const float projectionScale = 0.5f * float(height) * projection[1][1];
-        cloud.draw(matrix, size, projectionScale, round);
+        if (plot.renderMode == 0) cloud.drawCubes(matrix, size);
+        else cloud.draw(matrix, size, projectionScale, round);
         if (showAxes) axes.draw(matrix, size, projectionScale, false, GL_LINES);
         if (smoke && pointCount > 0 && frame == 3) {
             // Read before the GUI so a blank 3D scene cannot pass the smoke test.
@@ -189,7 +212,13 @@ int render(GLFWwindow* window, bool smoke) {
         if (pointCount > 0) ++frame;
     }
     controls.capture(window, false);
-    if (!smoke && !saveControlSettings(settingsPath, {controls.mode, controls.sensitivity, controls.speed}))
+    if (!smoke) {
+        plot.generator = generator.settings();
+        plot.camera = camera;
+        plot.hasCamera = true;
+        if (!savePlotSettings(plotSettingsPath(), plot)) std::fprintf(stderr, "Could not save plot settings\n");
+    }
+    if (!smoke && !saveControlSettings(settingsPath, {controls.mode, controls.sensitivity, controls.speed, controls.zoomFactor}))
         std::fprintf(stderr, "Could not save camera control settings\n");
     return 0;
 }

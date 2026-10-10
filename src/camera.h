@@ -16,8 +16,9 @@ struct Camera {
     glm::vec3 up() const { return glm::cross(right(), forward()); }
     glm::vec3 eye() const { return target - forward() * distance; }
     glm::mat4 view() const { return glm::lookAt(eye(), target, up()); }
-    glm::mat4 projection(float aspect) const {
-        return glm::perspective(glm::radians(45.0f), aspect, 0.01f, 10000.0f);
+    glm::mat4 projection(float aspect, float magnification = 1.0f) const {
+        const float fov = 2.0f * std::atan(std::tan(glm::radians(22.5f)) / magnification);
+        return glm::perspective(fov, aspect, 0.01f, 10000.0f);
     }
     void rotate(float dx, float dy, bool fly = false, float sensitivity = 0.25f) {
         const auto oldEye = eye();
@@ -26,8 +27,8 @@ struct Camera {
         if (fly) target = oldEye + forward() * distance;
     }
     void zoom(float wheel) { distance = std::clamp(distance * std::exp(-wheel * 0.12f), 0.05f, 2000.0f); }
-    void pan(float dx, float dy, float viewportHeight) {
-        const float units = 2.0f * distance * std::tan(glm::radians(22.5f)) / std::max(viewportHeight, 1.0f);
+    void pan(float dx, float dy, float viewportHeight, float magnification = 1.0f) {
+        const float units = 2.0f * distance * std::tan(glm::radians(22.5f)) / (std::max(viewportHeight, 1.0f) * magnification);
         target += (-right() * dx + up() * dy) * units;
     }
 };

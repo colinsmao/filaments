@@ -67,8 +67,18 @@ pattern does not require a C++ rebuild or an application restart.
 While Python works, you can continue moving the camera around the previous cloud.
 A newer request cancels an older job; **Cancel** stops generation. Errors and
 tracebacks appear in the panel and the previous valid cloud stays visible.
-The first successful cloud is framed automatically; later updates preserve the
-camera. Use **Fit cloud** to reframe a different-sized distribution.
+The first successful cloud is framed automatically unless a saved camera is
+restored; later updates preserve the camera. Use **Fit cloud** to reframe a
+different-sized distribution. Each generator has **Star size (units)** and
+**Size variation** controls; changing these leaves star positions unchanged.
+
+Plot settings are saved on normal exit to `%LOCALAPPDATA%\Filaments\plot.json`:
+selected script, star count, seed, each script's parameters, auto-apply/file-watching
+preferences, rendering mode, size scale, round points, axes, background, VSync,
+and camera position/direction. The selected plot regenerates from those settings
+on the next launch. Point buffers and transient performance statistics are not
+saved. The current spatial algorithms are unchanged; noise-based distributions
+are planned for later.
 
 The panel reports generation/packing time, total worker/transfer time, CPU time
 spent uploading to OpenGL, and FPS. Timing varies with the algorithm; rendering
@@ -91,11 +101,16 @@ def generate(count, seed, scale=3.0):
     rng = np.random.default_rng(seed)
     positions = rng.normal(0, scale, (count, 3))
     colors = np.full((count, 3), [0.7, 0.8, 1.0])
-    return positions, colors
+    sizes = rng.uniform(0.02, 0.06, count)
+    return positions, colors, sizes
 ```
 
-Return two arrays of shape `(count, 3)`: XYZ positions and RGB colors in `[0, 1]`.
-The bridge validates finiteness, shapes, colors and coordinates, then converts to
+Return XYZ positions and RGB colors in `[0, 1]`, both shaped `(count, 3)`, plus
+an array of world-space sizes shaped `(count,)` (or one scalar for all stars).
+Size is the cube's side length or point's diameter, before the display multiplier;
+it must be finite and in `(0, 1000]`. Existing scripts returning only positions
+and colors still work, receiving a default size of `0.04` per star.
+The bridge validates finiteness, shapes, colors, sizes and coordinates, then converts to
 contiguous float32 data. `PARAMETERS` supports `float` and `int`, with unique keys,
 labels, defaults and bounds; values are clamped to the current schema on reload.
 Use NumPy operations over whole arrays rather than a Python loop per star. A seed
@@ -120,10 +135,16 @@ Adjust **Sensitivity** and **Move speed** in the GUI. Movement speed is independ
 of orbit distance. The wheel only zooms in drag mode. Default sensitivity is 0.10
 (previously 0.15).
 
-Sensitivity, movement speed, and camera mode are saved on normal quit to
+Hold the **right mouse button** over the scene (or in captured first-person mode)
+to zoom in by narrowing the field of view. Release it to restore normal FOV.
+**Right-click zoom** sets magnification from 1–10×, default 3×. Camera position
+stays fixed, and look/pan sensitivity scales down while zoomed. Right-drag look
+in orbit mode is replaced by this zoom control; use first-person mode to look around.
+
+Sensitivity, movement speed, zoom factor, and camera mode are saved on normal quit to
 `%LOCALAPPDATA%\Filaments\controls.ini` and restored on the next run. Restored
 first-person mode starts with the mouse free; click the scene or press Tab to
-capture it. Display settings and camera position are not saved.
+capture it. Plot/display settings and camera position are saved in `plot.json`.
 
 | Input | Action |
 | --- | --- |
@@ -133,7 +154,7 @@ capture it. Display settings and camera position are not saved.
 | Tab / Esc (first person) | Toggle capture / release mouse |
 | Left drag (drag mode) | Orbit around target |
 | Middle drag (drag mode) | Pan |
-| Right drag (drag mode) | Look from current camera position |
+| Hold right mouse | Narrow FOV to zoom; release to restore |
 | Wheel (drag mode) | Zoom toward/away from target |
 | WASD | Move forward/back/left/right |
 | Space / E | Move up |
@@ -141,24 +162,37 @@ capture it. Display settings and camera position are not saved.
 | R | Reset camera |
 | Esc (drag mode) | Quit |
 
-ImGui captures its own mouse and keyboard interactions. **Display** controls star
-diameter in world units, round/square points, axes, background color, and VSync. A
-star at twice the camera depth has half the pixel diameter, adjusted for field of
-view and framebuffer resolution. Sizes are clamped to the GPU's supported point
-size range (typically at least one pixel), so extremely distant stars stop shrinking
-at the minimum. The GUI supports
+ImGui captures its own mouse and keyboard interactions. **Display → Draw as**
+switches between **Shaded cubes** (default) and **Points (fast)**. Cubes have
+fixed block-style face shading and depth testing to distinguish
+overlaps. Top faces retain full color; north/south faces use 92% brightness,
+east/west 82%, and bottom faces 85%. Opposite horizontal faces match, with no
+directional light or edge outlines. They are world-aligned, with equal side
+lengths for now. A small center crosshair stays visible in both camera modes.
+Points can be
+round or square. **Star size scale** multiplies each star's own size without
+regeneration; axes, background color, and VSync are also adjustable.
+
+Both modes have perspective: a star at twice the camera depth has approximately
+half the pixel diameter. In point mode, sizes are clamped to the GPU's supported
+point size range (typically at least one pixel), so extremely distant stars stop
+shrinking at the minimum. Cubes use real geometry and have no point-size clamp.
+The GUI supports
 1,000–1,000,000 stars. The generator protocol also accepts smaller clouds for tests.
 
 ## Data and rendering
 
-`src/point.h` defines `Point { position, color }`.
+`src/point.h` defines `Point { position, color, size }`.
 `src/point_renderer.h` owns GPU buffers/shaders and accepts any `std::vector<Point>`.
 `src/generation.cpp` handles background jobs, cancellation and validated binary
 transfer; `src/generator_panel.h` handles discovery, sliders and file watching.
 `python/worker.py` loads the independent modules in `generators/`.
-Each point currently occupies 24 bytes on the GPU (two vec3s).
-Data uploads happen only when replaced; the entire cloud uses one GL_POINTS draw
-call per frame, with depth testing and no per-point CPU work during drawing.
+Each star occupies 28 bytes on the GPU (two vec3s and one float).
+Data uploads happen only when replaced. The entire cloud uses one instanced cube
+draw call or one GL_POINTS draw call per frame, with depth testing and no per-star
+CPU work during drawing. Both modes share the same star buffer, so switching
+does not regenerate or re-upload it. Cubes reuse one 12-triangle mesh; they cost
+more GPU work than points, especially at high counts.
 
 `src/camera.h` contains the orbit/fly camera and projection. The current demo uses
 single-precision coordinates and a fixed 0.01–10,000 clipping range. Very large
@@ -166,8 +200,8 @@ world coordinates, file loading, picking, streaming, and level of detail are
 future work. The sample count range is not a performance guarantee; GPU speed,
 point size, and overlapping points all affect frame time.
 
-The transfer file is a 16-byte header (`FSTAR001`, then a little-endian uint64
-count), followed by `count` interleaved XYZ/RGB float32 records. JSON is used only
+The transfer file is a 16-byte header (`FSTAR002`, then a little-endian uint64
+count), followed by `count` interleaved XYZ/RGB/size float32 records. JSON is used only
 for small parameter/schema messages. Each job uses its own temporary directory,
 cleaned after completion. A fresh Python process loads the saved source on each
 run, with no interpreter/GIL integration or per-frame Python calls.
@@ -181,13 +215,16 @@ CPU-only tests (no viewer window):
 .\build\Release\generation_test.exe --benchmark
 ```
 
-These cover deterministic generation, array validation, binary parsing, settings,
+These cover deterministic generation, per-star sizes, array validation, binary parsing, settings,
+windowless generator-panel startup with default and restored settings,
 script discovery/reload/repair, missing interpreters, stale-job cancellation, and
 timeouts. `scripts/build.ps1 -Test` also runs a hidden GPU test comparing the
-pixel footprints of stars at different depths, and the GPU smoke test below.
+pixel footprints of stars at different depths/sizes, cube face shading, instancing,
+and overlap depth, and the GPU smoke test below.
 
 The smoke test creates a hidden native OpenGL context, compiles the GLSL 330
-shaders, draws 100,000 points, exercises camera movements and window resize,
+shaders, checks the loading frames before a star buffer exists, draws 100,000 stars,
+exercises camera movements and window resize,
 checks mouse capture/release, focus loss, and jump-free mouse recapture, checks
 scene pixels before drawing the GUI, and checks for OpenGL errors.
 It writes `smoke.ppm` in the test working directory for visual inspection.

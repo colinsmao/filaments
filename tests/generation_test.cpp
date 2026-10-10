@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
         require(before != runtime.sourceFingerprint(), "New script not detected by file watcher");
         auto first = run(runtime, "hot");
         require(first.error.empty() && first.points.front().position.x == 1, "New script not discovered");
+        require(first.points.front().size == 0.04f, "Legacy scripts should receive default star sizes");
         const auto stamp = std::filesystem::last_write_time(hot);
         write(hot, prefix + "2), np.ones((count,3))\n");
         std::filesystem::last_write_time(hot, stamp); // same timestamp and size: no stale bytecode allowed
@@ -64,6 +65,10 @@ int main(int argc, char** argv) {
         write(hot, prefix + "3), np.ones((count,3))\n");
         auto repaired = run(runtime, "hot");
         require(repaired.error.empty() && repaired.points.front().position.x == 3, "Script repair did not recover");
+        write(root / "sized.py", prefix + "0), np.ones((count,3)), np.linspace(0.02, 0.2, count)\n");
+        const auto sized = run(runtime, "sized");
+        require(sized.error.empty() && sized.points.front().size == 0.02f && sized.points.back().size == 0.2f,
+                "Individual star sizes did not survive the Python/C++ transfer");
         write(root / "invalid.py", prefix + "np.nan), np.ones((count,3))\n");
         require(!run(runtime, "invalid").error.empty(), "NaN points must be rejected");
         write(root / "slow.py", "import time\nimport numpy as np\ndef generate(count, seed):\n    time.sleep(10)\n    return np.zeros((count,3)), np.ones((count,3))\n");

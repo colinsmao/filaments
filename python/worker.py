@@ -82,7 +82,15 @@ def generate_request(request, directory, output):
             value = max(entry["min"], min(entry["max"], value))
             params[entry["key"]] = int(value) if entry["type"] == "int" else float(value)
         started = time.perf_counter()
-        positions, colors = modules[selected].generate(count=count, seed=seed, **params)
+        generated = modules[selected].generate(count=count, seed=seed, **params)
+        if not isinstance(generated, (tuple, list)) or len(generated) not in (2, 3):
+            raise ValueError("generate must return (positions, colors) or (positions, colors, sizes)")
+        positions, colors = generated[:2]
+        sizes = np.asarray(generated[2] if len(generated) == 3 else 0.04, dtype=np.float32)
+        if sizes.ndim == 0:
+            sizes = np.full(count, sizes, dtype=np.float32)
+        if sizes.shape != (count,) or not np.isfinite(sizes).all() or ((sizes <= 0) | (sizes > 1000)).any():
+            raise ValueError(f"sizes must be a scalar or ({count},) array of finite world sizes in (0, 1000]")
         positions = np.asarray(positions, dtype=np.float32)
         colors = np.asarray(colors, dtype=np.float32)
         if positions.shape != (count, 3) or colors.shape != (count, 3):
@@ -93,10 +101,10 @@ def generate_request(request, directory, output):
             raise ValueError("Position magnitude exceeds 1,000,000 units")
         if ((colors < 0) | (colors > 1)).any():
             raise ValueError("RGB colors must be in [0, 1]")
-        points = np.empty((count, 6), dtype="<f4")
-        points[:, :3], points[:, 3:] = positions, colors
+        points = np.empty((count, 7), dtype="<f4")
+        points[:, :3], points[:, 3:6], points[:, 6] = positions, colors, sizes
         with output.open("wb") as stream:
-            stream.write(struct.pack("<8sQ", b"FSTAR001", count))
+            stream.write(struct.pack("<8sQ", b"FSTAR002", count))
             stream.write(points.tobytes())
         response.update(ok=True, generator=selected, params=params, count=count,
                         generation_ms=(time.perf_counter() - started) * 1000)

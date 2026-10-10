@@ -14,6 +14,7 @@ struct ControlSettings {
     int cameraMode = 0;
     float sensitivity = 0.10f;
     float moveSpeed = 5.0f;
+    float zoomFactor = 3.0f;
 };
 
 inline std::filesystem::path controlSettingsPath() {
@@ -43,6 +44,7 @@ inline ControlSettings loadControlSettings(const std::filesystem::path& path) {
         if (key == "camera_mode" && (number == 0.0f || number == 1.0f)) result.cameraMode = static_cast<int>(number);
         else if (key == "sensitivity") result.sensitivity = std::clamp(number, 0.02f, 0.5f);
         else if (key == "move_speed") result.moveSpeed = std::clamp(number, 0.1f, 50.0f);
+        else if (key == "zoom_factor") result.zoomFactor = std::clamp(number, 1.0f, 10.0f);
     }
     return result;
 }
@@ -56,7 +58,8 @@ inline bool saveControlSettings(const std::filesystem::path& path, const Control
     file << std::setprecision(std::numeric_limits<float>::max_digits10)
          << "camera_mode=" << settings.cameraMode << '\n'
          << "sensitivity=" << settings.sensitivity << '\n'
-         << "move_speed=" << settings.moveSpeed << '\n';
+         << "move_speed=" << settings.moveSpeed << '\n'
+         << "zoom_factor=" << settings.zoomFactor << '\n';
     file.close();
     return !file.fail();
 }

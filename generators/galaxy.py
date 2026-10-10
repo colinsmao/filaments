@@ -9,11 +9,13 @@ PARAMETERS = [
     dict(key="scatter", label="Arm scatter", type="float", default=0.18, min=0.01, max=1.0),
     dict(key="thickness", label="Disk thickness", type="float", default=0.12, min=0.01, max=1.0),
     dict(key="bulge", label="Bulge fraction", type="float", default=0.2, min=0.0, max=0.8),
+    dict(key="star_size", label="Star size (units)", type="float", default=0.04, min=0.002, max=0.5),
+    dict(key="size_variation", label="Size variation", type="float", default=0.4, min=0.0, max=0.9),
 ]
 
 
 def generate(count, seed, radius=5.0, arms=4, turns=1.3, scatter=0.18,
-             thickness=0.12, bulge=0.2):
+             thickness=0.12, bulge=0.2, star_size=0.04, size_variation=0.4):
     rng = np.random.default_rng(seed)
     r = radius * np.sqrt(rng.random(count))
     angle = (rng.integers(arms, size=count) * (2 * np.pi / arms)
@@ -24,4 +26,5 @@ def generate(count, seed, radius=5.0, arms=4, turns=1.3, scatter=0.18,
     positions[:bulge_count] = rng.normal(0, radius * 0.14, (bulge_count, 3))
     t = np.clip(np.linalg.norm(positions, axis=1) / radius, 0, 1)[:, None]
     colors = (1 - t) * np.array([1.0, 0.8, 0.45]) + t * np.array([0.4, 0.65, 1.0])
-    return positions, colors
+    sizes = star_size * rng.uniform(1 - size_variation, 1 + size_variation, count)
+    return positions, colors, sizes
