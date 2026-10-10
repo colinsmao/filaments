@@ -5,3 +5,4 @@ imgui.ini
 *.ppm
 __pycache__/
 *.pyc
+config/*.tmp

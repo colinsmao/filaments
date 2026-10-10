@@ -77,13 +77,28 @@ restored; later updates preserve the camera. Use **Fit cloud** to reframe a
 different-sized distribution. Each generator has **Star size (units)** and
 **Size variation** controls; changing these leaves star positions unchanged.
 
-Plot settings are saved on normal exit to `%LOCALAPPDATA%\Filaments\plot.json`:
+Plot settings save automatically to the repository's `config/plot.json`:
 selected script, star count, seed, each script's parameters, auto-apply/file-watching
 preferences, rendering mode, size scale, round points, axes, background, VSync,
 and camera position/direction. The selected plot regenerates from those settings
 on the next launch. Point buffers and transient performance statistics are not
 saved. The original spatial algorithms are preserved in `galaxy.py` and
 `filaments.py` for comparison with the noise-based patterns.
+
+The C++ viewer writes settings 350 ms after edits settle, including when
+Auto-apply is off or generation fails/cancels. Continuous camera movement saves
+at least every two seconds while edits are pending. Normal exit flushes remaining
+edits. Files are replaced atomically; a failed save leaves the previous file
+intact and is retried, with an error shown in the panel. Idle frames do not write.
+Python scripts define control schemas/defaults and never edit themselves.
+
+`config/plot.json` and `config/controls.ini` belong in version control, so commits
+can preserve and share a chosen configuration. Atomic-save `config/*.tmp` files
+are ignored. Settings changes appear as ordinary Git changes until committed.
+The latest settings from the earlier `%LOCALAPPDATA%\Filaments` location were
+copied into `config/`; the viewer now uses the repository copies. Like the script
+paths, the absolute config directory is recorded at build time, so launching
+from another working directory works and moving the repository requires a rebuild.
 
 Two additional scripts explore noise-driven densities:
 
@@ -302,10 +317,10 @@ to zoom in by narrowing the field of view. Release it to restore normal FOV.
 stays fixed, and look/pan sensitivity scales down while zoomed. Right-drag look
 in orbit mode is replaced by this zoom control; use first-person mode to look around.
 
-Sensitivity, movement speed, zoom factor, and camera mode are saved on normal quit to
-`%LOCALAPPDATA%\Filaments\controls.ini` and restored on the next run. Restored
+Sensitivity, movement speed, zoom factor, and camera mode save automatically to
+`config/controls.ini` and are restored on the next run. Restored
 first-person mode starts with the mouse free; click the scene or press Tab to
-capture it. Plot/display settings and camera position are saved in `plot.json`.
+capture it. Plot/display settings and camera position are saved in `config/plot.json`.
 
 | Input | Action |
 | --- | --- |

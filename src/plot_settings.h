@@ -79,7 +79,7 @@ inline PlotSettings loadPlotSettings(const std::filesystem::path& path) {
     return result;
 }
 
-inline bool savePlotSettings(const std::filesystem::path& path, const PlotSettings& settings) {
+inline nlohmann::json plotSettingsJson(const PlotSettings& settings) {
     nlohmann::json json = {{"version", 1}, {"generator", settings.generator},
         {"render_mode", settings.renderMode}, {"size_scale", settings.sizeScale},
         {"round_points", settings.round}, {"axes", settings.showAxes}, {"vsync", settings.vsync},
@@ -87,11 +87,9 @@ inline bool savePlotSettings(const std::filesystem::path& path, const PlotSettin
     if (settings.hasCamera) json["camera"] = {{"yaw", settings.camera.yaw}, {"pitch", settings.camera.pitch},
         {"distance", settings.camera.distance},
         {"target", {settings.camera.target.x, settings.camera.target.y, settings.camera.target.z}}};
-    std::error_code error;
-    if (!path.parent_path().empty()) std::filesystem::create_directories(path.parent_path(), error);
-    if (error) return false;
-    std::ofstream file(path, std::ios::trunc);
-    file << json.dump(2) << '\n';
-    file.close();
-    return !file.fail();
+    return json;
+}
+
+inline bool savePlotSettings(const std::filesystem::path& path, const PlotSettings& settings) {
+    return writeSettingsAtomically(path, plotSettingsJson(settings).dump(2) + '\n');
 }

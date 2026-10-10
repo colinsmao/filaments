@@ -1,4 +1,5 @@
 #pragma once
+#include "runtime_config.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -9,6 +10,37 @@
 #include <locale>
 #include <sstream>
 #include <string>
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#endif
+
+inline bool writeSettingsAtomically(const std::filesystem::path& path, const std::string& contents) {
+    std::error_code error;
+    if (!path.parent_path().empty()) std::filesystem::create_directories(path.parent_path(), error);
+    if (error) return false;
+    auto temporary = path;
+    temporary += ".tmp";
+    std::ofstream file(temporary, std::ios::binary | std::ios::trunc);
+    file << contents;
+    file.close();
+    bool ok = !file.fail();
+    if (ok) {
+#ifdef _WIN32
+        ok = MoveFileExW(temporary.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0;
+#else
+        std::filesystem::rename(temporary, path, error);
+        ok = !error;
+#endif
+    }
+    if (!ok) std::filesystem::remove(temporary, error);
+    return ok;
+}
 
 struct ControlSettings {
     int cameraMode = 0;
@@ -18,13 +50,7 @@ struct ControlSettings {
 };
 
 inline std::filesystem::path controlSettingsPath() {
-    if (const char* local = std::getenv("LOCALAPPDATA"))
-        return std::filesystem::path(local) / "Filaments" / "controls.ini";
-    if (const char* config = std::getenv("XDG_CONFIG_HOME"))
-        return std::filesystem::path(config) / "filaments" / "controls.ini";
-    if (const char* home = std::getenv("HOME"))
-        return std::filesystem::path(home) / ".config" / "filaments" / "controls.ini";
-    return "filaments-controls.ini";
+    return std::filesystem::path(FILAMENTS_SETTINGS_DIRECTORY) / "controls.ini";
 }
 
 inline ControlSettings loadControlSettings(const std::filesystem::path& path) {
@@ -50,16 +76,12 @@ inline ControlSettings loadControlSettings(const std::filesystem::path& path) {
 }
 
 inline bool saveControlSettings(const std::filesystem::path& path, const ControlSettings& settings) {
-    std::error_code error;
-    if (!path.parent_path().empty()) std::filesystem::create_directories(path.parent_path(), error);
-    if (error) return false;
-    std::ofstream file(path, std::ios::trunc);
+    std::ostringstream file;
     file.imbue(std::locale::classic());
     file << std::setprecision(std::numeric_limits<float>::max_digits10)
          << "camera_mode=" << settings.cameraMode << '\n'
          << "sensitivity=" << settings.sensitivity << '\n'
          << "move_speed=" << settings.moveSpeed << '\n'
          << "zoom_factor=" << settings.zoomFactor << '\n';
-    file.close();
-    return !file.fail();
+    return writeSettingsAtomically(path, file.str());
 }

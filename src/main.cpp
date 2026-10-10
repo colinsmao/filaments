@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "camera_controls.h"
 #include "settings.h"
+#include "settings_autosave.h"
 #include <cstddef>
 #include <cstdio>
 #include <fstream>
@@ -43,6 +44,18 @@ int render(GLFWwindow* window, bool smoke) {
         controls.zoomFactor = saved.zoomFactor;
         // A restored first-person mode starts with the mouse free for the GUI.
     }
+    auto currentControls = [&]() -> ControlSettings {
+        return {controls.mode, controls.sensitivity, controls.speed, controls.zoomFactor};
+    };
+    auto currentPlot = [&]() {
+        auto snapshot = plot;
+        snapshot.generator = generator.settings();
+        snapshot.camera = camera;
+        // Keep the original restored-camera flag intact for first-cloud fitting.
+        snapshot.hasCamera = plot.hasCamera || pointCount > 0;
+        return snapshot;
+    };
+    SettingsAutosave autosave(plotSettingsPath(), settingsPath, plot, currentControls());
     auto& size = plot.sizeScale;
     auto& showAxes = plot.showAxes;
     auto& round = plot.round;
@@ -74,6 +87,7 @@ int render(GLFWwindow* window, bool smoke) {
         }
         if (smoke && !generator.lastError().empty()) throw std::runtime_error(generator.lastError());
         if (smoke && glfwGetTime() - started > 30.0) throw std::runtime_error("Generator smoke test timed out");
+        if (!smoke) autosave.tick(glfwGetTime(), currentPlot(), currentControls());
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         if (width == 0 || height == 0) { glfwWaitEventsTimeout(0.1); continue; }
@@ -113,7 +127,8 @@ int render(GLFWwindow* window, bool smoke) {
         ImGui::SameLine();
         if (ImGui::Button("Fit cloud")) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 2000.0f); }
         ImGui::EndDisabled();
-        ImGui::TextDisabled("Plot and camera settings saved on exit");
+        if (autosave.failed()) ImGui::TextColored(ImVec4(1, 0.5f, 0.4f, 1), "Settings save failed; retrying");
+        else ImGui::TextDisabled(autosave.pending() ? "Saving settings..." : "Settings saved automatically");
         ImGui::Separator();
         if (controls.captured()) ImGui::TextUnformatted("Tab / Esc: release | G: new seed");
         if (ImGui::CollapsingHeader("Controls")) {
@@ -213,13 +228,9 @@ int render(GLFWwindow* window, bool smoke) {
     }
     controls.capture(window, false);
     if (!smoke) {
-        plot.generator = generator.settings();
-        plot.camera = camera;
-        plot.hasCamera = true;
-        if (!savePlotSettings(plotSettingsPath(), plot)) std::fprintf(stderr, "Could not save plot settings\n");
+        autosave.tick(glfwGetTime(), currentPlot(), currentControls(), true);
+        if (autosave.failed()) std::fprintf(stderr, "Could not save settings\n");
     }
-    if (!smoke && !saveControlSettings(settingsPath, {controls.mode, controls.sensitivity, controls.speed, controls.zoomFactor}))
-        std::fprintf(stderr, "Could not save camera control settings\n");
     return 0;
 }
 

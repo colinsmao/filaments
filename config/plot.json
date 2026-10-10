@@ -1,0 +1,135 @@
+{
+  "axes": true,
+  "background": [
+    0.02500000037252903,
+    0.03500000014901161,
+    0.054999999701976776
+  ],
+  "camera": {
+    "distance": 18.0,
+    "pitch": 41.959434509277344,
+    "target": [
+      2.1001546382904053,
+      -7.357190132141113,
+      6.39651346206665
+    ],
+    "yaw": -4847.04833984375
+  },
+  "generator": {
+    "auto_apply": true,
+    "count": 2838,
+    "parameters": {
+      "filaments": {
+        "clusters": 0.20000000298023224,
+        "curvature": 0.699999988079071,
+        "extent": 6.0,
+        "nodes": 18,
+        "size_variation": 0.4000000059604645,
+        "star_size": 0.03999999910593033,
+        "width": 0.11999999731779099
+      },
+      "galaxy": {
+        "arms": 2,
+        "bulge": 0.20000000298023224,
+        "radius": 5.0,
+        "scatter": 0.18000000715255737,
+        "size_variation": 0.4000000059604645,
+        "star_size": 0.03999999910593033,
+        "thickness": 0.11999999731779099,
+        "turns": 1.2999999523162842
+      },
+      "layer_filaments": {
+        "cells": 6,
+        "clumping": 2.5420000553131104,
+        "extent": 6.0,
+        "fade": 1,
+        "size_variation": 0.4000000059604645,
+        "star_size": 0.03999999910593033,
+        "warp": 0.6499999761581421,
+        "width": 0.02500000037252903,
+        "y_scale": 0.8999999761581421
+      },
+      "noise_clouds": {
+        "contrast": 20.5,
+        "extent": 6.0,
+        "fade": 0,
+        "frequency": 2.190000057220459,
+        "octaves": 5,
+        "roughness": 0.5979999899864197,
+        "size_variation": 0.4000000059604645,
+        "star_size": 0.04899999871850014,
+        "y_scale": 1.0
+      },
+      "noise_filament_curves": {
+        "bundle_curves": 5,
+        "bundle_radius": 0.05999999865889549,
+        "color_curves": 1,
+        "extent": 6.0,
+        "frequency": 2.0,
+        "min_length": 0.15000000596046448,
+        "min_stars": 32,
+        "octaves": 2,
+        "roughness": 0.2199999988079071,
+        "size_variation": 0.4000000059604645,
+        "smoothing": 1.0,
+        "star_size": 0.03999999910593033,
+        "y_scale": 0.30000001192092896
+      },
+      "noise_filaments": {
+        "clumping": 6.875,
+        "extent": 6.0,
+        "fade": 0,
+        "frequency": 2.0179998874664307,
+        "layer_continuity": 1.0,
+        "octaves": 2,
+        "roughness": 0.06300000101327896,
+        "size_variation": 0.5199999809265137,
+        "star_size": 0.03200000151991844,
+        "strand_continuity": 0.5,
+        "width": 0.02500000037252903,
+        "y_scale": 1.0
+      },
+      "noise_filaments_aligned": {
+        "alignment": 0.652999997138977,
+        "alignment_radius": 0.3499999940395355,
+        "clumping": 5.25,
+        "color_alignment": 1,
+        "curve_smoothing": 1.0,
+        "extent": 6.0,
+        "fade": 1,
+        "frequency": 2.0759999752044678,
+        "guide_layers": 3,
+        "layer_continuity": 1.0,
+        "octaves": 3,
+        "roughness": 0.09099999815225601,
+        "size_variation": 0.4000000059604645,
+        "star_size": 0.03999999910593033,
+        "strand_continuity": 0.515999972820282,
+        "width": 0.02500000037252903,
+        "y_scale": 0.14100000262260437
+      },
+      "noise_filaments_branches": {
+        "clumping": 6.438000202178955,
+        "connectivity": 1.0,
+        "extent": 6.0,
+        "fade": 0,
+        "frequency": 2.0,
+        "layer_continuity": 1.0,
+        "octaves": 3,
+        "roughness": 0.14399999380111694,
+        "size_variation": 0.4000000059604645,
+        "star_size": 0.03999999910593033,
+        "width": 0.02500000037252903,
+        "y_scale": 0.515999972820282
+      }
+    },
+    "script": "noise_filaments_aligned",
+    "seed": 817983802,
+    "watch_files": true
+  },
+  "render_mode": 0,
+  "round_points": true,
+  "size_scale": 0.4099999964237213,
+  "version": 1,
+  "vsync": true
+}

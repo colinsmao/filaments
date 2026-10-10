@@ -1,5 +1,6 @@
 #include "settings.h"
 #include "plot_settings.h"
+#include "settings_autosave.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -66,7 +67,57 @@ int main(int argc, char** argv) {
         require(loadPlotSettings(plotPath).generator["count"] == 100000, "Invalid JSON must use plot defaults");
         require(loadPlotSettings(plotPath.string() + ".missing").renderMode == 0, "Missing plot must default to cubes");
         require(!savePlotSettings(path / "invalid-child.json", plot), "Plot save failure should be reported");
-        std::cout << "Settings round-trip, defaults, validation and save-error checks passed\n";
+        const auto autoPlotPath = path.parent_path() / "auto-plot.json";
+        const auto autoControlsPath = path.parent_path() / "auto-controls.ini";
+        require(savePlotSettings(autoPlotPath, plot), "Could not prepare autosave test");
+        require(saveControlSettings(autoControlsPath, original), "Could not prepare controls autosave test");
+        SettingsAutosave autosave(autoPlotPath, autoControlsPath, plot, original);
+        auto controls = original;
+        autosave.tick(0, plot, controls);
+        require(!autosave.pending(), "Unchanged settings must not be pending");
+        plot.generator["seed"] = 1001; // Auto-apply is disabled; still must save.
+        autosave.tick(1, plot, controls);
+        autosave.tick(1.2, plot, controls);
+        require(loadPlotSettings(autoPlotPath).generator["seed"] == 674, "Edits must be debounced");
+        plot.generator["seed"] = 1002;
+        controls.zoomFactor = 7;
+        autosave.tick(1.3, plot, controls);
+        autosave.tick(1.7, plot, controls);
+        require(!autosave.pending() && !autosave.failed(), "Autosave did not finish after debounce");
+        require(loadPlotSettings(autoPlotPath).generator["seed"] == 1002 &&
+                loadControlSettings(autoControlsPath).zoomFactor == 7, "Latest edits must persist without generation");
+        const auto timestamp = std::filesystem::last_write_time(autoPlotPath);
+        autosave.tick(2, plot, controls);
+        require(std::filesystem::last_write_time(autoPlotPath) == timestamp, "Idle frames must not rewrite settings");
+        // Continuous camera input cannot postpone saving forever.
+        for (int i = 0; i <= 21; ++i) {
+            plot.camera.yaw = 200 + float(i);
+            autosave.tick(3 + i * 0.1, plot, controls);
+        }
+        require(loadPlotSettings(autoPlotPath).camera.yaw >= 219, "Continuous input must save within two seconds");
+        plot.generator["seed"] = 1003;
+        autosave.tick(5.2, plot, controls, true);
+        require(loadPlotSettings(autoPlotPath).generator["seed"] == 1003, "Exit must flush pending edits");
+#ifdef _WIN32
+        // Deny replacement while allowing reads: an interrupted/failed save must
+        // retain the previous complete JSON and retry after the lock is released.
+        HANDLE locked = CreateFileW(autoPlotPath.c_str(), GENERIC_READ, FILE_SHARE_READ,
+                                    nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        require(locked != INVALID_HANDLE_VALUE, "Could not lock settings for failure test");
+        plot.generator["seed"] = 1004;
+        autosave.tick(6, plot, controls, true);
+        const bool failed = autosave.failed() && autosave.pending();
+        const bool preserved = loadPlotSettings(autoPlotPath).generator["seed"] == 1003;
+        CloseHandle(locked);
+        require(failed && preserved, "Failed replacement must preserve the old file and stay pending");
+        autosave.tick(7.1, plot, controls);
+        require(!autosave.failed() && !autosave.pending() && loadPlotSettings(autoPlotPath).generator["seed"] == 1004,
+                "Failed autosave must retry successfully");
+#endif
+        require(!std::filesystem::exists(autoPlotPath.string() + ".tmp"), "Atomic save left a temporary file");
+        require(controlSettingsPath().parent_path() == std::filesystem::path(FILAMENTS_SETTINGS_DIRECTORY),
+                "Settings must live in the configured repository directory");
+        std::cout << "Settings validation, atomic replacement, debounced autosave, bounded delay and retry checks passed\n";
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';
         return 1;
