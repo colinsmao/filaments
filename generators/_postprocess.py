@@ -13,6 +13,24 @@ FADE_DENSITY_PARAMETER = dict(key="fade_density_strength", label="Edge clump sup
                               group="Edge fade", enabled_if="fade")
 
 
+def remap_density(density, low=1., middle=1., high=1.):
+    """Continuous three-slope curve, before edge fading and star sampling.
+
+    Breaks are at 1/3 and 2/3 of the input peak, not spatial regions or
+    quantiles. Positive slopes preserve density ordering and exact zeros.
+    All ones bypass exactly; the sampler normalizes the resulting weights.
+    """
+    if low == middle == high == 1.:
+        return density
+    peak = float(np.max(density))
+    if peak <= 0:
+        return density
+    x = density / peak
+    return peak * (low * np.minimum(x, 1/3)
+                   + middle * np.clip(x - 1/3, 0, 1/3)
+                   + high * np.maximum(x - 2/3, 0))
+
+
 def edge_envelope(radius, width=0.8):
     """Smooth fade over the outer `width` fraction of the normalized half-extent."""
     t = np.clip((1 - np.asarray(radius)) / max(width, 1e-6), 0, 1)
@@ -20,21 +38,32 @@ def edge_envelope(radius, width=0.8):
 
 
 def density_fade_weights(envelope, relative_density, strength=1.0):
-    """Lower the permitted density toward the boundary, preserving the core.
+    """Compress only density above the dense threshold near the boundary.
 
-    rho_out = rho*e / (1 + strength*(1-e)*rho/mean_rho).
-    Dense peaks saturate at mean_rho*e/(strength*(1-e)) rather than remaining
-    arbitrarily dense after a positional fade. At e=1 all densities are unchanged.
+    r = rho / threshold, excess = max(r-1, 0), k = strength*(1-e).
+    Output density / threshold = e*(min(r,1) + excess/(1+k*excess)).
+    Below threshold the ordinary envelope is unchanged, at every strength.
+    The shoulder is continuous with continuous first derivative and never
+    reverses density ordering. At e=1 or strength=0, only positional fade applies.
     """
-    return envelope / (1 + strength * (1 - envelope) * relative_density)
+    e, r = np.broadcast_arrays(np.asarray(envelope), np.asarray(relative_density))
+    excess = np.maximum(r - 1., 0.)
+    k = strength * (1 - e)
+    compressed = np.minimum(r, 1.) + excess / (1 + k * excess)
+    ratio = np.divide(compressed, r, out=np.ones_like(compressed, dtype=float), where=r > 0)
+    return np.where((r <= 1) | (k == 0), e, e * ratio)
+
+
+def edge_dense_threshold(density):
+    """Fixed knee at one quarter peak; empty volume cannot lower it."""
+    return max(.25 * float(np.max(density)), np.finfo(float).tiny)
 
 
 def fade_density(density, width=0.8, strength=1.0):
     axis = np.abs(np.linspace(-1, 1, density.shape[0], dtype=np.float32))
     radius = np.maximum(np.maximum(axis[:, None, None], axis[None, :, None]), axis[None, None, :])
     envelope = edge_envelope(radius, width)
-    mean = max(float(np.mean(density)), np.finfo(float).tiny)
-    return density * density_fade_weights(envelope, density / mean, strength)
+    return density * density_fade_weights(envelope, density / edge_dense_threshold(density), strength)
 
 
 def relative_density_at_stars(normalized, resolution=48):
@@ -78,7 +107,8 @@ def suppress_voids(density, threshold):
     return density * squared / (squared + threshold * threshold)
 
 
-def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_empty=False):
+def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_empty=False,
+                   density_source=None):
     """Optional point-stage processors; masks always travel with star attributes.
 
     Bounds are (center, half_extents) in world coordinates. Without an explicit
@@ -88,7 +118,7 @@ def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_em
     if allow_empty and len(positions) == 0:
         return positions, colors, sizes
     if not params.get("fade", 0):
-        return apply_appearance(positions, colors, sizes, seed, params)
+        return apply_appearance(positions, colors, sizes, seed, params, density_source)
     if bounds is None:
         low, high = positions.min(axis=0), positions.max(axis=0)
         center, half_extents = (low + high) * 0.5, (high - low) * 0.5
@@ -98,13 +128,14 @@ def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_em
                 or not np.isfinite(center).all() or not np.isfinite(half_extents).all()
                 or (half_extents < 0).any()):
             raise ValueError("postprocess_bounds must return finite center and nonnegative half-extents")
-    positions, colors, sizes = apply_appearance(positions, colors, sizes, seed, params)
+    positions, colors, sizes = apply_appearance(positions, colors, sizes, seed, params, density_source)
     normalized = np.divide(positions - center, half_extents,
                            out=np.zeros_like(positions), where=half_extents > 0)
     weights = edge_envelope(np.max(np.abs(normalized), axis=1), params.get("fade_width", .8))
     strength = params.get("fade_density_strength", 1.)
     if strength > 0:
-        weights = density_fade_weights(weights, relative_density_at_stars(normalized), strength)
+        density = relative_density_at_stars(normalized)
+        weights = density_fade_weights(weights, density / edge_dense_threshold(density), strength)
     rng = np.random.default_rng(np.random.SeedSequence([seed, 9401]))
     keep = rng.random(len(positions)) < weights
     if not keep.any() and not allow_empty:

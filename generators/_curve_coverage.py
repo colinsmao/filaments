@@ -6,7 +6,8 @@ from _noise import sample_density
 
 
 class CurveCoverage:
-    def __init__(self, density, half_extents, radius, total_length, resolution=48):
+    def __init__(self, density, half_extents, radius, total_length, resolution=48, steering=True):
+        self.steering = steering
         self.half = np.asarray(half_extents, dtype=float)
         self.axes = np.array([0, 2]) if self.half[1] < radius/20 else np.arange(3)
         source = density if len(self.axes) == 3 else density.mean(axis=1)
@@ -37,13 +38,16 @@ class CurveCoverage:
         self.load = self.smooth_deposited/np.maximum(self.smooth_target, floor)
         # Bounded fractional deficit: steer toward *underrepresented* space,
         # not just toward the already strongest density peak a second time.
-        deficit = np.maximum(1-self.load, .05)
-        self.deficit_gradient = np.stack(np.gradient(np.log(deficit), *self.spacing, edge_order=2))
+        if self.steering:
+            deficit = np.maximum(1-self.load, .05)
+            self.deficit_gradient = np.stack(np.gradient(np.log(deficit), *self.spacing, edge_order=2))
 
-    def sample(self, positions):
+    def sample(self, positions, steering=True):
         q = self.coordinates(positions)
         load = map_coordinates(self.load, q, order=1, mode='nearest')
         gradient = np.zeros_like(positions)
+        if not steering or not self.steering:
+            return load, gradient
         gradient[:, self.axes] = np.column_stack([map_coordinates(g, q, order=1, mode='nearest') for g in self.deficit_gradient])
         steering = self.radius*gradient
         steering /= np.maximum(1., np.linalg.norm(steering, axis=1))[:, None]

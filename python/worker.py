@@ -59,13 +59,19 @@ def load_catalog(directory):
                 keys.add(key)
                 parameters.append(dict(key=key, label=str(entry.get("label", key)), type=kind,
                                        min=lo, max=hi, default=default))
-            if "fade" not in keys:
+                for hint in ('group', 'enabled_if', 'toggle'):
+                    if hint in entry:
+                        parameters[-1][hint] = entry[hint]
+            axis_fade = getattr(module, 'NATIVE_AXIS_FADE', False)
+            if "fade" not in keys and not axis_fade:
                 parameters.append(dict(FADE_PARAMETER))
             else:
                 for entry in parameters:
                     if entry["key"] == "fade":
                         entry.update(group="Edge fade", toggle=True)
             for shared in (FADE_WIDTH_PARAMETER, FADE_DENSITY_PARAMETER):
+                if axis_fade:
+                    continue
                 if shared["key"] not in keys:
                     parameters.append(dict(shared))
                 else:
@@ -73,6 +79,18 @@ def load_catalog(directory):
                         if entry["key"] == shared["key"]:
                             entry.update(group="Edge fade", enabled_if="fade")
             parameters.extend(dict(entry) for entry in APPEARANCE_PARAMETERS)
+            if primitive == "points" and callable(getattr(module, "generate_density_source", None)):
+                # Field guidance has no random curve length or guide palette.
+                parameters = [p for p in parameters if p['key'] not in ('pp_curve_length', 'pp_curve_colors')]
+                for entry in parameters:
+                    if entry.get('group') == 'Sparse curves':
+                        entry['group'] = 'Density alignment'
+                    if entry['key'] == 'pp_curves':
+                        entry['label'] = 'Align sparse stars to density'
+                    if entry['key'] == 'pp_curve_reach':
+                        entry['label'] = 'Maximum alignment travel (units)'
+                parameters.append(dict(key='pp_density_radius', label='Field smoothing (units)',
+                    type='float', default=.25, min=.02, max=3., group='Density alignment', enabled_if='pp_curves'))
             # Independent line endpoint pairs cannot be thinned, merged or moved
             # by star postprocessors without breaking the skeleton topology.
             if primitive == "lines" and not population:
@@ -110,6 +128,9 @@ def generate_request(request, directory, output):
         supplied = request.get("params", {})
         if not isinstance(supplied, dict):
             raise ValueError("params must be an object")
+        migrate = getattr(modules[selected], 'migrate_parameters', None)
+        if callable(migrate):
+            supplied = migrate(supplied)
         params = {}
         for entry in schema["parameters"]:
             value = supplied.get(entry["key"], entry["default"])
@@ -125,8 +146,12 @@ def generate_request(request, directory, output):
         # Existing density generators own their fade stage; all others receive
         # the shared point-stage fallback without changing their signatures.
         native_params = {key: value for key, value in params.items() if key in native_keys}
+        density_source = None
         if schema["population"]:
             generated, paths, path_colors = module.generate_population_source(count=count, seed=seed, **native_params)
+        elif primitive == "points" and params.get('pp_curves', 0) and callable(getattr(module, 'generate_density_source', None)):
+            generated, density, half_extents = module.generate_density_source(count=count, seed=seed, **native_params)
+            density_source = (density, half_extents)
         else:
             generated = module.generate(count=count, seed=seed, **native_params)
         if not isinstance(generated, (tuple, list)) or len(generated) not in (2, 3):
@@ -160,7 +185,8 @@ def generate_request(request, directory, output):
             post_params = dict(params)
             if "fade" in native_keys:
                 post_params["fade"] = 0
-            positions, colors, sizes = apply_to_stars(positions, colors, sizes, seed, post_params, bounds)
+            positions, colors, sizes = apply_to_stars(positions, colors, sizes, seed, post_params, bounds,
+                                                     density_source=density_source)
             if (not np.isfinite(positions).all() or not np.isfinite(colors).all()
                     or not np.isfinite(sizes).all() or (np.abs(positions) > 1e6).any()
                     or ((colors < 0) | (colors > 1)).any() or ((sizes <= 0) | (sizes > 1000)).any()):

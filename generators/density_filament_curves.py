@@ -1,13 +1,16 @@
-"""Original noise-filament density -> local stochastic strands -> shared stars."""
+"""Symmetric branch density -> local stochastic strands -> shared stars."""
 import numpy as np
-import noise_filaments as base
+import noise_filaments_branches as base
+from _axis_controls import fade_density_axes, migrate_parameters as migrate_axes
 from _density_curves import trace_density
 
 NAME = 'Density-guided local strands'
 PRIMITIVE = 'lines'
-_DENSITY_KEYS = {'extent', 'y_scale', 'layer_continuity', 'frequency', 'width',
-                 'strand_continuity', 'octaves', 'roughness', 'clumping'}
-PARAMETERS = [dict(entry) for entry in base.PARAMETERS if entry['key'] in _DENSITY_KEYS] + [
+NATIVE_AXIS_FADE = True
+_DENSITY_KEYS = {'frequency', 'width', 'strand_continuity', 'octaves', 'roughness',
+                 'clumping', 'density_low', 'density_mid', 'density_high'}
+PARAMETERS = [dict(entry) for entry in base.PARAMETERS
+              if entry['key'] not in ('star_size', 'size_variation')] + [
     dict(key='strand_count', label='Local strands', type='int', default=512, min=16, max=2048),
     dict(key='strand_length', label='Mean strand length (units)', type='float', default=2., min=.2, max=6.),
     dict(key='direction_scale', label='Density direction radius (units)', type='float', default=.3, min=.1, max=1.5),
@@ -22,24 +25,36 @@ PARAMETERS = [dict(entry) for entry in base.PARAMETERS if entry['key'] in _DENSI
 ]
 # Start this comparison at the user's 2026-10-10 reference density. These are
 # fixed experiment defaults, not reads/writes of the live viewer settings.
-_REFERENCE_DEFAULTS = dict(extent=9.458, y_scale=.234, frequency=2.505, width=.025,
+_REFERENCE_DEFAULTS = dict(extent=9.458, y_extent=9.458*.234, frequency=2.505, width=.025,
                            roughness=.107, clumping=6.875, strand_continuity=1.)
 for _entry in PARAMETERS:
     if _entry['key'] in _REFERENCE_DEFAULTS:
         _entry['default'] = _REFERENCE_DEFAULTS[_entry['key']]
 
 
+def migrate_parameters(params):
+    # This experiment's historical defaults differ from the direct sampler.
+    supplied = dict(extent=9.458, y_scale=.234)
+    supplied.update(params)
+    return migrate_axes(supplied)
+
+
 def generate_population_source(count, seed, extent=9.458, y_scale=.234, strand_count=512,
                                strand_length=2., direction_scale=.3, density_pull=.35,
                                curve_wander=.15, join_reach=.6, join_strength=1.,
                                join_radius=.08, coverage_mode=1, coverage_radius=.5,
-                               capacity_scale=1., **params):
+                               capacity_scale=1., y_extent=None, **params):
+    half_y = extent*y_scale if y_extent is None else y_extent
     density_params = {entry['key']: entry['default'] for entry in PARAMETERS
-                      if entry['key'] in _DENSITY_KEYS-{'extent', 'y_scale'}}
+                      if entry['key'] in _DENSITY_KEYS}
     # Ignore retired controls if a caller supplies an old preset directly.
     density_params.update({k: v for k, v in params.items() if k in _DENSITY_KEYS})
-    density = base.build_density(seed, y_scale=y_scale, **density_params)
-    paths = trace_density(density, seed, [extent, extent*y_scale, extent],
+    density = base.build_density(seed, y_scale=half_y/extent, **density_params)
+    fade = migrate_parameters(params)
+    density = fade_density_axes(density, half_y, *[
+        fade[key] for key in ('fade_xz', 'fade_xz_width', 'fade_xz_density_strength',
+                              'fade_y', 'fade_y_width', 'fade_y_density_strength')])
+    paths = trace_density(density, seed, [extent, half_y, extent],
                           strand_count, strand_length, direction_scale, density_pull, curve_wander,
                           join_reach, join_strength, join_radius,
                           coverage_mode, coverage_radius, capacity_scale)

@@ -14,6 +14,195 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_density_strands_share_branch_field_bounds_and_fade(self):
+        from unittest.mock import patch
+        _, modules, errors = worker.load_catalog(ROOT/'generators')
+        self.assertFalse(errors)
+        curves, branches = modules['density_filament_curves'], modules['noise_filaments_branches']
+        from _axis_controls import fade_density_axes
+        params = dict(extent=8., y_extent=1.5, frequency=2.3, width=.07,
+                      octaves=2, roughness=.2, clumping=4., strand_continuity=.6,
+                      density_low=.7, density_mid=1.1, density_high=.3)
+        _, expected, half = branches.generate_density_source(1, 123, **params)
+        for fade in (dict(fade_xz=0, fade_y=0), dict(fade_xz=1, fade_y=0),
+                     dict(fade_xz=0, fade_y=1)):
+            fade.update(fade_xz_width=.5, fade_y_width=.2,
+                        fade_xz_density_strength=2., fade_y_density_strength=3.)
+            with patch.object(curves, 'trace_density', return_value=[np.zeros((3, 3))]) as trace:
+                curves.generate_population_source(100, 123, **params, **fade,
+                                                   layer_continuity=1., connectivity=0.)
+            np.testing.assert_array_equal(trace.call_args.args[0],
+                fade_density_axes(expected, half[1], **fade))
+            np.testing.assert_array_equal(trace.call_args.args[2], half)
+        old = curves.migrate_parameters(dict(extent=8., y_scale=.2, fade=1, fade_width=.6))
+        self.assertEqual(old['y_extent'], 1.6)
+        self.assertEqual(old['fade_xz_width'], .6)
+        self.assertEqual(old['fade_y'], 1)
+        self.assertEqual(curves.migrate_parameters({})['y_extent'], 9.458*.234)
+        self.assertEqual(curves.migrate_parameters(dict(extent=8., y_scale=.2, y_extent=3.))['y_extent'], 3.)
+        with tempfile.TemporaryDirectory() as temp:
+            response = worker.generate_request(dict(generator='density_filament_curves', count=100,
+                seed=42, params=dict(strand_count=16, strand_length=.5, extent=8., y_extent=0.,
+                                     fade_xz=1, fade_y=1, layer_continuity=1., y_scale=.8)),
+                ROOT/'generators', Path(temp)/'points.bin')
+            self.assertTrue(response['ok'], response)
+            for key in ('layer_continuity', 'connectivity', 'y_scale', 'fade'):
+                self.assertNotIn(key, response['params'])
+            points = np.fromfile(Path(temp)/'points.bin', dtype='<f4', offset=16).reshape(-1, 7)
+            np.testing.assert_array_equal(points[:, 1], 0.)
+            self.assertTrue((np.abs(points[:, [0, 2]]) <= 8.).all())
+
+    def test_density_contacts_local_bound_keeps_long_segment_endpoints(self):
+        worker.load_catalog(ROOT/'generators')
+        from _density_curves import StrandContacts
+        # The midpoint lies well outside the query radius, but the endpoint is close.
+        line = np.array([[0., 0., 0.], [10., 0., 0.]])
+        index = StrandContacts([line])
+        points = np.array([[0., .1, 0.], [100., 0., 0.]])
+        headings = np.array([[1., 0., 0.]]*2)
+        target, tangent, distance = index.query(points, headings, np.array([1, 1]), .2)
+        self.assertAlmostEqual(distance[0], .1)
+        np.testing.assert_array_equal(target[0], line[0])
+        self.assertTrue(np.isinf(distance[1]))
+        np.testing.assert_array_equal(target[1], points[1])
+        self.assertEqual(len(index.query(points[:0], headings[:0], np.array([], dtype=int), .2)[0]), 0)
+
+    def test_curve_coverage_load_only_matches_full_steering(self):
+        worker.load_catalog(ROOT/'generators')
+        from _curve_coverage import CurveCoverage
+        density = np.ones((16, 16, 16))
+        for half in ([2., 0., 2.], [2., 1., 2.]):
+            full = CurveCoverage(density, half, .2, 40.)
+            load_only = CurveCoverage(density, half, .2, 40., steering=False)
+            start, end = np.array([[0., 0., 0.]]), np.array([[1., 0., .1]])
+            for field in (full, load_only):
+                field.deposit(start, end)
+                field.refresh()
+            self.assertFalse(hasattr(load_only, 'deficit_gradient'))
+            np.testing.assert_array_equal(load_only.sample(start)[0], full.sample(start)[0])
+            np.testing.assert_array_equal(full.sample(start, steering=False)[0], full.sample(start)[0])
+            np.testing.assert_array_equal(load_only.sample(start)[1], 0.)
+
+    def test_axis_fades_are_independent_and_match_legacy_when_equal(self):
+        from _axis_controls import fade_density_axes
+        from _postprocess import fade_density
+        density = np.ones((25, 25, 25))
+        horizontal = fade_density_axes(density, 2., 1, .6, 1., 0, .2, 4.)
+        vertical = fade_density_axes(density, 2., 0, .2, 4., 1, .6, 1.)
+        np.testing.assert_array_equal(horizontal[:, 0, :], horizontal[:, 12, :])
+        np.testing.assert_array_equal(vertical[0, :, 0], vertical[12, :, 12])
+        self.assertGreater(horizontal[12, 0, 12], 0)
+        self.assertGreater(vertical[0, 12, 0], 0)
+        self.assertIs(fade_density_axes(density, 0., 0, .6, 1., 1, .6, 1.), density)
+        rng = np.random.default_rng(12)
+        uneven = rng.random(density.shape)
+        np.testing.assert_allclose(fade_density_axes(uneven, 2., 1, .6, 2., 1, .6, 2.),
+                                   fade_density(uneven, .6, 2.), rtol=1e-7, atol=1e-12)
+
+    def test_axis_extent_migration_and_worker_preserve_scene(self):
+        from _axis_controls import migrate_parameters
+        old = dict(extent=10., y_scale=.2, fade=1, fade_width=.4, fade_density_strength=2.)
+        migrated = migrate_parameters(old)
+        self.assertEqual(migrated['y_extent'], 2.)
+        self.assertEqual(migrated['fade_y_width'], .4)
+        self.assertEqual(migrate_parameters(dict(old, y_extent=3., fade_y=0))['y_extent'], 3.)
+        self.assertEqual(migrate_parameters(dict(old, y_extent=3., fade_y=0))['fade_y'], 0)
+        catalog, modules, errors = worker.load_catalog(ROOT/'generators')
+        self.assertFalse(errors)
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)/'stars.bin'
+            for name in ('noise_filaments', 'noise_filaments_branches'):
+                schema = next(c for c in catalog if c['id'] == name)
+                keys = {p['key'] for p in schema['parameters']}
+                self.assertTrue({'y_extent', 'fade_xz', 'fade_y'} <= keys)
+                self.assertTrue(keys.isdisjoint({'y_scale', 'fade', 'fade_width', 'fade_density_strength'}))
+                for axis in ('xz', 'y'):
+                    control = next(p for p in schema['parameters'] if p['key'] == f'fade_{axis}_width')
+                    self.assertEqual(control['enabled_if'], f'fade_{axis}')
+                legacy = modules[name].generate(1000, 42, **old)
+                response = worker.generate_request(dict(generator=name, count=1000, seed=42, params=old),
+                                                    ROOT/'generators', output)
+                self.assertTrue(response['ok'], response)
+                actual = np.frombuffer(output.read_bytes(), dtype='<f4', offset=16).reshape(-1, 7)
+                np.testing.assert_allclose(actual, np.column_stack(legacy), rtol=1e-6, atol=1e-6)
+                self.assertEqual(response['params']['y_extent'], 2.)
+                self.assertNotIn('y_scale', response['params'])
+                for horizontal_extent in (3., 12.):
+                    generated, _, half = modules[name].generate_density_source(1000, 42,
+                        extent=horizontal_extent, y_extent=2.)
+                    np.testing.assert_array_equal(half, [horizontal_extent, 2., horizontal_extent])
+                    self.assertLessEqual(np.abs(generated[0][:, 1]).max(), 2.)
+                # Restored settings run through the new density-alignment path too.
+                request = dict(generator=name, count=1000, seed=42,
+                               params=dict(response['params'], fade_y=0, pp_curves=1))
+                self.assertTrue(worker.generate_request(request, ROOT/'generators', output)['ok'])
+
+    def test_density_alignment_concentrates_faint_tube_without_axial_drift(self):
+        from _density_alignment import align_to_density
+        u = np.linspace(-2., 2., 49)
+        x, y, z = np.meshgrid(u, u, u, indexing='ij')
+        density = np.exp(-(y*y+z*z)/(.3**2)) * np.exp(x)
+        source = (density, [2., 2., 2.])
+        points = np.array([[-1., .25, .2], [-.8, -.2, .15], [-.5, .3, -.1]], dtype=np.float32)
+        moved = align_to_density(points, source, np.ones(3), 0., .7, .12, 1.)
+        self.assertLess(np.linalg.norm(moved[:, 1:], axis=1).max(), .01)
+        np.testing.assert_allclose(moved[:, 0], points[:, 0], atol=.002)
+        # Even one star gets a field-defined direction: no population PCA.
+        single = align_to_density(points[:1], source, np.ones(1), 0., .7, .12, 1.)
+        np.testing.assert_array_equal(single, moved[:1])
+        limited = align_to_density(points, source, np.ones(3), 0., .05, .12, 1.)
+        self.assertLessEqual(np.linalg.norm(limited-points, axis=1).max(), .050001)
+        self.assertIs(align_to_density(points, source, np.ones(3), 0., .7, .12, 0.), points)
+
+    def test_density_alignment_follows_curved_flat_ridge_and_leaves_uniform_field(self):
+        from _density_alignment import align_to_density
+        u = np.linspace(-2., 2., 65)
+        x, z = np.meshgrid(u, u, indexing='ij')
+        ring = np.exp(-((np.hypot(x, z)-1.)/.13)**2)
+        density = np.repeat(ring[:, None, :], 3, axis=1)
+        angles = np.linspace(0, 2*np.pi, 13, endpoint=False)
+        points = np.column_stack((1.2*np.cos(angles), np.zeros(13), 1.2*np.sin(angles))).astype(np.float32)
+        moved = align_to_density(points, (density, [2., 0., 2.]), np.ones(13), 0., .4, .08, 1.)
+        np.testing.assert_allclose(np.linalg.norm(moved[:, [0, 2]], axis=1), 1., atol=.025)
+        np.testing.assert_array_equal(moved[:, 1], points[:, 1])
+        np.testing.assert_allclose(np.arctan2(moved[:, 2], moved[:, 0]), angles - (angles > np.pi)*2*np.pi, atol=.015)
+        uniform = align_to_density(points, (np.ones_like(density), [2., 0., 2.]), np.ones(13), 0., .4, .08, 1.)
+        np.testing.assert_array_equal(uniform, points)
+
+    def test_density_alignment_worker_preserves_merge_count_attributes_and_centers(self):
+        catalog, modules, errors = worker.load_catalog(ROOT / 'generators')
+        self.assertFalse(errors)
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)/'stars.bin'
+            for name in ('noise_filaments', 'noise_filaments_branches'):
+                keys = {p['key'] for item in catalog if item['id'] == name for p in item['parameters']}
+                self.assertIn('pp_density_radius', keys)
+                self.assertNotIn('pp_curve_length', keys)
+                self.assertNotIn('pp_curve_colors', keys)
+                native = dict(y_scale=.2, density_high=.25)
+                params = dict(native, pp_merge=1, pp_merge_distance=.6, pp_dense_fraction=.5,
+                              pp_sparse_fraction=1., pp_curve_strength=1., pp_curve_reach=.6)
+                def run(enabled):
+                    response = worker.generate_request(dict(generator=name, count=2000, seed=42,
+                        params=dict(params, pp_curves=enabled)), ROOT/'generators', output)
+                    self.assertTrue(response['ok'], response)
+                    return np.frombuffer(output.read_bytes(), dtype='<f4', offset=16).reshape(-1, 7).copy()
+                base, aligned = run(0), run(1)
+                self.assertEqual(base.shape, aligned.shape)
+                np.testing.assert_array_equal(base[:, 3:], aligned[:, 3:])
+                displacement = np.linalg.norm(aligned[:, :3]-base[:, :3], axis=1)
+                self.assertGreater(np.count_nonzero(displacement > .001), 100)
+                self.assertLessEqual(displacement.max(), .60001)
+                # Merged stars are larger than any original at this size boost.
+                merged = base[:, 6] > .04*1.4
+                self.assertTrue(merged.any())
+                np.testing.assert_array_equal(aligned[merged], base[merged])
+                np.testing.assert_array_equal(run(1), aligned)
+                direct = modules[name].generate(2000, 42, **native)
+                shared, density, half = modules[name].generate_density_source(2000, 42, **native)
+                for a, b in zip(direct, shared):
+                    np.testing.assert_array_equal(a, b)
+
     def test_curve_coverage_counts_length_and_original_density_capacity(self):
         worker.load_catalog(ROOT / 'generators')
         from _curve_coverage import CurveCoverage
@@ -987,15 +1176,22 @@ class Generators(unittest.TestCase):
                 self.assertIn("even vertex count", result["error"])
 
     def test_density_aware_fade_limits_edge_knots(self):
-        from _postprocess import density_fade_weights, apply_to_stars
+        from _postprocess import density_fade_weights, apply_to_stars, relative_density_at_stars, edge_dense_threshold
         rho = np.array([.1, 1., 100., 10000.])
         np.testing.assert_array_equal(density_fade_weights(1., rho), np.ones(4))
         np.testing.assert_array_equal(density_fade_weights(.2, rho, 0), np.full(4, .2))
         output = rho * density_fade_weights(.2, rho)
-        self.assertTrue((output <= .2 / .8).all())
+        self.assertTrue((output <= .2 * (1 + 1/.8)).all())
         self.assertTrue((np.diff(output) > 0).all())  # No inverted dense/sparse ordering.
         self.assertLess(output[-1] / output[-2], 1.02)  # Edge peaks saturate.
         self.assertLess((rho * density_fade_weights(.02, rho)).max(), output.max() / 8)
+        # The extra suppression leaves every sub-threshold density exactly alone.
+        for strength in (0, 1, 4):
+            np.testing.assert_array_equal(density_fade_weights(.2, np.linspace(0, 1, 101), strength),
+                                          np.full(101, .2))
+        around_knee = np.array([1-1e-5, 1., 1+1e-5])
+        slopes = np.diff(around_knee * density_fade_weights(.2, around_knee, 4)) / 1e-5
+        np.testing.assert_allclose(slopes, .2, rtol=1e-4)
 
         rng = np.random.default_rng(12)
         dense = rng.normal(0, .015, (6000, 3)); dense[:, 0] = .8
@@ -1009,11 +1205,29 @@ class Generators(unittest.TestCase):
                             dict(fade=1, fade_density_strength=0), bounds)[2]
         new = apply_to_stars(positions, colors, ids, 42,
                             dict(fade=1, fade_density_strength=1), bounds)[2]
-        self.assertLess(np.count_nonzero(new < 6000), np.count_nonzero(old < 6000) * .1)
-        self.assertGreater(np.count_nonzero((new >= 6000) & (new < 9000)), np.count_nonzero(new < 6000))
+        self.assertLess(np.count_nonzero(new < 6000), np.count_nonzero(old < 6000) * .75)
+        # Sparse stars retain the exact baseline survivors, not just the count.
+        np.testing.assert_array_equal(new[(new >= 6000) & (new < 9000)], old[(old >= 6000) & (old < 9000)])
+        estimated = relative_density_at_stars(positions)
+        self.assertTrue((estimated[6000:9000] <= edge_dense_threshold(estimated)).all())
         np.testing.assert_array_equal(new[new >= 9000], np.arange(9000, 10000))
         # With a shared random stream, the new fade only removes more stars.
         self.assertTrue(np.isin(new, old).all())
+
+    def test_density_edge_suppression_preserves_faint_field_and_ignores_empty_volume(self):
+        from _postprocess import fade_density, edge_dense_threshold
+        density = np.full((21, 21, 21), .05)
+        density[15:19, 8:13, 8:13] = 1.
+        density[2:5, 8:13, 8:13] = .2
+        sparse = density <= .25
+        baseline = fade_density(density, .8, 0)
+        for strength in (1, 4):
+            faded = fade_density(density, .8, strength)
+            np.testing.assert_array_equal(faded[sparse], baseline[sparse])
+            self.assertTrue((faded[~sparse] < baseline[~sparse]).all())
+            self.assertTrue((faded <= baseline).all())
+        self.assertEqual(edge_dense_threshold(density), edge_dense_threshold(np.pad(density, 20)))
+        np.testing.assert_allclose(fade_density(density*7, .8, 4), fade_density(density, .8, 4)*7)
 
     def test_swirl_flow_and_stable_guide_assignments(self):
         from _appearance import apply_appearance, swirl_warp, coherent_warp
@@ -1090,7 +1304,8 @@ class Generators(unittest.TestCase):
         colors = rng.random(positions.shape).astype(np.float32)
         sizes = rng.uniform(.02, .06, len(positions)).astype(np.float32)
         p, c, s = apply_appearance(positions, colors, sizes, 42,
-                                  dict(pp_merge=1, pp_merge_distance=.15, pp_dense_fraction=1))
+                                  dict(pp_merge=1, pp_merge_distance=.15, pp_dense_fraction=1,
+                                       pp_merge_size_boost=1))
         self.assertLess(len(p), len(positions) // 2)
         self.assertGreater(s.max(), sizes.max())
         before, after = sizes.astype(float)**3, s.astype(float)**3
@@ -1099,6 +1314,56 @@ class Generators(unittest.TestCase):
                                    (p * after[:, None]).sum(axis=0), atol=1e-8)
         np.testing.assert_allclose((colors * before[:, None]).sum(axis=0),
                                    (c * after[:, None]).sum(axis=0), atol=1e-8)
+
+    def test_merge_boost_only_enlarges_combined_stars(self):
+        from _appearance import apply_appearance, merge_dense, neighbor_spacing
+        rng = np.random.default_rng(51)
+        positions = np.vstack((rng.normal(0, .08, (2000, 3)), [[10, 0, 0]])).astype(np.float32)
+        colors = rng.random(positions.shape).astype(np.float32)
+        sizes = rng.uniform(.02, .06, len(positions)).astype(np.float32)
+        spacing = neighbor_spacing(positions)[1]
+        p, c, s, remaining = merge_dense(positions, colors, sizes, 42, spacing, .15, 1)
+        self.assertGreater(remaining, 0)
+        self.assertLess(remaining, len(p))
+        for boost in (1, 2, 8):
+            result = apply_appearance(positions, colors, sizes, 42,
+                dict(pp_merge=1, pp_merge_distance=.15, pp_dense_fraction=1,
+                     pp_merge_size_boost=boost))
+            np.testing.assert_array_equal(result[0], p)
+            np.testing.assert_array_equal(result[1], c)
+            np.testing.assert_array_equal(result[2][:remaining], s[:remaining])
+            np.testing.assert_allclose(result[2][remaining:], s[remaining:] * boost)
+        # Visual boost saturates at the protocol limit, preserving grouping.
+        huge = np.full(len(positions), 400., dtype=np.float32)
+        base = merge_dense(positions, colors, huge, 42, spacing, .15, 1, 1)
+        boosted = merge_dense(positions, colors, huge, 42, spacing, .15, 1, 8)
+        np.testing.assert_array_equal(base[0], boosted[0])
+        self.assertLessEqual(boosted[2].max(), 1000)
+
+    def test_alignment_reclassifies_residual_stars_and_keeps_clumps_fixed(self):
+        from _appearance import apply_appearance, merge_dense, neighbor_spacing
+        rng = np.random.default_rng(21)
+        positions = np.vstack((rng.normal(0, .03, (500, 3)), rng.uniform(-2, 2, (4000, 3)))).astype(np.float32)
+        colors = rng.random(positions.shape).astype(np.float32)
+        sizes = np.full(len(positions), .04, dtype=np.float32)
+        tree, spacing = neighbor_spacing(positions)
+        cutoff = np.quantile(spacing, .35)
+        p, c, s, remaining = merge_dense(positions, colors, sizes, 42, spacing, .7, .6, 2)
+        original_ids = tree.query(p[:remaining])[1]
+        residual_spacing = neighbor_spacing(p[:remaining])[1]
+        newly_sparse = ((spacing[original_ids] < cutoff) & (residual_spacing > cutoff))
+        self.assertTrue(newly_sparse.any())
+        params = dict(pp_merge=1, pp_merge_distance=.7, pp_dense_fraction=.6,
+                      pp_curves=1, pp_curve_reach=.8, pp_sparse_fraction=.65,
+                      pp_curve_colors=1)
+        moved = apply_appearance(positions, colors, sizes, 42, params)
+        distance = np.linalg.norm(moved[0][:remaining] - p[:remaining], axis=1)
+        self.assertGreater(np.count_nonzero(distance[newly_sparse] > .001), 0)
+        np.testing.assert_array_equal(moved[0][remaining:], p[remaining:])
+        np.testing.assert_array_equal(moved[1][remaining:], c[remaining:])
+        np.testing.assert_array_equal(moved[2], s)
+        for a, b in zip(moved, apply_appearance(positions, colors, sizes, 42, params)):
+            np.testing.assert_array_equal(a, b)
 
     def test_combined_appearance_worker_and_tiny_clouds(self):
         from _appearance import apply_appearance
@@ -1161,7 +1426,8 @@ class Generators(unittest.TestCase):
         self.assertFalse(errors)
         for entry in catalog:
             self.assertEqual(sum(p["key"] == "fade" for p in entry["parameters"]),
-                             0 if entry["primitive"] == "lines" and not entry["population"] else 1)
+                             0 if (entry["primitive"] == "lines" and not entry["population"])
+                             or getattr(modules[entry['id']], 'NATIVE_AXIS_FADE', False) else 1)
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / "stars.bin"
             for name in ("galaxy", "filaments", "zeldovich", "noise_filament_curves"):
@@ -1317,6 +1583,52 @@ class Generators(unittest.TestCase):
         self.assertGreater(len(np.unique(colors, axis=0)), 1)
         self.assertEqual(len(np.unique(plain, axis=0)), 1)
 
+    def test_density_curve_is_monotone_local_and_scale_independent(self):
+        from _postprocess import remap_density
+        density = np.linspace(0., 1., 301)
+        self.assertIs(remap_density(density), density)
+        compressed = remap_density(density, high=.25)
+        np.testing.assert_allclose(compressed[:201], density[:201], atol=1e-15)
+        self.assertAlmostEqual(compressed[-1], .75)
+        self.assertAlmostEqual(compressed[-1] - compressed[200], (1/3)*.25)
+        for slopes in ((.05, 3, .05), (3, .05, 3), (.25, 1, .25)):
+            result = remap_density(density, *slopes)
+            self.assertEqual(result[0], 0.)
+            self.assertTrue((np.diff(result) > 0).all())
+            np.testing.assert_allclose(remap_density(7*density, *slopes), 7*result)
+        np.testing.assert_array_equal(remap_density(np.zeros(8), high=.25), np.zeros(8))
+
+    def test_noise_density_curve_precedes_fade_and_preserves_count(self):
+        from unittest.mock import patch
+        from _postprocess import remap_density, fade_density
+        _, modules, errors = worker.load_catalog(ROOT / "generators")
+        self.assertFalse(errors)
+        module = modules["noise_filaments"]
+        original = module.generate(1000, 42)
+        neutral = module.generate(1000, 42, density_low=1, density_mid=1, density_high=1)
+        for a, b in zip(original, neutral):
+            np.testing.assert_array_equal(a, b)
+        # Inspect the actual sampling input to catch wrong order/double remapping.
+        base = module.build_density(42)
+        expected = fade_density(remap_density(base, .25, 1, .25), .8, 1)
+        with patch.object(module, 'sample_density', wraps=module.sample_density) as sample:
+            changed = module.generate(1000, 42, fade=1, density_low=.25, density_high=.25)
+            np.testing.assert_array_equal(sample.call_args.args[0], expected)
+        self.assertEqual(len(changed[0]), 1000)
+        self.assertFalse(np.array_equal(changed[0], original[0]))
+        np.testing.assert_array_equal(changed[2], original[2])
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / 'stars.bin'
+            request = dict(generator='noise_filaments', count=1000, seed=42,
+                           params=dict(density_low=.25, density_high=.25, fade=1))
+            response = worker.generate_request(request, ROOT / 'generators', output)
+            self.assertTrue(response['ok'], response)
+            self.assertEqual(response['count'], 1000)
+            self.assertEqual(response['params']['density_high'], .25)
+            first = output.read_bytes()
+            self.assertTrue(worker.generate_request(request, ROOT / 'generators', output)['ok'])
+            self.assertEqual(first, output.read_bytes())
+
     def test_strand_continuity_limits_clump_gaps(self):
         _, modules, errors = worker.load_catalog(ROOT / "generators")
         self.assertFalse(errors)
@@ -1342,13 +1654,41 @@ class Generators(unittest.TestCase):
         t = np.linspace(-1, 1, 101)
         zero = np.zeros_like(t)
         for a, b, c in ((t, zero, zero), (zero, t, zero), (zero, zero, t)):
-            density = np.exp(module._strand_log_density(a, b, c, 0.065, 1, 1))
+            density = np.exp(module._strand_log_density(a, b, c, 0.065))
             self.assertTrue((density >= 0.99).all())
-        isolated = np.exp(module._strand_log_density(t, zero, zero, 0.065, 1, 0))
-        self.assertLess(isolated[0], 1e-20)
+        # Being on just one zero surface must not produce a sheet.
+        sheet = np.exp(module._strand_log_density(zero, zero + 1, zero + 1, .065))
+        self.assertTrue((sheet < 1e-20).all())
         void = np.exp(module._strand_log_density(t * 0 + 1, t * 0 + 1,
-                                                t * 0 + 1, 0.065, 1, 1))
+                                                t * 0 + 1, 0.065))
         self.assertTrue((void < 1e-20).all())
+
+    def test_three_field_density_is_symmetric_and_retired_controls_are_ignored(self):
+        from itertools import permutations
+        catalog, modules, errors = worker.load_catalog(ROOT / "generators")
+        self.assertFalse(errors)
+        module = modules['noise_filaments_branches']
+        fields = np.random.default_rng(51).normal(size=(3, 1000))
+        expected = module._strand_log_density(*fields, .065)
+        for order in permutations(range(3)):
+            np.testing.assert_allclose(module._strand_log_density(*fields[list(order)], .065), expected,
+                                       rtol=1e-12, atol=1e-12)
+        schema = next(entry for entry in catalog if entry['id'] == 'noise_filaments_branches')
+        keys = {entry['key'] for entry in schema['parameters']}
+        self.assertTrue(keys.isdisjoint({'connectivity', 'layer_continuity'}))
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / 'stars.bin'
+            request = dict(generator='noise_filaments_branches', count=1000, seed=42,
+                           params=dict(y_scale=.15, density_high=.25))
+            response = worker.generate_request(request, ROOT / 'generators', output)
+            self.assertTrue(response['ok'], response)
+            expected_bytes = output.read_bytes()
+            request['params'].update(connectivity=0, layer_continuity=1)
+            response = worker.generate_request(request, ROOT / 'generators', output)
+            self.assertTrue(response['ok'], response)
+            self.assertEqual(expected_bytes, output.read_bytes())
+            self.assertNotIn('connectivity', response['params'])
+            self.assertNotIn('layer_continuity', response['params'])
 
     def test_layer_filaments_3d_structure_and_axis_scaling(self):
         _, modules, errors = worker.load_catalog(ROOT / "generators")

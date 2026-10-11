@@ -11,7 +11,7 @@ from noise_filament_curves import build_curves
 from _alignment import attract_to_curves
 
 NAME = "Noise filaments with alignment"
-PARAMETERS = [dict(entry) for entry in base.PARAMETERS] + [
+PARAMETERS = [dict(entry) for entry in base.LEGACY_PARAMETERS] + [
     dict(key="alignment", label="Alignment strength", type="float", default=0.6, min=0.0, max=0.95),
     dict(key="alignment_radius", label="Alignment reach (units)", type="float", default=0.35, min=0.01, max=2.0),
     dict(key="curve_smoothing", label="Guide smoothing", type="float", default=1.0, min=0.0, max=3.0),

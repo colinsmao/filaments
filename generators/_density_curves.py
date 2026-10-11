@@ -24,24 +24,28 @@ class StrandContacts:
         if not len(self.start):
             return
         self.tangent = self.delta/np.sqrt(self.length2)[:, None]
+        self.half_length = .5*np.sqrt(self.length2.max())
         self.tree = cKDTree(self.start+self.delta*.5)
 
     def query(self, positions, headings, owners, radius):
         target, tangent = positions.copy(), headings.copy()
         distance = np.full(len(positions), np.inf)
-        if self.tree is None or radius <= 0:
+        if self.tree is None or radius <= 0 or not len(positions):
             return target, tangent, distance
         # Bounded nearest-midpoint search; exact distances then reject false
         # candidates. Crowded self-segments can hide eligible guides, so this
         # deliberately makes no guarantee that every encounter is detected.
-        _, ids = self.tree.query(positions, k=list(range(1, min(48, len(self.start))+1)))
+        _, ids = self.tree.query(positions, k=list(range(1, min(48, len(self.start))+1)),
+                                 distance_upper_bound=radius+self.half_length)
+        nearby = ids < len(self.start)
+        ids = np.minimum(ids, len(self.start)-1)
         offset = positions[:, None]-self.start[ids]
         fraction = np.clip(np.sum(offset*self.delta[ids], axis=2)/self.length2[ids], 0, 1)
         candidates = self.start[ids]+fraction[:, :, None]*self.delta[ids]
         distances = np.linalg.norm(candidates-positions[:, None], axis=2)
         alignment = np.sum(self.tangent[ids]*headings[:, None], axis=2)
         valid = (self.owner[ids] != owners[:, None]) & (np.abs(alignment) >= np.cos(np.deg2rad(25.)))
-        valid &= distances < radius
+        valid &= nearby & (distances < radius)
         distances = np.where(valid, distances, np.inf)
         best = distances.argmin(axis=1)
         rows = np.arange(len(positions))
@@ -63,6 +67,7 @@ class DensityShape:
     eigensystem; their starting heights remain unchanged.
     """
     def __init__(self, density, half_extents, radius):
+        self.radius = radius
         self.half = np.asarray(half_extents, dtype=float)
         self.axes = np.array([0, 2]) if self.half[1] < radius/20 else np.arange(3)
         self.density = np.asarray(density, dtype=float)
@@ -83,7 +88,8 @@ class DensityShape:
     def coordinates(self, points):
         return ((points[:, self.axes] + self.half[self.axes])/self.spacing).T
 
-    def sample(self, points, preferred=None):
+    def eigensystem(self, points):
+        """Physical gradient and Hessian eigenpairs on the active axes."""
         q = self.coordinates(points)
         n = len(self.axes)
         grad = np.column_stack([map_coordinates(g, q, order=1, mode='nearest') for g in self.gradient])
@@ -92,6 +98,10 @@ class DensityShape:
             for j in range(i, n):
                 hess[:, i, j] = hess[:, j, i] = map_coordinates(self.hessian[i, j], q, order=1, mode='nearest')
         values, vectors = np.linalg.eigh(hess)
+        return grad, values, vectors
+
+    def sample(self, points, preferred=None):
+        grad, values, vectors = self.eigensystem(points)
         # A tube has two negative transverse curvatures and a less negative
         # axial one. Sheets/round peaks have an ambiguous leading direction.
         confidence = np.clip((values[:, -1]-values[:, -2]) /
@@ -141,7 +151,7 @@ def trace_density(density, seed, half_extents, strand_count=512, strand_length=2
     active = np.ones(len(positions), dtype=bool)
     floor = field.log_value(positions)-np.log(10.)
     coverage = (CurveCoverage(density, half, coverage_radius,
-                             strand_count*strand_length*capacity_scale)
+                             strand_count*strand_length*capacity_scale, steering=coverage_mode == 2)
                 if coverage_mode else None)
     wave_size = max(1, int(np.ceil(len(roots)/4)))
     next_root = len(roots)
@@ -191,17 +201,18 @@ def trace_density(density, seed, half_extents, strand_count=512, strand_length=2
         wandering[:, np.setdiff1d(np.arange(3), field.axes)] = 0
         joining = np.zeros_like(p)
         if interaction:
-            target, guide, distance = contacts.query(p, h, ids//2, join_reach)
+            eligible = load > .5 if coverage is not None else np.ones(len(p), dtype=bool)
+            target, guide, distance = contacts.query(p[eligible], h[eligible], ids[eligible]//2, join_reach)
             weight = np.maximum(0., 1-distance/join_reach)**2
-            weight *= np.minimum(1., traveled[ids]/max(join_reach, step))
+            weight *= np.minimum(1., traveled[ids[eligible]]/max(join_reach, step))
             if coverage is not None:
                 # Do not consolidate an underfilled blob merely because
                 # another curve is nearby. Join as local capacity runs out.
-                weight *= np.clip((load-.5)*2, 0., 1.)
+                weight *= np.clip((load[eligible]-.5)*2, 0., 1.)
             # Match the nearby strand's heading and correct sideways toward it.
-            offset = target-p
-            offset -= h*np.sum(offset*h, axis=1)[:, None]
-            joining = weight[:, None]*(guide-h + 2*offset/join_reach)
+            offset = target-p[eligible]
+            offset -= h[eligible]*np.sum(offset*h[eligible], axis=1)[:, None]
+            joining[eligible] = weight[:, None]*(guide-h[eligible] + 2*offset/join_reach)
             joining[:, np.setdiff1d(np.arange(3), field.axes)] = 0
         if coverage_mode == 2:
             deficit -= h*np.sum(deficit*h, axis=1)[:, None]
@@ -214,18 +225,21 @@ def trace_density(density, seed, half_extents, strand_count=512, strand_length=2
         proposed = p + ds[:, None]*heading
         joined = np.zeros(len(ids), dtype=bool)
         if interaction and join_radius > 0:
-            target, _, distance = contacts.query(proposed, heading, ids//2, min(join_radius, join_reach))
-            joined = (distance < min(join_radius, join_reach)) & (traveled[ids] >= 2*step)
+            eligible = traveled[ids] >= 2*step
             if coverage is not None:
-                joined &= load >= .75
+                eligible &= load >= .75
+            target, _, distance = contacts.query(proposed[eligible], heading[eligible], ids[eligible]//2,
+                                                 min(join_radius, join_reach))
+            hit = distance < min(join_radius, join_reach)
+            joined[eligible] = hit
             # Join an actual deposited segment, not another tip's prediction.
             # Deposited geometry never moves and is never deleted afterward.
-            proposed[joined] = target[joined]
+            proposed[joined] = target[hit]
         inside = np.all(np.abs(proposed) <= half+1e-10, axis=1)
         supported = field.log_value(proposed) >= floor[ids]
         full = np.zeros(len(ids), dtype=bool)
         if coverage is not None:
-            proposed_load, _ = coverage.sample(proposed)
+            proposed_load, _ = coverage.sample(proposed, steering=False)
             full = (proposed_load >= 1.) & (traveled[ids] >= 2*step)
         accepted = inside & supported & (~full | joined)
         if coverage is not None:

@@ -116,23 +116,75 @@ Two additional scripts explore noise-driven densities:
   This reduces faint stretches without introducing more strands or changing
   their widths or wavelengths. It cannot join genuinely separate loops.
 
-**noise_filaments_branches.py** preserves the three-field experiment. Its
-**Connectivity** slider adds the A/C and B/C strand families to A/B; these
-meet at triple-zero junctions but can produce a much busier pattern. At 0 it
-reproduces the original two-field method. **layer_filaments.py** also remains
-available as the separate cellular experiment.
+**Noise filaments** also has three **Density curve** slope controls in the
+generator settings. This is density postprocessing before sampling, separate
+from the shared star Postprocessing panel. Let `x = density / max(density)`:
 
-Both noise scripts have **Y thickness fraction**: 1 uses the full volume, 0.1
-samples Y between `-0.1 * extent` and `+0.1 * extent`, and 0 makes a flat layer.
-Noise is evaluated at those actual coordinates, so its wavelengths stay unchanged;
-this selects a thinner region rather than compressing the noise features.
-**Fade edges (0 off, 1 on)** optionally tapers density toward the box faces.
-**Fade width** controls the taper, defaulting to 80% of each half-extent.
-The total star count stays fixed; stars are
-redistributed toward the interior rather than made transparent or smaller.
-The toggle uses an integer 0/1 control supported by the running viewer.
+```text
+f(x) = low * min(x, 1/3)
+     + middle * clamp(x - 1/3, 0, 1/3)
+     + high * max(x - 2/3, 0)
+```
 
-In **noise_filaments.py**, **Layer continuity** defaults to 1 to reduce isolated
+The new density is `max(density) * f(x)`. Low, middle and high refer to thirds
+of the input density range, not thirds of the stars or spatial regions. Each
+slope is dimensionless, range 0.05-3, default 1. All ones bypass exactly.
+Below 1 compresses the corresponding segment; above 1 steepens it. Segments
+connect continuously, so changing a lower slope also shifts the starting
+height of later segments. Positive slopes preserve density ordering and zeros.
+For a first peak-flattening trial, keep low/middle at 1 and set high to 0.25:
+the lower two thirds stay unchanged and input 1 maps to 0.75. A slope of 0.05
+is almost flat. These controls add no randomness and preserve the requested
+sample count, redistributing its sampling probability. They work even with
+Strand continuity at 1. Uniformly scaling all three slopes has no distribution
+effect because sampling normalizes density. Colors follow the processed density;
+per-star sizes keep their independent draws. This remaps values, not spatial
+noise frequencies, and does not spatially smooth the field.
+
+Order: original density, density curve, native edge fade, star sampling, shared
+star merging/alignment/warp. Later merging can still reduce the displayed count.
+The shared `build_density` function stays raw for existing comparison experiments.
+
+**noise_filaments_branches.py** always combines A/B, A/C and B/C with equal
+weight. Its base density is the symmetric sum
+`exp(-(A*A+B*B)/(2*w*w)) + exp(-(A*A+C*C)/(2*w*w)) + exp(-(B*B+C*C)/(2*w*w))`.
+The families meet at triple-zero junctions but can produce a much busier pattern.
+Connectivity and Layer continuity have been removed from this generator; old
+saved values are ignored and disappear when the viewer next saves a successful
+generation. Thin Y samples a literal slice without relaxing any field constraint.
+The original two-field generator remains available for comparison.
+The branches generator supports the same density curve and Strand continuity
+controls. Strand continuity defaults to 0 here to retain its older clump
+modulation. **layer_filaments.py** remains the separate cellular experiment.
+
+`noise_filaments.py` and `noise_filaments_branches.py` now have independent
+**XZ half-extent (units)** and **Y half-extent (units)**. They define bounds
+`[-XZ, XZ]` in X/Z and `[-Y, Y]` vertically. Defaults are 6 units each; XZ ranges
+1-30 and Y ranges 0-30. Y=0 makes a flat layer. Changing XZ no longer multiplies
+the Y half-extent. Changing Y selects a different noise slice rather than merely
+stretching existing points. Noise frequency still specifies detail across the
+horizontal span, so changing XZ extent also changes the world-space noise
+wavelength. These dimensions add no randomness or stars; count stays fixed
+before merging. Earlier comparison generators retain their old extent/fraction
+controls.
+
+The **XZ edge fade** and **Y edge fade** sections each have an independent
+on/off toggle, width and clump suppression. Width is a fraction of that group's
+half-extent (default .8, range .05-1); larger means a broader taper. Suppression
+has the same dense-only shoulder in each group (default 1, range 0-4). Neither
+adds randomness. The XZ envelope uses `max(abs(x/XZ), abs(z/XZ))`; Y uses
+`abs(y/Y)`. Disabled groups contribute no attenuation, and Y fade is bypassed
+for a zero-height layer. Where both apply, the stronger attenuation wins rather
+than multiplying two fades; equal settings reproduce the old box envelope.
+These density stages redistribute a fixed requested star count before merging.
+
+Old saved presets migrate inside the worker: `y_extent = extent*y_scale`, and
+the old fade toggle/width/suppression populate both axis groups. Explicit new
+values take precedence. The viewer receives migrated values on source reload
+and saves them normally, avoiding external writes to live settings. To taper
+the horizontal outline without thinning the layer vertically, turn off Y fade.
+
+In the original two-field **noise_filaments.py**, **Layer continuity** defaults to 1 to reduce isolated
 patches caused by slicing across 3D strands. The base strand family uses
 `exp(-(a*a + beta*b*b)/(2*width*width))`, multiplied by the clump modulation, where
 `beta = (1-continuity) + continuity*y_thickness**2`.
@@ -291,7 +343,43 @@ C++ panel reads section names, checkbox hints, ranges, and dependent controls
 from the worker schema. Adding a new section using these widget types does not
 require another rebuild. A new widget type or C++ layout change does.
 
-- **Sparse curves** selects low-density stars using eighth-neighbor distance.
+- **Density alignment** is used by `noise_filaments.py` and
+  `noise_filaments_branches.py`. **Align sparse stars to density** uses the
+  original continuous density rather than fitting directions to sparse stars.
+  The generator shares its density after remapping but before edge fade;
+  Gaussian smoothing and log-density derivatives are computed once per job.
+  Each star takes bounded steps in the negative-curvature directions transverse
+  to the local filament, approaching a density ridge without intentionally
+  migrating along it toward a brighter blob. Movement fades where there is no
+  clear filament direction. Steps backtrack if density decreases and stay inside
+  the source box. There is no generated curve network or extra star population.
+  The method remains limited by grid resolution and local ridge ambiguity.
+
+  Merging runs first. Only unmerged originals can move, using the existing sparse
+  fraction and feathered spacing cutoff; merged centers/colors stay fixed.
+  **Field smoothing (units)** is Gaussian standard deviation in world units,
+  default 0.25, range 0.02-3. Higher values ignore finer density detail but can
+  blend nearby structures. **Maximum alignment travel (units)** reuses the old
+  reach value and caps each star's total projection travel (default 0.5).
+  **Alignment strength** mixes the original position with the projected position
+  (0 unchanged, 1 full alignment); sparse-selection feathering also multiplies it.
+  These controls add no randomness or stars and do not change colors/sizes.
+  They tighten transverse scatter; they do not refill gaps or impose uniform
+  along-filament spacing. Guide length and Color by guide are removed from these
+  generators' panels because field alignment does not use those controls.
+  Extremely thin Y (half-height below smoothing/20) uses Y-averaged XZ guidance
+  while retaining each star's sampled height. Work is capped at 32 projection
+  iterations, so a large travel limit does not guarantee ridge convergence.
+  A saved-scene comparison is in `build/density-alignment-comparison.png`:
+  15,963 stars, 9,862 moved, about 0.42 seconds for merging and alignment together
+  in the initial measurement, excluding worker startup. Appearance is experimental.
+
+- **Sparse curves** remains the sample-based method for other generators.
+  It selects low-density stars using eighth-neighbor distance.
+  When merging is enabled, it runs afterward on the remaining unmerged stars.
+  Spacing is recomputed without combined stars; the sparse cutoff remains the
+  input cloud's quantile, so newly sparse remnants can qualify too. Combined
+  stars keep their centers and colors and do not seed or steer these guides.
   Random anchors are spaced across the cloud; each short sinusoidal guide follows
   its anchor neighborhood's principal direction and bends in its local plane.
   Nearby sparse stars are gently attracted to the guides, with smooth distance
@@ -304,9 +392,15 @@ require another rebuild. A new widget type or C++ layout change does.
   oriented spatial bins. Each bin's diameter is at most **Merge distance**;
   close stars across bin boundaries may remain separate. Merged positions and
   colors use volume-weighted averages, and size is `cbrt(sum(sizeÂ³))`. The result
-  has fewer, larger stars, preserving total cube volume without chaining a whole
-  filament into one object. Groups exceeding the renderer's size limit remain
-  unmerged.
+  has fewer, larger stars without chaining a whole filament into one object.
+  **Merged size boost** then multiplies only combined stars' diameters/cube sides:
+  default 2, range 1-8, dimensionless. It adds no randomness and does not change
+  grouping, centers, colors, or count. At 1 the merge preserves total cube
+  volume; larger values deliberately increase visual weight (eight equal stars
+  become four times as wide at boost 2). Unmerged stars retain their sizes.
+  Groups whose base size exceeds 1000 units stay unmerged; boosted sizes
+  saturate at that limit. Bounded bins can still leave multiple merged stars
+  inside a broad blob.
 - **Coherent warp** offers **Flow (0 swirl, 1 waves)**. Swirl, the default,
   applies a large-scale differential rotation around the world Y axis:
   `theta = angle / (1 + (horizontal_radius / swirl_radius)^2)`.
@@ -318,9 +412,11 @@ require another rebuild. A new widget type or C++ layout change does.
   **Wave amount** and **Wave wavelength** controls. Its short-axis displacements
   are reduced for thin clouds. Either warp preserves colors, sizes, and count.
 
-The order is sparse alignment, merging, warp, then point-stage edge fade.
-Alignment and merging classify density before alignment so newly aligned strands
-are not mistaken for original dense knots. Each experiment has a separate random
+The order is merging, residual sparse alignment, warp, then point-stage edge fade.
+Merging classifies the original cloud before any alignment. **Sparse fraction**
+sets the original spacing cutoff; after merging it is not a quota on the
+remaining stars. Removing neighbors can make more remnants eligible. Alignment
+still feathers its effect above that cutoff and within guide reach. Each experiment has a separate random
 stream; toggles are deterministic for a fixed seed and configuration. Warp runs
 after guide assignment and merging so changing its strength deforms the same
 stars instead of rebuilding a different set of guides. Point-stage fade can
@@ -335,22 +431,34 @@ the taper as a fraction of each half-extent. The default 0.8 starts fading at
 20% of the half-extent and smoothly reaches zero at the face. Smaller widths
 make a narrower edge transition; 1 fades across the entire half-extent.
 **Edge clump suppression** (default 1, range 0â€“4) additionally suppresses dense
-edge regions. With positional envelope `e`, relative density `rho` (density
-divided by the volume mean), and strength `s`, the survival multiplier is
-`e / (1 + s*(1-e)*rho)`. The full-strength interior (`e=1`) is unchanged; toward
-the boundary, dense regions approach an output-density ceiling of
-`e / (s*(1-e))` times the original mean. This ceiling drops to zero at the face,
-preventing a very dense knot from overpowering the taper. Strength 0 restores
-the position-only fade. This thins existing structures; it does not extend them
-or create new outward-reaching branches.
+edge regions. It now acts only above a fixed knee `T = 0.25 * peak_density`,
+using the pre-fade density after any density remapping. Empty space cannot lower
+this threshold. With `r = density/T`, `q = max(r-1, 0)`, positional envelope `e`,
+and suppression strength `s`, the output density is
+`T * e * (min(r,1) + q/(1+s*(1-e)*q))`.
+Below the knee the ordinary edge fade is exactly unchanged at every suppression
+strength. Above it only the excess is compressed, with continuous value and
+slope at the knee and no reversed density ordering. The full-strength interior
+(`e=1`) is unchanged. Strength 0 restores position-only fading. No extra slider
+was added; the quarter-peak knee is an experimental choice and a dominant
+outlier can raise it. Suppression is distinct from the ordinary positional
+fade, which still attenuates sparse regions toward the box faces.
+The previous formula penalized every nonzero density against a volume mean,
+so empty space caused faint filaments to be classified as dense too.
+This thins existing structures; it does not extend them or create new branches.
 
 Existing density generators
 apply it before sampling and keep their requested star count. Other generators
 use the worker's shared postprocessing stage: each sampled star survives with
 the density-aware probability. Their density estimate uses a smoothed 48-cell
 grid per active axis, compensating smoothing at the boundaries and ignoring
-collapsed axes; opposite edges never wrap into each other. Surviving positions,
-colors and sizes are unchanged;
+collapsed axes; opposite edges never wrap into each other. The point-stage knee
+is one quarter of the maximum estimated density at stars.
+For native density sampling, normalization redistributes the
+fixed count after suppression, so unchanged low-density weights do not mean
+identical sampled star positions. For sampled-star thinning, sub-threshold
+stars retain exactly the same survivors when only suppression strength changes.
+For point-stage thinning, surviving positions, colors and sizes are unchanged;
 the displayed count decreases. Disabling fade restores the original output.
 
 The fallback uses the cloud's bounding box unless the generator supplies
@@ -433,13 +541,21 @@ still deferred. The earlier free vector-steered growth remains in grown_filament
 
 ## Density-guided local strands (`density_filament_curves.py`)
 
-Select **Density-guided local strands**. This reuses `noise_filaments.build_density`
-including clumping and layer continuity, then traces short curves within that
-density. It does not construct a new blob network or trace A=B=0. Curve and star
+Select **Density-guided local strands**. This shares
+`noise_filaments_branches.build_density` with the direct branch sampler: equal
+AB, AC and BC contributions, clump modulation and the three-regime density curve.
+There is no Layer continuity or Connectivity control. It traces short curves within
+that density. It does not construct a new blob network or trace A=B=0. Curve and star
 visibility remain independent; stars and appearance use the shared pipeline.
-The original generator is unchanged. Initial density defaults match the user's
-2026-10-10 reference (extent 9.458, Y .234, frequency 2.505, width .025, roughness
-.107, clumping 6.875, continuity 1). No live settings are copied or overwritten.
+The XZ and Y half-extents are independent world-unit bounds. Old presets migrate
+Y to `extent*y_scale`; initial bounds are XZ 9.458 and Y 2.213172. Frequency 2.505,
+width .025, roughness .107, clumping 6.875 and Strand continuity 1 retain the
+experiment's earlier defaults. Separate XZ/Y fades use the shared density-fade
+helper before seeding and guidance, rather than thinning sampled stars afterward.
+Old shared fade settings migrate to both axes. Fade can change roots, curve
+lengths and star counts; equal settings reproduce the shared box density taper.
+Bounds/remapping/fade introduce no extra random draws. Physical noise wavelength
+still follows XZ extent through Frequency. No live settings files are overwritten.
 
 Math: smooth the density with a Gaussian of physical standard deviation r, then
 compute `L=log(smoothed_density)` and its symmetric Hessian `H=second_derivatives(L)`.
@@ -450,7 +566,7 @@ local curvature. The l2 eigenvector is the least sharply curved direction.
 Confidence is `clip((l2-l1)/max(abs(l)),0,1)`, zero when l1 is nonnegative.
 Thus tube-like regions guide strongly, while sheets and round peaks guide weakly.
 
-Roots are sampled from the unchanged density. Initial directions are shared
+Roots are sampled from the remapped, edge-faded density. Initial directions are shared
 spatial Perlin vectors softly projected into the low-curvature directions:
 each eigenvector component is weighted by `exp(-(l2-li)/(0.2*max(abs(l))))`.
 That permits a plane of directions in sheets instead of arbitrary out-of-plane
@@ -528,11 +644,24 @@ how closely stars reproduce the curve-length density.
 
 Joining acts **during growth** (capacity-gated in coverage modes 1/2); the rejected post-growth overlap-deletion pass
 and its controls are no longer used. A global deposited-segment tree refreshes
-every four growth steps. Query the 48 nearest midpoints, then choose the closest
+every four growth steps. Query up to 48 nearest midpoints within joining distance
+plus the longest segment's half-length, then choose the closest
 eligible segment by exact 3D distance. Eligibility requires a different source
 strand (both halves of one's own strand are excluded) and absolute tangent dot
 >= cos(25 degrees). Transverse crossings do not join. This bounded search can
 miss eligible segments hidden behind many ineligible neighbors.
+
+Checks use local density-grid interpolation. Neighbor steering searches are
+skipped at load <=0.5, and contact searches are skipped below load 0.75 or before
+the initial two steps. These are the same existing eligibility thresholds.
+Coverage gradients are only built for filling mode, and proposed-step capacity
+checks interpolate only the scalar load. Density derivatives are built once;
+coverage still refreshes its small grid every four steps. No new controls.
+On one fixed saved branch field with 512 starts, median growth times over three
+runs changed from 0.62 to 0.56 seconds (coverage off), 0.65 to 0.50 (capacity), and
+1.04 to 0.85 (filling), excluding noise construction, stars and process startup.
+All three optimized outputs matched the previous path bytes exactly in this
+comparison. Timings vary with bounds, strand count, length and early termination.
 
 For nearest projection q, oriented neighbor tangent g, current heading h,
 distance d and reach R, define transverse offset `v=(q-x)-h*dot(q-x,h)` and

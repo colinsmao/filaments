@@ -23,6 +23,7 @@ PARAMETERS = [
     _parameter("pp_merge", "Merge dense stars", 0, 0, 1, "Merge dense stars", True),
     _parameter("pp_merge_distance", "Merge distance (units)", .18, .005, 1., "Merge dense stars"),
     _parameter("pp_dense_fraction", "Dense fraction", .3, .05, 1., "Merge dense stars"),
+    _parameter("pp_merge_size_boost", "Merged size boost", 2., 1., 8., "Merge dense stars"),
     _parameter("pp_warp", "Warp positions", 0, 0, 1, "Coherent warp", True),
     dict(_parameter("pp_flow_mode", "Flow (0 swirl, 1 waves)", 0, 0, 1, "Coherent warp"), type="int"),
     _parameter("pp_swirl_angle", "Swirl angle (degrees)", 120., -360., 360., "Coherent warp"),
@@ -70,10 +71,12 @@ def swirl_warp(positions, angle, radius):
     return result
 
 
-def align_sparse(positions, colors, seed, tree, spacing, reach, length, strength, fraction, tint=False):
+def align_sparse(positions, colors, seed, tree, spacing, reach, length, strength, fraction, tint=False,
+                 cutoff=None):
     if len(positions) < 4 or strength <= 0:
         return positions, colors
-    cutoff = np.quantile(spacing, 1 - fraction)
+    if cutoff is None:
+        cutoff = np.quantile(spacing, 1 - fraction)
     eligible = np.flatnonzero(spacing >= cutoff)
     if not len(eligible):
         return positions, colors
@@ -112,15 +115,16 @@ def align_sparse(positions, colors, seed, tree, spacing, reach, length, strength
     return result, colors
 
 
-def merge_dense(positions, colors, sizes, seed, spacing, distance, fraction):
+def merge_dense(positions, colors, sizes, seed, spacing, distance, fraction, size_boost=1.):
     """Merge dense stars in randomly oriented bins of diameter <= distance.
 
     A bounded-bin heuristic avoids chaining an entire filament into one star.
-    Centers/colors are volume-weighted; cube sizes preserve total star volume.
+    Centers/colors are volume-weighted; unboosted sizes preserve star volume.
+    Return the three arrays plus the number of untouched originals at the front.
     """
     dense = np.flatnonzero(spacing <= np.quantile(spacing, fraction))
     if len(dense) < 2:
-        return positions, colors, sizes
+        return positions, colors, sizes, len(positions)
     rng = np.random.default_rng(np.random.SeedSequence([seed, 9412]))
     rotation, _ = np.linalg.qr(rng.normal(size=(3, 3)))
     cell_size = distance / np.sqrt(3)
@@ -128,7 +132,7 @@ def merge_dense(positions, colors, sizes, seed, spacing, distance, fraction):
     _, group, counts = np.unique(cells, axis=0, return_inverse=True, return_counts=True)
     merging = counts[group] > 1
     if not merging.any():
-        return positions, colors, sizes
+        return positions, colors, sizes, len(positions)
     members, group = dense[merging], group[merging]
     _, group = np.unique(group, return_inverse=True)
     volumes = sizes[members].astype(np.float64) ** 3
@@ -140,24 +144,43 @@ def merge_dense(positions, colors, sizes, seed, spacing, distance, fraction):
     merged_sizes = np.cbrt(volume)
     # Retain originals for a group that exceeds the viewer's per-star size limit.
     allowed = merged_sizes <= 1000
+    # Saturate artistic enlargement without changing membership or star count.
+    merged_sizes = np.minimum(merged_sizes * size_boost, 1000)
     keep = np.ones(len(positions), dtype=bool)
     keep[members[allowed[group]]] = False
     return (np.vstack((positions[keep], centers[allowed])).astype(np.float32),
             np.vstack((colors[keep], color[allowed])).astype(np.float32),
-            np.concatenate((sizes[keep], merged_sizes[allowed])).astype(np.float32))
+            np.concatenate((sizes[keep], merged_sizes[allowed])).astype(np.float32),
+            int(keep.sum()))
 
 
-def apply_appearance(positions, colors, sizes, seed, params):
-    if (params.get("pp_curves", 0) or params.get("pp_merge", 0)) and len(positions) > 1:
+def apply_appearance(positions, colors, sizes, seed, params, density_source=None):
+    if (params.get("pp_curves", 0) or params.get("pp_merge", 0)) and len(positions) > 0:
         tree, spacing = neighbor_spacing(positions)
-        if params.get("pp_curves", 0):
-            positions, colors = align_sparse(positions, colors, seed, tree, spacing,
+        fraction = params.get("pp_sparse_fraction", .65)
+        cutoff = np.quantile(spacing, 1 - fraction)
+        remaining = len(positions)
+        if params.get("pp_merge", 0) and len(positions) > 1:
+            positions, colors, sizes, remaining = merge_dense(positions, colors, sizes, seed, spacing,
+                params.get("pp_merge_distance", .18), params.get("pp_dense_fraction", .3),
+                params.get("pp_merge_size_boost", 2.))
+            if params.get("pp_curves", 0) and remaining > 0:
+                # Combined clumps are fixed landmarks, not small-star neighbors
+                # or guide anchors. Reclassify the actual residual population.
+                tree, spacing = neighbor_spacing(positions[:remaining])
+        if params.get("pp_curves", 0) and remaining > 0 and density_source is not None:
+            from _density_alignment import align_to_density
+            moved = align_to_density(positions[:remaining], density_source, spacing, cutoff,
+                params.get("pp_curve_reach", .5), params.get("pp_density_radius", .25),
+                params.get("pp_curve_strength", .85))
+            positions = np.concatenate((moved, positions[remaining:]))
+        elif params.get("pp_curves", 0) and remaining >= 4:
+            moved, tinted = align_sparse(positions[:remaining], colors[:remaining], seed, tree, spacing,
                 params.get("pp_curve_reach", .5), params.get("pp_curve_length", 2.),
-                params.get("pp_curve_strength", .85), params.get("pp_sparse_fraction", .65),
-                params.get("pp_curve_colors", 0))
-        if params.get("pp_merge", 0):
-            positions, colors, sizes = merge_dense(positions, colors, sizes, seed, spacing,
-                params.get("pp_merge_distance", .18), params.get("pp_dense_fraction", .3))
+                params.get("pp_curve_strength", .85), fraction,
+                params.get("pp_curve_colors", 0), cutoff=cutoff)
+            positions = np.concatenate((moved, positions[remaining:]))
+            colors = np.concatenate((tinted, colors[remaining:]))
     # Warp the completed cloud: changing flow must not reselect anchors, recolor
     # guides, or regroup mergers. This makes strength changes directly comparable.
     if params.get("pp_warp", 0):

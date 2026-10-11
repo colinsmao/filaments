@@ -5,6 +5,10 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Purpose and user preferences
 
+- Latest direction (2026-10-10): return to original `noise_filaments.py` with
+  shared alignment/merging. Curve-generation experiments remain available but
+  are no longer the active direction. Reduce noisy blobs through larger merged
+  stars and align the small stars left sparse by merging.
 - Build visually interesting distributions of stars: galaxies, filaments, voids,
   and other patterns. Appearance matters more than physical accuracy. Minecraft
   may be a later destination; currently this is a math playground and viewer.
@@ -68,9 +72,14 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Current math experiments
 
-- `density_filament_curves.py` / `_density_curves.py`: current local-alignment
-  experiment, reusing the actual `noise_filaments.build_density` (including
-  layer/clump modulation). Density-sampled roots grow short two-way strands.
+- `density_filament_curves.py` / `_density_curves.py`: local-alignment
+  experiment, now sharing `noise_filaments_branches.build_density` with the direct
+  branch sampler (equal AB/AC/BC, clumps, three-regime remap). No layer continuity
+  or connectivity. Independent XZ/Y bounds and shared axis density fades apply
+  before roots/guidance; legacy y_scale/shared fade migrate in the worker using
+  this experiment's historical defaults. No live config writes. Fading changes
+  curve placement/length and therefore star counts, not post-star survival.
+  Density-sampled roots grow short two-way strands.
   Gaussian-smoothed log-density gradient/Hessian are computed on the physical
   grid; interpolate tensors, then diagonalize. Least-curvature eigenvector
   guides where the eigenvalue gap is clear. Launch Perlin vectors are softly
@@ -115,6 +124,14 @@ the current implementation, not a commitment to continue any particular experime
   and saved-noise comparisons are in build/density-coverage-comparison.png;
   filling improved measured shape fidelity but used more length than old joining.
   Saved-scene growth roughly 2.1s capacity / 4.4s filling in the initial comparison.
+  Local-check optimization: bound KD queries by reach + longest half-segment;
+  retain at most 48 midpoint candidates and exact distance/owner/angle checks.
+  Skip steering query when load <=.5, contact query when load <.75 or before
+  two steps. Coverage builds deficit gradients only for filling; proposed-step
+  checks sample scalar load only. Keep four-step tree/grid refresh and existing
+  random draws. On a fixed saved branch field with 512 roots, median three-run
+  growth timings: off .62 -> .56s, capacity .65 -> .50s, fill 1.04 -> .85s;
+  paths byte-identical before/after in all modes. Excludes noise/stars/startup.
 
 
 - `guided_walk_filaments.py` / `_guided_walk.py`: latest simple one-pass
@@ -281,8 +298,26 @@ the current implementation, not a commitment to continue any particular experime
   constraint in thin Y regions; this creates sheets, not connected skeletons.
   Generic intersections can produce loops and disconnected paths, not a robust
   branching filament network. The user has already identified this limitation.
+  Active direct-star experiment adds `density_low/mid/high` slope controls
+  (dimensionless 0.05-3, default 1) to a continuous piecewise-linear transfer
+  curve at 1/3 and 2/3 of the input peak. `_postprocess.remap_density` runs in
+  `generate` after raw `build_density` and before native edge fade/sampling.
+  All ones bypass exactly. High .25 flattens the top while leaving the lower
+  two thirds unchanged. Lower-segment edits shift later segment heights to
+  preserve continuity. Positive slopes preserve ordering/zeros. No new RNG,
+  requested count unchanged; sampling renormalizes weights, colors use the
+  processed density, size draws stay independent. Raw density consumers and
+  other generators remain unchanged. This is value remapping, not smoothing.
 - `noise_filaments_branches.py`: unions several pairwise intersections; preserved
-  but visually busy. `layer_filaments.py`: anisotropic 3D Voronoi-edge experiment.
+  but visually busy. Now supports the same density remap and Strand continuity
+  as `noise_filaments.py` for preset copying. Strand continuity defaults to 0
+  here for backward compatibility. Connectivity and Layer continuity are now
+  removed from this generator: AB, AC and BC always have equal weight, using
+  exp(-(A*A+B*B)/(2*w*w)) and its two permutations. Symmetric under any A/B/C
+  permutation; thin Y slices the same 3D field without constraint relaxation.
+  Old saved keys are ignored by the worker and pruned on successful generation.
+  Original two-field generator retains its controls for comparison.
+  `layer_filaments.py`: anisotropic 3D Voronoi-edge experiment.
 - `_curves.py`, `noise_filament_curves.py`: explicit tetrahedral surface-intersection
   curves, regular sampling, bundles and per-curve minimum allocations. Not the
   preferred current baseline; do not treat this as an established good solution.
@@ -301,6 +336,43 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Shared appearance experiments
 
+The direct two/three-field generators now use `_axis_controls.py`: independent
+XZ half-extent (saved `extent`, default 6, range 1-30 units) and `y_extent`
+(default 6, range 0-30), plus `fade_xz`/`fade_y` toggles and independent
+`fade_*_width` (fraction of respective half-extent) and
+`fade_*_density_strength`. Stronger axis attenuation wins, preserving old box
+fade when axis settings match; collapsed Y skips Y fade. Worker honors native
+schema group/toggle/enabled_if and NATIVE_AXIS_FADE skips the old shared fade
+controls. Generator migrate_parameters copies old fade values to both groups
+and computes y_extent=extent*y_scale only when new keys are absent, before
+schema validation. No external config edit/restart required. Requested count
+is unchanged before merging. Physical height no longer scales with XZ extent;
+noise frequency remains defined across XZ, so wavelength still follows XZ
+extent. Older aligned/extracted-curve comparisons use
+`noise_filaments.LEGACY_PARAMETERS` and keep their previous controls;
+density_filament_curves now shares the branch schema/helpers instead.
+Legacy direct Python calls remain supported.
+
+The two direct noise-filament generators now expose
+`generate_density_source(count, seed, **params) -> (attributes, density, half_extents)`.
+The worker uses it only for enabled density alignment, passing the remapped,
+pre-fade field through shared postprocessing; ordinary `generate` still returns
+the original three arrays. `_density_alignment.py` uses `DensityShape` physical
+log-density derivatives to take bounded transverse Newton steps toward ridges,
+with eigenvalue-gap confidence, uphill backtracking, box bounds, and a 32-step
+cap. Direction comes from the field even for one star. Merge runs first and only
+unmerged originals move, retaining the original sparse cutoff and its feather.
+No count/color/size changes or new randomness. This narrows faint strands but
+cannot add stars in empty gaps. Tiny Y uses the existing XZ fallback, retaining
+heights. `pp_curves`, strength, sparse fraction and reach are retained; reach is
+now labeled Maximum alignment travel for these generators. `pp_density_radius`
+is Field smoothing, Gaussian sigma in world units (default .25, range .02-3).
+Guide length/colors are omitted from their schemas. Other generators retain
+the older sample-based alignment below. Saved-scene comparison in
+`build/density-alignment-comparison.png`: 15,963 stars, 9,862 moved, .42s for merge
+and alignment excluding startup. Synthetic faint-tube/ring, singleton, movement
+bound and worker checks added; visual acceptance remains with the user.
+
 `generators/_appearance.py` owns the shared schemas and operations. All three
 experiments default off. Settings may enable them in the user's saved preset.
 
@@ -308,15 +380,21 @@ experiments default off. Settings may enable them in the user's saved preset.
    spatially separated anchors, use local PCA directions to build sinusoidal
    guides, and attract nearby sparse stars with smooth falloff. Optional guide
    colors do not change positions. No guarantee of connectivity or uniform filling.
+   Now runs after merging on unmerged originals only. Recompute their neighbor
+   spacing/PCA without merged stars, retaining the pre-merge sparse quantile
+   cutoff so newly sparse remnants qualify. Merged centers/colors stay fixed.
 2. Merge dense stars: randomly oriented bounded bins combine nearby dense stars.
    Use volume-weighted centroids/colors and cube-root summed size-cubed. This
-   preserves star volume and avoids transitive merging of whole filaments.
+   preserves star volume at Merged size boost 1 and avoids transitive merging of
+   whole filaments. `pp_merge_size_boost` defaults to 2 (range 1-8), multiplying
+   merged diameters only; no randomness, membership, count or centroid changes.
+   Base sizes above 1000 reject merging; visual boost saturates at 1000.
 3. Warp: mode 0 is a global swirl about world Y, theta = angle/(1+(r/radius)Â²),
    preserving height and horizontal radius. Mode 1 retains the earlier sum of
    transverse sine waves. Swirl bends structures; it does not attract stars onto
    spiral ridges. All stars participate, with no motion on the rotation axis.
 
-Order: sparse alignment, merge, warp, point-stage fade. Warp intentionally runs
+Order: merge, residual sparse alignment, warp, point-stage fade. Warp intentionally runs
 after guide assignment/merging: the previous order regenerated guides and colors
 when warp changed, making even small changes look like an entirely new pattern.
 
@@ -325,9 +403,16 @@ when warp changed, making even small changes look like an entirely new pattern.
 - Rectangular fade uses max(abs(normalized position)), not a radial sphere.
   Fade width defaults to 0.8 of each half-extent; bigger means a broader taper.
 - **Edge clump suppression** defaults to 1 (0 restores positional fading).
-  Survival = e / (1 + strength*(1-e)*rho), with rho relative to volume mean.
-  The full-strength interior is unchanged. Dense edge regions have a decreasing
-  soft density ceiling. This is the latest experiment, not visually accepted yet.
+  Corrected to compress only density above T=.25*peak, not relative to the box
+  mean. For r=rho/T, q=max(r-1,0), output=T*e*(min(r,1)+q/(1+s*(1-e)*q)).
+  Sub-threshold density receives exactly ordinary positional fading, independent
+  of suppression strength; full interior is unchanged. Smooth monotone shoulder.
+  Empty volume cannot lower T, though a dominant peak can raise it. No new
+  control. Point-stage fallback uses .25*max(estimated density at stars).
+  Native samplers still renormalize fixed count, so individual positions can
+  change; point-stage sparse survivors remain identical for strength-only edits.
+  Saved-field check at strength 4: old formula removed another 40% of low-density
+  weight after ordinary fade; new formula removes none. Visual acceptance pending.
 - Native density generators apply fade before sampling and retain requested count.
   Others use deterministic survival sampling and output fewer stars. For these,
   density is estimated on a smoothed 48-cell grid per active axis, without periodic
