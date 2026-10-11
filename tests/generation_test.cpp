@@ -48,6 +48,18 @@ int main(int argc, char** argv) {
         require(curves.error.empty(), curves.error);
         require(curves.metadata.at("primitive") == "lines" && curves.points.size() > 2 && curves.points.size() % 2 == 0,
                 "Curve preview must transfer complete endpoint pairs independently of star count");
+        auto populatedRequest = request("stochastic_filaments", 1);
+        populatedRequest["params"] = {{"seed_count", 1}, {"curves_per_seed", 1}, {"length", 2}, {"pop_density", 20}};
+        const auto populated = runGeneration(runtime, populatedRequest, std::make_shared<std::atomic_bool>(false));
+        require(populated.error.empty(), populated.error);
+        require(populated.metadata.at("population") && !populated.stars.empty() &&
+                populated.metadata.at("star_count") == populated.stars.size(), "Missing star layer");
+        populatedRequest["params"]["pop_density"] = 0;
+        const auto emptyPopulation = runGeneration(runtime, populatedRequest, std::make_shared<std::atomic_bool>(false));
+        require(emptyPopulation.error.empty() && emptyPopulation.stars.empty() &&
+                emptyPopulation.points.size() == populated.points.size() &&
+                std::memcmp(emptyPopulation.points.data(), populated.points.data(), populated.points.size() * sizeof(Point)) == 0,
+                "Empty populations must retain the same curves");
         const auto before = runtime.sourceFingerprint();
         const auto hot = root / "hot.py";
         const std::string prefix = "import numpy as np\ndef generate(count, seed):\n    return np.full((count,3), ";

@@ -136,7 +136,7 @@ std::string GeneratorRuntime::sourceFingerprint() const {
     return result;
 }
 
-std::vector<Point> readPointFile(const std::filesystem::path& path) {
+std::vector<Point> readPointFile(const std::filesystem::path& path, bool allowEmpty) {
     std::ifstream stream(path, std::ios::binary | std::ios::ate);
     if (!stream) throw std::runtime_error("Python returned no point buffer");
     const auto size = stream.tellg();
@@ -145,7 +145,7 @@ std::vector<Point> readPointFile(const std::filesystem::path& path) {
     std::uint64_t count = 0;
     stream.read(magic, sizeof(magic));
     stream.read(reinterpret_cast<char*>(&count), sizeof(count));
-    if (!stream || std::string(magic, 8) != "FSTAR002" || count == 0 || count > 1000000 ||
+    if (!stream || std::string(magic, 8) != "FSTAR002" || (!allowEmpty && count == 0) || count > 1000000 ||
         size != std::streamoff(16 + count * sizeof(Point)))
         throw std::runtime_error("Invalid point buffer header, count or length");
     std::vector<Point> points(static_cast<size_t>(count));
@@ -187,6 +187,12 @@ GenerationResult runGeneration(const GeneratorRuntime& runtime, const nlohmann::
             throw std::runtime_error("Unknown geometry primitive");
         if (primitive == "lines" && result.points.size() % 2 != 0)
             throw std::runtime_error("Line buffer must contain endpoint pairs");
+        if (result.metadata.value("population", false)) {
+            if (primitive != "lines") throw std::runtime_error("Population layer requires curve geometry");
+            result.stars = readPointFile(directory.path / "points.stars.bin", true);
+            if (result.metadata.at("star_count").get<size_t>() != result.stars.size())
+                throw std::runtime_error("Star layer count mismatch");
+        }
     } catch (const std::exception& error) { result.error = error.what(); }
     result.cancelled = *cancel;
     result.elapsedMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();

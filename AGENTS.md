@@ -8,9 +8,13 @@ the current implementation, not a commitment to continue any particular experime
 - Build visually interesting distributions of stars: galaxies, filaments, voids,
   and other patterns. Appearance matters more than physical accuracy. Minecraft
   may be a later destination; currently this is a math playground and viewer.
-- The user likes the Zel'dovich generator as a baseline, but is dissatisfied with
-  the appearance of some postprocessing and edge fades and wants to explore new
-  ideas. Do not assume the existing approaches are the desired final direction.
+- The current baseline is **curve generation -> shared star population -> shared
+  postprocessing**. New patterns should primarily change how curves are generated,
+  reusing the existing star sampler, controls and postprocessors. Stochastic
+  filaments is the current implementation to follow; its particular noise/growth
+  algorithm is replaceable. Keep curves and stars independently visible.
+- Zel'dovich and the earlier direct-star generators remain comparison experiments.
+  Appearance, especially tapering and edge behavior, still needs user judgment.
 - Keep math separate from rendering and favor Python edits that reload live.
   Keep existing experiments available for comparison unless asked to remove them.
 - Do not launch the viewer automatically. The user often keeps it running. Do not
@@ -22,9 +26,19 @@ the current implementation, not a commitment to continue any particular experime
 - Use native Windows; WSL is unnecessary. Keep OpenGL 3.3 unless a concrete feature
   requires something newer. Avoid unnecessary dependency/environment changes.
 - Y is vertical; XZ is the horizontal plane.
+- Explain each new parameter when introducing it: its meaning, units, randomness
+  direction and whether it changes star count. Keep along-curve density/spacing
+  separate from transverse scatter.
 
 ## Architecture
 
+- For new patterns, use `PRIMITIVE = "lines"` and implement
+  `generate_population_source(count, seed, **params)` returning
+  `(line_attributes, paths, path_colors)`, following `stochastic_filaments.py`.
+  Keep `generate` as a wrapper returning the line attributes. Paths are ordered
+  polylines, excluding preview markers. Leave star placement in `_population.py`
+  and subsequent appearance processing in the shared worker pipeline; do not
+  duplicate these stages inside each new curve generator.
 - `src/main.cpp`: GLFW/ImGui main loop and cloud upload. `camera.h`,
   `camera_controls.h`, `point_renderer.h`: camera, controls, points/instanced cubes.
   Cubes have simple fixed face shading, no outlines. Points have perspective size.
@@ -42,31 +56,201 @@ the current implementation, not a commitment to continue any particular experime
   validates schemas/arrays, appends shared postprocessing controls, runs generation
   and postprocessing, and writes `FSTAR002` binary data. Header: 8-byte magic plus
   uint64 count, followed by count XYZ/RGB/size float32 records (28 bytes/star).
-  Input count is 1–1,000,000. Actual output may be smaller after merging/fading.
-  Zero-point clouds are currently rejected. Job timeout defaults to 60 seconds.
+  Input count is 1â€“1,000,000. Actual output may be smaller after merging/fading.
+  Zero-point primary clouds are rejected. Curve population sidecars may be empty.
+  Job timeout defaults to 60 seconds.
 - Generators expose `NAME`, `PARAMETERS`, and `generate(count, seed, **params)`.
   Return positions and colors shaped `(count, 3)`, plus scalar/per-star sizes.
   Existing worker support for legacy two-array returns must remain intact.
-  Shared control names beginning `pp_` are reserved by the worker.
+  Shared control names beginning `pp_` and `pop_` are reserved by the worker.
 - Python files under `generators/` and the worker are watched, including new files.
   Worker/schema errors are shown in the GUI without discarding the last valid cloud.
 
 ## Current math experiments
 
+- `density_filament_curves.py` / `_density_curves.py`: current local-alignment
+  experiment, reusing the actual `noise_filaments.build_density` (including
+  layer/clump modulation). Density-sampled roots grow short two-way strands.
+  Gaussian-smoothed log-density gradient/Hessian are computed on the physical
+  grid; interpolate tensors, then diagonalize. Least-curvature eigenvector
+  guides where the eigenvalue gap is clear. Launch Perlin vectors are softly
+  projected into low-curvature directions, including planes in sheets. Ongoing
+  steering combines confidence-weighted direction, bounded transverse density
+  pull, shared/offset Perlin wandering and gradual heading response. Finite
+  Beta lifetimes, domain exits and tenfold density decline stop growth.
+  Thin Y below direction radius/20 uses Y-averaged XZ analysis, retaining
+  sampled heights. 512 strands, mean length 2, direction radius .3, pull .35,
+  wandering .15 by default; base density defaults match the user's 2026-10-10
+  reference. Shared star pipeline unchanged. No graph, forced connectivity,
+  exact density preservation or aesthetic acceptance is implied. See README
+  for equations/parameters. Two saved-density comparisons took about .7s each
+  for generation plus shared sampling (excluding worker startup).
+  The post-growth overlap deletion pass was rejected and is no longer called;
+  its controls are retired. Growth now includes local strand joining: nearest
+  eligible deposited segment within reach .6, abs tangent dot >=cos(25deg),
+  excluding both halves of the same source. j=w*(neighbor_tangent-heading +
+  2*transverse_offset/reach), with squared distance falloff and a travel ramp.
+  Strength 1 by default; 0 restores independent growth and disables contact.
+  Contact radius .08 (capped by reach) locally snaps a proposed tip onto the
+  actual segment and stops that half after at least 2 steps; radius 0 retains
+  steering only. KD tree refresh every 4 steps, 48 nearest midpoint candidates,
+  so some eligible encounters can be missed. No curves deleted afterward, no
+  receiving geometry moved, no star budget redistribution. Original seed/noise
+  draws unchanged. All curves advance together; dependencies can propagate.
+  Tiny-Y planar guidance retains heights except for an actual join's final snap.
+  `_curve_coverage.py` adds coverage modes 0 original joining, 1 density capacity
+  (default), 2 residual filling. Target curve length = strand_count*strand_length
+  *capacity_scale, distributed by original density on a 48^d mass grid. Actual
+  accepted segment length is trilinearly deposited, including subdivision of
+  contact snaps. Equal physical Gaussian smoothing gives load C/T. Radius .5;
+  capacity_scale 1. Joining activates over load .5..1; contact allowed >=.75;
+  steps into load >=1 stop unless completing a join. Two initial steps and
+  four-step coverage refresh allow limited overshoot; not an exact constraint.
+  Mode 2 births in four waves, later roots from T*max(1-load,.001), and adds
+  bounded transverse gradient(log(max(1-load,.05))) steering to fill deficits.
+  No prescribed swirling/spirals: Perlin/persistence can bend paths through blobs.
+  Capacity affects total length/stars; no star-budget transfer or post-growth
+  deletion. Curve-length density fidelity is approximate and shared star density
+  variation/taper can change the final star distribution. Synthetic bridge/blob
+  and saved-noise comparisons are in build/density-coverage-comparison.png;
+  filling improved measured shape fidelity but used more length than old joining.
+  Saved-scene growth roughly 2.1s capacity / 4.4s filling in the initial comparison.
+
+
+- `guided_walk_filaments.py` / `_guided_walk.py`: latest simple one-pass
+  experiment, kept separate from all earlier generators. No noise zeros,
+  gradients, field pairs, prescribed blob edges, or reinforcement during growth.
+  Blobs are best-candidate random points inside a ball. Random-heading walks
+  start at blobs; free filaments start anywhere in that ball and grow both ways.
+  Free halves are returned as one continuous polyline for shared star sampling.
+  Blob count or walks per blob can be zero; some walk/free filament is required.
+  h_new = unit(h + ds/persistence * (wandering*N + guide_strength*G)). N uses
+  three value-only Perlin/Simplex fBm fields: 80% shared + 20% per-curve offsets,
+  times a fixed factor 2. G is exactly one chosen local blob or filament guide,
+  with distance falloff; never a sum. Weighted selection favors proximity and
+  filament alignment. Guide hold distance prevents immediate switching; free
+  walk probability holds no guide for the same interval. Source blobs and
+  filaments from the same source group are excluded. Filament tangent is oriented
+  into the heading hemisphere and gets a sideways correction; following does
+  not stop or snap the curve. Close arrivals at another blob snap locally and
+  stop. One global segment tree refreshes every 8 steps; query 24 candidates,
+  deduplicate curve owners and filter alignment >cos(60deg). This search can
+  miss eligible guides hidden behind many excluded candidates. All tips advance
+  in batches, mitigating first-curve dominance. Step .08 units; total 160k
+  candidate-step cap; all metrics before final Y compression. Shared star stage
+  and independent curve/star visibility are unchanged. Default growth measured
+  about 0.6 seconds for 65 exploratory filaments on two seeds. After growth,
+  `_centerline_selection.py` defaults to one shortest discovered route per blob
+  pair, arc/chord <=2, plus up to 4 open paths (free starts preferred). No new
+  edges are added. Selected curves get 0.2-unit Gaussian arc smoothing with
+  fixed endpoints before Y compression. Output mode 0 retains raw walks.
+  Aesthetic quality remains experimental; star-strand work is paused pending
+  centerline quality. Single-layer generators ignore dual-layer visibility
+  preferences; Show curves/stars controls apply only to populated curves.
+
+- `emergent_filaments.py` / `_emergent_network.py`: new local-interaction
+  experiment. The user explicitly rejected preselected blob pairs, spanning
+  trees, and fixed destination endpoints. The unfinished `relaxed_filaments.py`
+  implementation of that rejected model was removed, along with its helper/tests.
+  Start free finite curves at triple-noise blobs, using existing soft pair-noise
+  guidance and uneven 1-2-pair launch plans; no seed-pair route allocation.
+  Wandering uses independent-offset three-component Perlin/Simplex fBm here.
+  Nearby aligned segments from other source blobs supply bounded attraction and
+  alignment; same-source bundles cannot reward themselves. Direction signs are
+  interchangeable for alignment. No forces act beyond the local radius.
+  A tip within join radius can attach to another blob or an aligned deposited
+  segment; it stops there. All paths start at exact seed centers. Segment trees
+  refresh every eight steps, so encounter detection is approximate, not exhaustive.
+  Repeated passes retain starts/randomness and use prior geometry as a local
+  steering memory, weighting contacted curves 1 and unsupported curves 0.1.
+  Actual joins always target the current pass, never old memory geometry.
+  Receiving paths with no onward contact trim after their last incoming contact;
+  unsupported curves survive with a separate probability. Contact targets are
+  retained. If nothing survives, keep one exploration curve for a valid preview.
+  No explicit mid-curve spawning yet; junctions arise from shared starts and local
+  joins. Contacts do not guarantee global connectivity or monotonically improve
+  between passes. Existing spatially separated root selection is still used.
+  A total 160k candidate-step budget across passes bounds work and can truncate
+  extreme settings. Shared star population/postprocessing remain unchanged.
+
+- `_population.py`: shared optional star sampling for line generators exposing
+  `generate_population_source`, returning `(line_attributes, paths, path_colors)`.
+  Stochastic filaments currently provides this hook. Density is per displayed
+  arc length. Normalized exp(A*f(s)) density uses genuine 1D gradient octave noise
+  independently per curve, sampled by inverse CDF; it preserves each curve's
+  candidate count. Each curve first gets mean density D*(1+v*(2U-1)) from a
+  separate seed stream; Curve density variation v defaults to 0.5 (0 disables).
+  These multipliers change counts and are separate from along-curve noise.
+  Old pop_clumping/pop_clump_scale keys now control along-curve density
+  variation/scale; octaves and roughness add finer noise. Stratified quantile jitter
+  controls spacing, transverse Gaussian scatter uses a separate stream, and
+  smoothstep tip thinning is applied afterward. Taper can still change final
+  counts when density shifts into/out of the tip. Seed markers are excluded. Separate
+  random streams preserve surviving attributes when size/taper/color changes.
+  The worker appends a Star population panel (`pop_` reserved prefix), runs star
+  postprocessing and writes `points.stars.bin` alongside the unchanged curve
+  buffer. Both use FSTAR002; only the sidecar allows zero records. The viewer
+  validates both before publishing, uses separate GPU buffers, and persists
+  `show_curves` / `show_stars` renderer-only toggles. Population edits regenerate
+  deterministic curves; visibility edits do not queue Python jobs.
+
 - `stochastic_filaments.py` / `_stochastic_curves.py`: smooth stochastic line
-  bundles around 2-4 noise fields' pairwise zeros. Direct continuous noise and
+  bundles around 3-4 noise fields' pairwise zeros (default 3). Seeds are verified
+  continuous triple zeros from all triple families, not only AB junctions. Each
+  blob selects one or two pairs and stochastically launches unequal counts in
+  each direction. Seed pairing bias defaults to 1: walk the initialization graph
+  along each fixed pair to the next selected seed; no geometric links are added.
+  Rank existing routes by inverse arc length with seeded jitter, admitting at
+  most two pair families per blob. Facing ends share per-copy draws with
+  p=.65+.3/(1+L/noise_scale), and one launch each; unpaired arms use p=.1.
+  Unmatched blobs keep one sparse pair and one guaranteed launch. A lone seed
+  retains legacy behavior. Bias 0 restores independent plans; intermediate bias
+  mixes decisions. Global curve caps can truncate reciprocal allocations.
+  Selection still maximizes seed separation, so selected blobs can have no
+  common pair-zero strands in the box. No outside-box route detection or
+  guarantee that finite stochastic curves reach each other is provided.
+  The third pair can still appear through later branching. `curves_per_seed`
+  retains its saved key but is labeled Max curves / direction (default 6): it
+  caps candidates rather than forcing full arms. Increasing the cap extends the
+  seeded per-blob plan. Budget allocation is round-robin across blobs, with at
+  least one launch each. No ordinary-pair fallback; missing triple roots is an error.
+  Direct continuous noise and
   finite-difference gradients replace grid tangents. Motion combines tangent,
   finite regularized normal attraction, independent smooth random steering,
   and gradual heading response. Multiple curves per seed remain separate and
-  are never deduplicated/snapped. The exact graph only initializes seed locations.
-  Soft third-field encounters can branch from the parent's position/heading;
-  hysteresis, travel cooldown, depth/curve/length budgets prevent explosions.
+  are never deduplicated/snapped. The exact graph initializes seeds and launch
+  allocation, but does not prescribe trajectories or supply target attraction.
+  Soft inter-curve repulsion defaults to 0.15 with reach 0.2 before Y compression.
+  A spatial index queries nearby deposited segments, excludes self, selects one
+  closest candidate per other curve, and applies bounded transverse steering
+  with squared cutoff falloff. New paths ramp in over twice the reach; existing
+  vertices/attachments never move. Zero restores independent trajectories;
+  enabled interactions mean count/length/branch edits can affect other paths.
+  Per-curve attraction is A*(1-v*U^3), with v=0.9 by default: mostly near A,
+  with a smaller weak-attraction tail. Each root/child has an independent fixed
+  draw; v=0 restores equal strengths.
+  AttractionModulation optionally multiplies it by (1-b*dÂ²/(dÂ²+RÂ²)) and
+  (1+c*tanh(3*N(x))). Both amounts default off. d is Euclidean distance from
+  the original blob before Y compression, retained by descendants. Positive b
+  weakens outward, negative strengthens; R is half-change distance. N is an
+  independently seeded shared spatial Perlin/Simplex fBm field with its own
+  scale/octaves/roughness; it adds no geometry fields/junctions. Growth and
+  branch prediction use the same multipliers. Turn response length (saved `smoothness`)
+  smooths ongoing heading changes, not finished geometry or branch departure.
+  Soft third-field encounters branch from the parent's position but use their
+  own pair tangent as the initial heading (forward-oriented). Divergence
+  preference defaults to 0.8: a uniform/softmax mixture favors alternatives
+  whose short deterministic probes separate from the parent continuation.
+  Probes use per-curve attraction and turn response, without wandering/repulsion;
+  the real child keeps those effects. Preference zero is uniform pair selection.
+  Hysteresis, travel cooldown, depth/curve/length budgets prevent explosions.
   Seed-region bounds do not clip growth. Y compression happens afterward.
   Independent Beta(2,2) lifetimes taper bundle populations; mean length and
   variation bound root budgets, children use randomized fractions of remaining
-  parent travel. Length edits preserve earlier path prefixes. Zero variation
-  restores equal root lengths. Individual-tip star fading remains future work.
-  440,000 segments cap output below the binary vertex limit. Still no star stage.
+  parent travel. Length edits preserve earlier path prefixes with repulsion off. Zero variation
+  restores equal root lengths. Star population can additionally fade individual
+  tips while retaining full source curves. 440,000 segments cap line output
+  below the binary vertex limit.
 
 - `noise_branch_curves.py` / `_branch_curves.py`: line preview tracing 2-4 scalar
   noise fields' pairwise zeros, with probabilistic branching at triple zeros.
@@ -105,15 +289,15 @@ the current implementation, not a commitment to continue any particular experime
 - `_alignment.py`, `noise_filaments_aligned.py`: gently attract an existing noise
   cloud toward extracted guides. Layer-aware guides are heuristic. Open endpoints
   deliberately do not attract stars beyond their ends, preventing endpoint piles.
-- `zeldovich.py`: current baseline. Smoothed Gaussian initial density on a 96³
+- `zeldovich.py`: earlier direct-star baseline, retained for comparison. Smoothed Gaussian initial density on a 96Â³
   periodic grid; FFT displacement with divergence(s) = -density; x = q + D*s(q).
   One-shot approximation, not a gravity simulation or convergence iteration.
   Beyond crossings, stars pass through concentrations rather than binding.
   Y scale compresses the entire result (unlike thin-region sampling in noise
   generators). Colors reflect final concentration; per-star sizes use a separate RNG.
-  **Void threshold** applies rho²/(rho²+threshold²) as a bounded multiplier before
+  **Void threshold** applies rhoÂ²/(rhoÂ²+thresholdÂ²) as a bounded multiplier before
   resampling. It replaced a density power that overpopulated peaks. Zero bypasses
-  resampling exactly. A 64³ estimate and at least 262,144 pilot particles are used.
+  resampling exactly. A 64Â³ estimate and at least 262,144 pilot particles are used.
 
 ## Shared appearance experiments
 
@@ -127,7 +311,7 @@ experiments default off. Settings may enable them in the user's saved preset.
 2. Merge dense stars: randomly oriented bounded bins combine nearby dense stars.
    Use volume-weighted centroids/colors and cube-root summed size-cubed. This
    preserves star volume and avoids transitive merging of whole filaments.
-3. Warp: mode 0 is a global swirl about world Y, theta = angle/(1+(r/radius)²),
+3. Warp: mode 0 is a global swirl about world Y, theta = angle/(1+(r/radius)Â²),
    preserving height and horizontal radius. Mode 1 retains the earlier sum of
    transverse sine waves. Swirl bends structures; it does not attract stars onto
    spiral ridges. All stars participate, with no motion on the rotation axis.

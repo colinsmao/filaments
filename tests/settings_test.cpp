@@ -43,6 +43,8 @@ int main(int argc, char** argv) {
         plot.renderMode = 1;
         plot.sizeScale = 2.25f;
         plot.round = plot.showAxes = plot.vsync = false;
+        plot.showCurves = false;
+        plot.showStars = true;
         plot.background[0] = 0.25f;
         plot.camera.target = {3, -4, 5};
         plot.camera.yaw = 160;
@@ -52,7 +54,7 @@ int main(int argc, char** argv) {
         require(savePlotSettings(plotPath, plot), "Could not save plot");
         const auto restored = loadPlotSettings(plotPath);
         require(restored.generator == plot.generator && restored.renderMode == 1 && restored.sizeScale == 2.25f &&
-                !restored.round && !restored.showAxes && !restored.vsync && restored.background[0] == 0.25f &&
+                !restored.round && !restored.showAxes && !restored.vsync && !restored.showCurves && restored.showStars && restored.background[0] == 0.25f &&
                 restored.hasCamera && restored.camera.target == plot.camera.target && restored.camera.yaw == 160 &&
                 restored.camera.pitch == -22 && restored.camera.distance == 12, "Plot configuration did not round-trip");
         std::ofstream(plotPath) << R"({"generator":{"script":"galaxy","count":2000000,"seed":-1,
@@ -62,7 +64,8 @@ int main(int argc, char** argv) {
         require(badPlot.generator["count"] == 1000000 && badPlot.generator["seed"] == 0 &&
                 badPlot.generator["parameters"]["galaxy"]["arms"] == 4 &&
                 !badPlot.generator["parameters"]["galaxy"].contains("bad") && badPlot.sizeScale == 0.05f &&
-                !badPlot.hasCamera && badPlot.round, "Plot settings must ignore malformed values and bound numbers");
+                !badPlot.hasCamera && badPlot.round && badPlot.showCurves && badPlot.showStars,
+                "Plot settings must ignore malformed values and bound numbers");
         std::ofstream(plotPath) << "{truncated";
         require(loadPlotSettings(plotPath).generator["count"] == 100000, "Invalid JSON must use plot defaults");
         require(loadPlotSettings(plotPath.string() + ".missing").renderMode == 0, "Missing plot must default to cubes");

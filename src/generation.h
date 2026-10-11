@@ -24,12 +24,13 @@ struct GenerationResult {
     nlohmann::json request;
     nlohmann::json metadata = nlohmann::json::object();
     std::vector<Point> points;
+    std::vector<Point> stars; // Optional population layer accompanying line geometry.
     std::string error;
     double elapsedMs = 0;
     bool cancelled = false;
 };
 
-std::vector<Point> readPointFile(const std::filesystem::path& path);
+std::vector<Point> readPointFile(const std::filesystem::path& path, bool allowEmpty = false);
 GenerationResult runGeneration(const GeneratorRuntime& runtime, const nlohmann::json& request,
                                const std::shared_ptr<std::atomic_bool>& cancel);
 

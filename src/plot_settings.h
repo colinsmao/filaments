@@ -9,6 +9,7 @@ struct PlotSettings {
     int renderMode = 0; // Shaded cubes; 1 = inexpensive point sprites.
     float sizeScale = 1.0f;
     bool round = true, showAxes = true, vsync = true, hasCamera = false;
+    bool showCurves = true, showStars = true;
     float background[3] = {0.025f, 0.035f, 0.055f};
     Camera camera;
 };
@@ -58,6 +59,8 @@ inline PlotSettings loadPlotSettings(const std::filesystem::path& path) {
     result.sizeScale = static_cast<float>(plotNumber(json, "size_scale", 1, 0.05, 20));
     result.round = plotBool(json, "round_points", true);
     result.showAxes = plotBool(json, "axes", true);
+    result.showCurves = plotBool(json, "show_curves", true);
+    result.showStars = plotBool(json, "show_stars", true);
     result.vsync = plotBool(json, "vsync", true);
     const auto bg = json.find("background");
     if (bg != json.end() && bg->is_array() && bg->size() == 3) {
@@ -83,6 +86,7 @@ inline nlohmann::json plotSettingsJson(const PlotSettings& settings) {
     nlohmann::json json = {{"version", 1}, {"generator", settings.generator},
         {"render_mode", settings.renderMode}, {"size_scale", settings.sizeScale},
         {"round_points", settings.round}, {"axes", settings.showAxes}, {"vsync", settings.vsync},
+        {"show_curves", settings.showCurves}, {"show_stars", settings.showStars},
         {"background", {settings.background[0], settings.background[1], settings.background[2]}}};
     if (settings.hasCamera) json["camera"] = {{"yaw", settings.camera.yaw}, {"pitch", settings.camera.pitch},
         {"distance", settings.camera.distance},

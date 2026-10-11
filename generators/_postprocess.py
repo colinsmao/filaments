@@ -78,13 +78,15 @@ def suppress_voids(density, threshold):
     return density * squared / (squared + threshold * threshold)
 
 
-def apply_to_stars(positions, colors, sizes, seed, params, bounds=None):
+def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_empty=False):
     """Optional point-stage processors; masks always travel with star attributes.
 
     Bounds are (center, half_extents) in world coordinates. Without an explicit
     generator bound, use the cloud's bounding box. A collapsed axis contributes
     zero to radius. Appearance edits precede the optional point-stage fade.
     """
+    if allow_empty and len(positions) == 0:
+        return positions, colors, sizes
     if not params.get("fade", 0):
         return apply_appearance(positions, colors, sizes, seed, params)
     if bounds is None:
@@ -105,7 +107,7 @@ def apply_to_stars(positions, colors, sizes, seed, params, bounds=None):
         weights = density_fade_weights(weights, relative_density_at_stars(normalized), strength)
     rng = np.random.default_rng(np.random.SeedSequence([seed, 9401]))
     keep = rng.random(len(positions)) < weights
-    if not keep.any():
+    if not keep.any() and not allow_empty:
         # The current viewer protocol requires a nonempty buffer. Report this
         # explicitly rather than inventing a survivor outside the envelope.
         raise ValueError("Edge fade removed every star; increase the count or disable Fade edges")

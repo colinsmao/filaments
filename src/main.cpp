@@ -21,8 +21,8 @@
 
 int render(GLFWwindow* window, bool smoke) {
     if (smoke) std::fprintf(stderr, "Smoke: initializing renderers\n");
-    PointRenderer cloud, axes;
-    int pointCount = 0;
+    PointRenderer cloud, stars, axes;
+    int pointCount = 0, starCount = 0;
     auto plot = smoke ? PlotSettings{} : loadPlotSettings(plotSettingsPath());
     GeneratorPanel generator(plot.generator);
     if (smoke) std::fprintf(stderr, "Smoke: generator queued\n");
@@ -70,9 +70,14 @@ int render(GLFWwindow* window, bool smoke) {
         glfwPollEvents();
         controls.checkFocus(window);
         if (auto points = generator.tick(glfwGetTime())) {
+            auto starPoints = generator.takeStarLayer();
             const bool firstCloud = pointCount == 0;
             glm::vec3 low = points->front().position, high = low;
             for (const auto& point : *points) {
+                low = glm::min(low, point.position);
+                high = glm::max(high, point.position);
+            }
+            for (const auto& point : starPoints) {
                 low = glm::min(low, point.position);
                 high = glm::max(high, point.position);
             }
@@ -80,8 +85,10 @@ int render(GLFWwindow* window, bool smoke) {
             cloudRadius = std::max(glm::length(high - low) * 0.5f, 0.1f);
             const double uploadStart = glfwGetTime();
             cloud.setPoints(*points);
+            stars.setPoints(starPoints);
             uploadMs = (glfwGetTime() - uploadStart) * 1000;
             pointCount = static_cast<int>(points->size());
+            starCount = static_cast<int>(starPoints.size());
             if (smoke) std::fprintf(stderr, "Smoke: uploaded %d stars\n", pointCount);
             if (firstCloud && !plot.hasCamera) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 2000.0f); }
         }
@@ -112,13 +119,16 @@ int render(GLFWwindow* window, bool smoke) {
         ImGui::SliderFloat("Move speed", &controls.speed, 0.1f, 50.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
         ImGui::SliderFloat("Right-click zoom", &controls.zoomFactor, 1.0f, 10.0f, "%.1fx", ImGuiSliderFlags_AlwaysClamp);
         ImGui::Separator();
-        if (generator.drawsLines()) ImGui::Text("%d line segments | %.1f FPS", pointCount / 2, io.Framerate);
+        if (generator.drawsLines()) ImGui::Text("%d segments | %d stars | %.1f FPS", pointCount / 2, starCount, io.Framerate);
         else ImGui::Text("%d points | %.1f FPS", pointCount, io.Framerate);
-        ImGui::Text("GPU point buffer: %.1f MiB", pointCount * sizeof(Point) / (1024.0 * 1024.0));
+        ImGui::Text("GPU buffers: %.1f MiB", (pointCount + starCount) * sizeof(Point) / (1024.0 * 1024.0));
         ImGui::Text("Upload (CPU): %.1f ms", uploadMs);
         if (ImGui::CollapsingHeader("Display")) {
-            if (generator.drawsLines()) ImGui::TextUnformatted("Skeleton shown as continuous lines");
-            ImGui::BeginDisabled(generator.drawsLines());
+            if (generator.hasPopulation()) {
+                ImGui::Checkbox("Show curves", &plot.showCurves);
+                ImGui::Checkbox("Show stars", &plot.showStars);
+            }
+            ImGui::BeginDisabled(generator.drawsLines() && !generator.hasPopulation());
             ImGui::Combo("Draw as", &plot.renderMode, "Shaded cubes\0Points (fast)\0");
             ImGui::SliderFloat("Star size scale", &size, 0.05f, 20.0f, "%.2fx", ImGuiSliderFlags_Logarithmic);
             if (plot.renderMode == 1) ImGui::Checkbox("Round points", &round);
@@ -201,9 +211,18 @@ int render(GLFWwindow* window, bool smoke) {
         const auto projection = camera.projection(float(width) / float(height), controls.zoomMultiplier());
         const auto matrix = projection * camera.view();
         const float projectionScale = 0.5f * float(height) * projection[1][1];
-        if (generator.drawsLines()) cloud.draw(matrix, size, projectionScale, false, GL_LINES);
-        else if (plot.renderMode == 0) cloud.drawCubes(matrix, size);
-        else cloud.draw(matrix, size, projectionScale, round);
+        if (generator.drawsLines()) {
+            // Layer preferences belong to curve + population experiments.
+            // A single-layer generator must remain visible when switching scripts.
+            if (!generator.hasPopulation() || plot.showCurves) cloud.draw(matrix, size, projectionScale, false, GL_LINES);
+            if (generator.hasPopulation() && plot.showStars) {
+                if (plot.renderMode == 0) stars.drawCubes(matrix, size);
+                else stars.draw(matrix, size, projectionScale, round);
+            }
+        } else {
+            if (plot.renderMode == 0) cloud.drawCubes(matrix, size);
+            else cloud.draw(matrix, size, projectionScale, round);
+        }
         if (showAxes) axes.draw(matrix, size, projectionScale, false, GL_LINES);
         if (smoke && pointCount > 0 && frame == 3) {
             // Read before the GUI so a blank 3D scene cannot pass the smoke test.

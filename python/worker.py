@@ -14,6 +14,7 @@ MAX_POINTS = 1_000_000
 # Bundled shared processors are available even for external generator folders.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "generators"))
 from _postprocess import FADE_PARAMETER, FADE_WIDTH_PARAMETER, FADE_DENSITY_PARAMETER, APPEARANCE_PARAMETERS, apply_to_stars
+from _population import PARAMETERS as POPULATION_PARAMETERS, populate_curves
 
 
 def load_catalog(directory):
@@ -36,13 +37,14 @@ def load_catalog(directory):
             primitive = getattr(module, "PRIMITIVE", "points")
             if primitive not in ("points", "lines"):
                 raise ValueError("PRIMITIVE must be 'points' or 'lines'")
+            population = primitive == "lines" and callable(getattr(module, "generate_population_source", None))
             parameters, keys = [], set()
             for entry in getattr(module, "PARAMETERS", []):
                 key, kind = entry["key"], entry["type"]
                 if not isinstance(key, str) or not key.isidentifier() or key in keys or key in ("count", "seed"):
                     raise ValueError(f"Invalid or duplicate parameter key: {key}")
-                if key.startswith("pp_"):
-                    raise ValueError("Parameter prefix pp_ is reserved for shared postprocessing")
+                if key.startswith(("pp_", "pop_")):
+                    raise ValueError("Parameter prefixes pp_ and pop_ are reserved for shared processing")
                 if kind not in ("int", "float"):
                     raise ValueError(f"Unsupported parameter type: {kind}")
                 lo, hi, default = entry["min"], entry["max"], entry["default"]
@@ -73,12 +75,14 @@ def load_catalog(directory):
             parameters.extend(dict(entry) for entry in APPEARANCE_PARAMETERS)
             # Independent line endpoint pairs cannot be thinned, merged or moved
             # by star postprocessors without breaking the skeleton topology.
-            if primitive == "lines":
+            if primitive == "lines" and not population:
                 parameters = [p for p in parameters if p["key"] in keys]
+            if population:
+                parameters.extend(dict(entry) for entry in POPULATION_PARAMETERS)
             if len(parameters) > 64:
                 raise ValueError("Maximum 64 parameters per generator")
             catalog.append(dict(id=path.stem, name=str(getattr(module, "NAME", path.stem)),
-                                primitive=primitive, parameters=parameters))
+                                primitive=primitive, population=population, parameters=parameters))
             modules[path.stem] = module
         except Exception:
             errors.append(f"{path.name}:\n{traceback.format_exc(limit=5)}")
@@ -121,7 +125,10 @@ def generate_request(request, directory, output):
         # Existing density generators own their fade stage; all others receive
         # the shared point-stage fallback without changing their signatures.
         native_params = {key: value for key, value in params.items() if key in native_keys}
-        generated = module.generate(count=count, seed=seed, **native_params)
+        if schema["population"]:
+            generated, paths, path_colors = module.generate_population_source(count=count, seed=seed, **native_params)
+        else:
+            generated = module.generate(count=count, seed=seed, **native_params)
         if not isinstance(generated, (tuple, list)) or len(generated) not in (2, 3):
             raise ValueError("generate must return (positions, colors) or (positions, colors, sizes)")
         positions, colors = generated[:2]
@@ -164,7 +171,24 @@ def generate_request(request, directory, output):
         with output.open("wb") as stream:
             stream.write(struct.pack("<8sQ", b"FSTAR002", count))
             stream.write(points.tobytes())
+        if schema["population"]:
+            stars, stats = populate_curves(paths, path_colors, seed, params, limit=MAX_POINTS)
+            stars = apply_to_stars(*stars, seed, params, allow_empty=True)
+            star_positions, star_colors, star_sizes = (np.asarray(a, dtype=np.float32) for a in stars)
+            star_count = len(star_positions)
+            if (star_count > MAX_POINTS or star_positions.shape != (star_count, 3)
+                    or star_colors.shape != (star_count, 3) or star_sizes.shape != (star_count,)
+                    or not all(np.isfinite(a).all() for a in (star_positions, star_colors, star_sizes))
+                    or (np.abs(star_positions) > 1e6).any() or ((star_colors < 0) | (star_colors > 1)).any()
+                    or ((star_sizes <= 0) | (star_sizes > 1000)).any()):
+                raise ValueError("Invalid populated star attributes")
+            packed = np.column_stack((star_positions, star_colors, star_sizes)).astype("<f4")
+            with output.with_suffix(".stars.bin").open("wb") as stream:
+                stream.write(struct.pack("<8sQ", b"FSTAR002", star_count))
+                stream.write(packed.tobytes())
+            response.update(star_count=star_count, **stats)
         response.update(ok=True, generator=selected, params=params, primitive=primitive,
+                        population=schema["population"],
                         count=count, requested_count=requested_count,
                         generation_ms=(time.perf_counter() - started) * 1000)
     except Exception:

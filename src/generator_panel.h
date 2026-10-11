@@ -52,6 +52,9 @@ public:
             mathMs = result->metadata.at("generation_ms").get<double>();
             totalMs = result->elapsedMs;
             lines = result->metadata.value("primitive", std::string("points")) == "lines";
+            population = result->metadata.value("population", false);
+            populationLimited = result->metadata.value("population_limited", false);
+            starLayer = std::move(result->stars);
             return std::move(result->points);
         }
         return {};
@@ -71,11 +74,14 @@ public:
             }
             ImGui::EndCombo();
         }
-        bool selectedLines = false;
+        bool selectedLines = false, selectedPopulation = false;
         for (const auto& item : catalog)
-            if (item.at("id") == selected) selectedLines = item.value("primitive", std::string("points")) == "lines";
+            if (item.at("id") == selected) {
+                selectedLines = item.value("primitive", std::string("points")) == "lines";
+                selectedPopulation = item.value("population", false);
+            }
         bool edited = false;
-        if (selectedLines) ImGui::TextUnformatted("Curve preview - no stars yet");
+        if (selectedLines) ImGui::TextUnformatted(selectedPopulation ? "Curves + star population" : "Curve preview");
         else edited = ImGui::SliderInt("Stars", &count, 1000, 1000000, "%d", ImGuiSliderFlags_Logarithmic);
         edited |= ImGui::InputInt("Seed", &seed);
         seed = std::max(seed, 0);
@@ -112,12 +118,20 @@ public:
                 }
                 ImGui::EndDisabled();
             };
-            for (const auto& entry : item.at("parameters"))
-                if (entry.value("group", std::string{}).empty()) drawParameter(entry);
-            if (!selectedLines && ImGui::CollapsingHeader("Postprocessing", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (!selectedPopulation || ImGui::CollapsingHeader("Curve generation", ImGuiTreeNodeFlags_DefaultOpen)) {
+                for (const auto& entry : item.at("parameters"))
+                    if (entry.value("group", std::string{}).empty()) drawParameter(entry);
+            }
+            if (selectedPopulation && ImGui::CollapsingHeader("Star population", ImGuiTreeNodeFlags_DefaultOpen)) {
+                for (const auto& entry : item.at("parameters"))
+                    if (entry.value("section", std::string{}) == "population") drawParameter(entry);
+                if (populationLimited) ImGui::TextWrapped("Star limit reached; density reduced to fit 1,000,000 stars.");
+            }
+            if ((!selectedLines || selectedPopulation) && ImGui::CollapsingHeader("Postprocessing", ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::Indent();
                 std::vector<std::string> groups;
                 for (const auto& entry : item.at("parameters")) {
+                    if (entry.value("section", std::string{}) == "population") continue;
                     const auto group = entry.value("group", std::string{});
                     if (!group.empty() && std::find(groups.begin(), groups.end(), group) == groups.end())
                         groups.push_back(group);
@@ -159,6 +173,8 @@ public:
 
     bool busy() const { return service.busy() || dirty; }
     bool drawsLines() const { return lines; }
+    bool hasPopulation() const { return population; }
+    std::vector<Point> takeStarLayer() { return std::move(starLayer); }
     void handleShortcuts(bool cameraCaptured) {
         const auto& io = ImGui::GetIO();
         if ((cameraCaptured || (!io.WantCaptureKeyboard && !io.WantTextInput)) &&
@@ -176,6 +192,8 @@ private:
     int count = 100000, seed = 42;
     bool watchFiles = true, autoApply = true, dirty = false;
     bool lines = false; // Describes the last successful buffer, not the pending selection.
+    bool population = false, populationLimited = false;
+    std::vector<Point> starLayer;
     double lastScan = 0, lastEdit = 0;
     unsigned long long editRevision = 0;
     std::mt19937 random{std::random_device{}()};
