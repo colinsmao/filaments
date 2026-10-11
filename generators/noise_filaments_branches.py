@@ -23,6 +23,8 @@ PARAMETERS = [
     # Keep the historical clump modulation unless a copied preset requests a floor.
     dict(key="strand_continuity", label="Strand continuity", type="float", default=0.0, min=0.0, max=1.0),
     *(dict(entry) for entry in FILAMENT_PARAMETERS if entry["key"].startswith("density_")),
+    dict(key="broad_strength", label="Broad density strength (0 off)", type="float", default=4.0, min=0.0, max=12.0),
+    dict(key="broad_scale", label="Broad density scale (base wavelengths)", type="float", default=2.0, min=2.0, max=8.0),
     dict(key="star_size", label="Star size (units)", type="float", default=0.04, min=0.002, max=0.5),
     dict(key="size_variation", label="Size variation", type="float", default=0.4, min=0.0, max=0.9),
     *(dict(entry) for entry in FADE_PARAMETERS),
@@ -40,9 +42,10 @@ def _strand_log_density(a, b, c, width):
 
 def build_density(seed, frequency=2.0, width=0.065, octaves=2, roughness=0.22,
                   clumping=3.0, y_scale=1.0, strand_continuity=0.0,
-                  density_low=1.0, density_mid=1.0, density_high=1.0):
+                  density_low=1.0, density_mid=1.0, density_high=1.0,
+                  broad_strength=4.0, broad_scale=2.0, _return_fields=False, _resolution=96):
     """Shared symmetric three-field density, remapped but not edge-faded."""
-    resolution = 96
+    resolution = int(_resolution)
     points = grid(resolution, y_scale)
     a = fractal_noise(points, np.random.SeedSequence([seed, 101]), frequency, octaves, roughness)
     b = fractal_noise(points, np.random.SeedSequence([seed, 202]), frequency, octaves, roughness)
@@ -51,7 +54,17 @@ def build_density(seed, frequency=2.0, width=0.065, octaves=2, roughness=0.22,
     log_density = (_strand_log_density(a, b, c, width)
                    + _clump_log_weight(knots, clumping, strand_continuity))
     density = np.exp(log_density - log_density.max()).reshape((resolution,) * 3)
-    return remap_density(density, density_low, density_mid, density_high)
+    density = remap_density(density, density_low, density_mid, density_high)
+    if broad_strength > 0:
+        # A separate coarser octave reweights existing fine structures. Keep
+        # A/B/C and clump streams untouched, and bypass exactly at strength 0.
+        broad = fractal_noise(points, np.random.SeedSequence([seed, 505]),
+                              frequency/broad_scale, 1).reshape(density.shape)
+        # The common scale cancels when sampling; subtract max for stability.
+        density = density * np.exp(broad_strength*(broad-broad.max()))
+    if _return_fields:
+        return density, np.stack((a, b, c)).reshape((3, resolution, resolution, resolution))
+    return density
 
 
 def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
@@ -60,11 +73,13 @@ def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
              strand_continuity=0.0, density_low=1.0, density_mid=1.0, density_high=1.0,
              _return_density=False, y_extent=None,
              fade_xz=None, fade_xz_width=None, fade_xz_density_strength=None,
-             fade_y=None, fade_y_width=None, fade_y_density_strength=None):
+             fade_y=None, fade_y_width=None, fade_y_density_strength=None,
+             broad_strength=4.0, broad_scale=2.0):
     half_y = extent*y_scale if y_extent is None else y_extent
     y_scale = half_y / extent
     density = build_density(seed, frequency, width, octaves, roughness, clumping,
-                            y_scale, strand_continuity, density_low, density_mid, density_high)
+                            y_scale, strand_continuity, density_low, density_mid, density_high,
+                            broad_strength, broad_scale)
     guidance = density
     if fade_xz is None and fade_y is None and fade:
         density = fade_density(density, fade_width, fade_density_strength)

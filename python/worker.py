@@ -199,7 +199,10 @@ def generate_request(request, directory, output):
             stream.write(points.tobytes())
         if schema["population"]:
             stars, stats = populate_curves(paths, path_colors, seed, params, limit=MAX_POINTS)
-            stars = apply_to_stars(*stars, seed, params, allow_empty=True)
+            bounds_function = getattr(module, 'postprocess_bounds', None)
+            bounds = bounds_function(**native_params) if callable(bounds_function) else None
+            stars = apply_to_stars(*stars, seed, params, bounds=bounds, allow_empty=True,
+                                   axis_fade=getattr(module, 'POPULATION_AXIS_FADE', False))
             star_positions, star_colors, star_sizes = (np.asarray(a, dtype=np.float32) for a in stars)
             star_count = len(star_positions)
             if (star_count > MAX_POINTS or star_positions.shape != (star_count, 3)

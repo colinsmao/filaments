@@ -9,7 +9,7 @@ from _curve_coverage import CurveCoverage
 
 class StrandContacts:
     """Nearest aligned deposited segment from a different two-way strand."""
-    def __init__(self, paths):
+    def __init__(self, paths, families=None):
         segments = [(i//2, np.asarray(p)) for i, p in enumerate(paths) if len(p) > 1]
         self.tree = None
         if not segments:
@@ -20,6 +20,7 @@ class StrandContacts:
         length2 = np.sum(delta*delta, axis=1)
         valid = length2 > 1e-12
         self.start, self.delta, self.owner = start[valid], delta[valid], owners[valid]
+        self.family = np.asarray(families)[self.owner] if families is not None else None
         self.length2 = length2[valid]
         if not len(self.start):
             return
@@ -27,7 +28,8 @@ class StrandContacts:
         self.half_length = .5*np.sqrt(self.length2.max())
         self.tree = cKDTree(self.start+self.delta*.5)
 
-    def query(self, positions, headings, owners, radius):
+    def query(self, positions, headings, owners, radius, families=None, aligned=True,
+              contact_families=None, allow_crossings=True):
         target, tangent = positions.copy(), headings.copy()
         distance = np.full(len(positions), np.inf)
         if self.tree is None or radius <= 0 or not len(positions):
@@ -44,7 +46,19 @@ class StrandContacts:
         candidates = self.start[ids]+fraction[:, :, None]*self.delta[ids]
         distances = np.linalg.norm(candidates-positions[:, None], axis=2)
         alignment = np.sum(self.tangent[ids]*headings[:, None], axis=2)
-        valid = (self.owner[ids] != owners[:, None]) & (np.abs(alignment) >= np.cos(np.deg2rad(25.)))
+        valid = self.owner[ids] != owners[:, None]
+        if aligned:
+            valid &= np.abs(alignment) >= np.cos(np.deg2rad(25.))
+        if families is not None:
+            valid &= self.family[ids] == families[:, None]
+        if contact_families is not None:
+            parallel = ((self.family[ids] == contact_families[:, None])
+                        & (np.abs(alignment) >= np.cos(np.deg2rad(25.))))
+            # Close duplicates yield to a stable source priority, so two tips
+            # cannot both terminate against each other's deposited prefixes.
+            valid &= ~parallel | (self.owner[ids] < owners[:, None])
+            # Coverage can gate other junctions, but cannot license duplicates.
+            valid &= parallel | np.broadcast_to(allow_crossings, len(positions))[:, None]
         valid &= nearby & (distances < radius)
         distances = np.where(valid, distances, np.inf)
         best = distances.argmin(axis=1)
@@ -66,7 +80,7 @@ class DensityShape:
     Flat or extremely thin scenes use the Y-averaged XZ density and a 2D
     eigensystem; their starting heights remain unchanged.
     """
-    def __init__(self, density, half_extents, radius):
+    def __init__(self, density, half_extents, radius, derivatives=True):
         self.radius = radius
         self.half = np.asarray(half_extents, dtype=float)
         self.axes = np.array([0, 2]) if self.half[1] < radius/20 else np.arange(3)
@@ -77,6 +91,8 @@ class DensityShape:
         # ridge. Growth itself stops at the original box, without wrapping.
         blurred = gaussian_filter(data, radius/self.spacing, mode='reflect')
         self.log_density = np.log(np.maximum(blurred, max(blurred.max()*1e-9, 1e-30)))
+        if not derivatives:
+            return
         self.gradient = np.stack(np.gradient(self.log_density, *self.spacing, edge_order=2))
         n = len(self.axes)
         self.hessian = np.empty((n, n)+data.shape)
@@ -123,24 +139,93 @@ class DensityShape:
         return map_coordinates(self.log_density, self.coordinates(points), order=1, mode='nearest')
 
 
+class PairFilamentShape:
+    """Keep the three original pair directions separate, including at crossings."""
+    pairs = np.array([[0, 1], [0, 2], [1, 2]])
+
+    def __init__(self, fields, half_extents, radius, width):
+        self.half = np.asarray(half_extents, dtype=float)
+        self.radius, self.width = radius, width
+        self.axes = np.array([0, 2]) if self.half[1] < radius/20 else np.arange(3)
+        self.fields = np.asarray(fields, dtype=float)
+        self.planar = len(self.axes) == 2
+        self.values_grid = self.fields.mean(axis=2) if self.planar else self.fields
+        self.spacing = 2*self.half[self.axes]/(np.array(self.values_grid.shape[1:])-1)
+        if self.planar:
+            # A literal flat slice need not contain 3D zero-intersection lines.
+            # Follow each pair's own density ridge in XZ, never their sum.
+            self.shapes = []
+            for a, b in self.pairs:
+                log_pair = -(self.fields[a]**2+self.fields[b]**2)/(2*width**2)
+                self.shapes.append(DensityShape(np.exp(log_pair-log_pair.max()), self.half, radius))
+        else:
+            self.gradients = np.stack([np.gradient(f, *self.spacing, edge_order=2) for f in self.fields])
+
+    def coordinates(self, points):
+        return ((points[:, self.axes]+self.half[self.axes])/self.spacing).T
+
+    def values(self, points):
+        q = self.coordinates(points)
+        return np.column_stack([map_coordinates(f, q, order=1, mode='nearest') for f in self.values_grid])
+
+    def choose(self, points, rng):
+        values = self.values(points)
+        log_weight = -np.sum(values[:, self.pairs]**2, axis=2)/(2*self.width**2)
+        weight = np.exp(log_weight-log_weight.max(axis=1, keepdims=True))
+        cumulative = np.cumsum(weight/weight.sum(axis=1, keepdims=True), axis=1)
+        return np.minimum((rng.random(len(points))[:, None] > cumulative).sum(axis=1), 2)
+
+    def log_value(self, points, families):
+        values = self.values(points)
+        selected = values[np.arange(len(points))[:, None], self.pairs[families]]
+        return -np.sum(selected**2, axis=1)/(2*self.width**2)
+
+    def sample(self, points, families, headings):
+        if self.planar:
+            tangent, gradient, confidence = np.zeros_like(points), np.zeros_like(points), np.zeros(len(points))
+            for family, shape in enumerate(self.shapes):
+                selected = families == family
+                if selected.any():
+                    t, g, c = shape.sample(points[selected], headings[selected])
+                    tangent[selected], gradient[selected], confidence[selected] = t, g, c
+            return tangent, gradient, confidence
+        # Reuse the pair-tangent/normal-correction math from stochastic curves.
+        # The source is the very same cached A/B/C grids used for density.
+        from _stochastic_curves import guidance
+        q = self.coordinates(points)
+        values = self.values(points)
+        gradients = np.empty((len(points), 3, 3))
+        for field in range(3):
+            for axis in range(3):
+                gradients[:, field, axis] = map_coordinates(self.gradients[field, axis], q, order=1, mode='nearest')
+        tangent, correction = guidance(values, gradients, self.pairs[families], headings)
+        return tangent, -correction/self.radius**2, np.ones(len(points))
+
+
 def trace_density(density, seed, half_extents, strand_count=512, strand_length=2.,
                   direction_scale=.3, density_pull=.35, curve_wander=.15,
                   join_reach=.6, join_strength=1., join_radius=.08,
-                  coverage_mode=0, coverage_radius=.5, capacity_scale=1.):
+                  coverage_mode=0, coverage_radius=.5, capacity_scale=1.,
+                  pair_fields=None, pair_width=.065, return_families=False):
     """Seed from density; grow both directions with bounded, local steering.
 
-    No blob extraction, assigned endpoints, pair-zero constraints or externally
-    supplied guide curves. Density is unchanged. This sampler approximates its
-    distribution; it does not claim to preserve its exact marginal density.
+    Optional original scalar fields lock each source to AB, AC or BC. Without
+    them, retain the older density-only experiment. No assigned endpoints or
+    exact density-preservation claim; input density is unchanged.
     """
     half = np.asarray(half_extents, dtype=float)
-    field = DensityShape(density, half, direction_scale)
+    field = DensityShape(density, half, direction_scale, derivatives=pair_fields is None)
+    pair_shape = PairFilamentShape(pair_fields, half, direction_scale, pair_width) if pair_fields is not None else None
+    family_rng = np.random.default_rng(np.random.SeedSequence([seed, 82517]))
     rng = np.random.default_rng(np.random.SeedSequence([seed, 82191]))
     roots, _ = sample_density(density, int(strand_count), rng)
     roots = roots.astype(float)*half
     root_offsets = rng.uniform(0, 128, roots.shape)
     noise = VectorNoise(seed, max(4*direction_scale, .1), 0, 2, .35)
-    launch, _, _ = field.sample(roots, noise.sample(roots, root_offsets))
+    families = pair_shape.choose(roots, family_rng) if pair_shape is not None else None
+    preferred = noise.sample(roots, root_offsets)
+    launch, _, _ = (pair_shape.sample(roots, families, preferred) if pair_shape is not None
+                     else field.sample(roots, preferred))
     positions = np.repeat(roots, 2, axis=0)
     headings = np.repeat(launch, 2, axis=0)*np.tile([1., -1.], len(roots))[:, None]
     paths = [[p.copy()] for p in positions]
@@ -150,6 +235,8 @@ def trace_density(density, seed, half_extents, strand_count=512, strand_length=2
     traveled = np.zeros(len(positions))
     active = np.ones(len(positions), dtype=bool)
     floor = field.log_value(positions)-np.log(10.)
+    pair_floor = (np.repeat(pair_shape.log_value(roots, families)-np.log(10.), 2)
+                  if pair_shape is not None else None)
     coverage = (CurveCoverage(density, half, coverage_radius,
                              strand_count*strand_length*capacity_scale, steering=coverage_mode == 2)
                 if coverage_mode else None)
@@ -174,11 +261,18 @@ def trace_density(density, seed, half_extents, strand_count=512, strand_length=2
             end_root = min(len(roots), next_root+wave_size)
             new_roots = coverage.roots(end_root-next_root, residual_rng)
             starts = np.repeat(new_roots, 2, axis=0)
-            new_launch, _, _ = field.sample(new_roots, noise.sample(new_roots, root_offsets[next_root:end_root]))
+            preferred = noise.sample(new_roots, root_offsets[next_root:end_root])
+            if pair_shape is not None:
+                families[next_root:end_root] = pair_shape.choose(new_roots, family_rng)
+                new_launch, _, _ = pair_shape.sample(new_roots, families[next_root:end_root], preferred)
+            else:
+                new_launch, _, _ = field.sample(new_roots, preferred)
             section = slice(2*next_root, 2*end_root)
             positions[section] = starts
             headings[section] = np.repeat(new_launch, 2, axis=0)*np.tile([1., -1.], len(new_roots))[:, None]
             floor[section] = field.log_value(starts)-np.log(10.)
+            if pair_shape is not None:
+                pair_floor[section] = np.repeat(pair_shape.log_value(new_roots, families[next_root:end_root])-np.log(10.), 2)
             for i, p0 in zip(range(2*next_root, 2*end_root), starts):
                 paths[i] = [p0.copy()]
             active[section] = True
@@ -189,8 +283,10 @@ def trace_density(density, seed, half_extents, strand_count=512, strand_length=2
             coverage.refresh()
         load, deficit = coverage.sample(p) if coverage is not None else (np.zeros(len(p)), np.zeros_like(p))
         if interaction and iteration % 4 == 0:
-            contacts = StrandContacts(paths)
-        tangent, gradient, confidence = field.sample(p)
+            contacts = StrandContacts(paths, families)
+        local_families = families[ids//2] if pair_shape is not None else None
+        tangent, gradient, confidence = (pair_shape.sample(p, local_families, h) if pair_shape is not None
+                                         else field.sample(p))
         tangent *= np.where(np.sum(tangent*h, axis=1) < 0, -1., 1.)[:, None]
         # Only transverse ascent: never deliberately pull along a strand into
         # a density maximum. Clamp its amplitude to avoid sharp correction.
@@ -202,7 +298,8 @@ def trace_density(density, seed, half_extents, strand_count=512, strand_length=2
         joining = np.zeros_like(p)
         if interaction:
             eligible = load > .5 if coverage is not None else np.ones(len(p), dtype=bool)
-            target, guide, distance = contacts.query(p[eligible], h[eligible], ids[eligible]//2, join_reach)
+            target, guide, distance = contacts.query(p[eligible], h[eligible], ids[eligible]//2, join_reach,
+                families=local_families[eligible] if pair_shape is not None else None)
             weight = np.maximum(0., 1-distance/join_reach)**2
             weight *= np.minimum(1., traveled[ids[eligible]]/max(join_reach, step))
             if coverage is not None:
@@ -226,10 +323,12 @@ def trace_density(density, seed, half_extents, strand_count=512, strand_length=2
         joined = np.zeros(len(ids), dtype=bool)
         if interaction and join_radius > 0:
             eligible = traveled[ids] >= 2*step
-            if coverage is not None:
+            if coverage is not None and pair_shape is None:
                 eligible &= load >= .75
             target, _, distance = contacts.query(proposed[eligible], heading[eligible], ids[eligible]//2,
-                                                 min(join_radius, join_reach))
+                min(join_radius, join_reach), aligned=pair_shape is None,
+                contact_families=local_families[eligible] if pair_shape is not None else None,
+                allow_crossings=load[eligible] >= .75 if coverage is not None else True)
             hit = distance < min(join_radius, join_reach)
             joined[eligible] = hit
             # Join an actual deposited segment, not another tip's prediction.
@@ -237,6 +336,10 @@ def trace_density(density, seed, half_extents, strand_count=512, strand_length=2
             proposed[joined] = target[hit]
         inside = np.all(np.abs(proposed) <= half+1e-10, axis=1)
         supported = field.log_value(proposed) >= floor[ids]
+        if pair_shape is not None:
+            # Another family's density cannot rescue a tip that left its own
+            # filament. Only an explicit final contact may cross that boundary.
+            supported &= (pair_shape.log_value(proposed, local_families) >= pair_floor[ids]) | joined
         full = np.zeros(len(ids), dtype=bool)
         if coverage is not None:
             proposed_load, _ = coverage.sample(proposed, steering=False)
@@ -250,11 +353,12 @@ def trace_density(density, seed, half_extents, strand_count=512, strand_length=2
         positions[ids], headings[ids] = proposed, heading
         traveled[ids] += ds
         active[ids] = accepted & ~joined & (traveled[ids] < budgets[ids]-1e-9)
-    output = []
+    output, output_families = [], []
     for i in range(len(roots)):
         path = np.concatenate((np.asarray(paths[2*i+1])[::-1], np.asarray(paths[2*i])[1:]))
         if len(path) >= 3:
             output.append(path)
+            output_families.append(families[i] if families is not None else -1)
     if not output:
         raise ValueError('No density strands survived; increase direction scale or change the noise seed')
-    return output
+    return (output, np.asarray(output_families)) if return_families else output

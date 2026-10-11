@@ -5,10 +5,12 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Purpose and user preferences
 
-- Latest direction (2026-10-10): return to original `noise_filaments.py` with
-  shared alignment/merging. Curve-generation experiments remain available but
-  are no longer the active direction. Reduce noisy blobs through larger merged
-  stars and align the small stars left sparse by merging.
+- Latest direction (2026-10-11): stable `density_filament_curves.py`, extracting
+  the symmetric A/B/C pair-zero paths and using fixed arc-spaced central seeds.
+  Density changes shorten fixed travel intervals rather than moving roots;
+  XZ/Y edge fade now thins only stars, leaving curves byte-identical.
+  Earlier growth is retained as `density_filament_growth.py`; appearance still
+  needs user judgment. Shared stars/postprocessing remain the baseline.
 - Build visually interesting distributions of stars: galaxies, filaments, voids,
   and other patterns. Appearance matters more than physical accuracy. Minecraft
   may be a later destination; currently this is a math playground and viewer.
@@ -72,7 +74,46 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Current math experiments
 
-- `density_filament_curves.py` / `_density_curves.py`: local-alignment
+- Broad-density trial: checkpoint `b9f9455` snapshots all preceding code and
+  saved viewer settings. Shared `noise_filaments_branches.build_density` now
+  applies one extra Perlin octave after remapping and before axis fading:
+  rho *= exp(broad_strength*(B-max(B))), B at frequency/broad_scale, seed stream
+  505. Strength default 4, range 0-12; scale default 2, range 2-8 base wavelengths.
+  Strength 0 bypasses exactly (verified against snapshot). A/B/C/clump streams
+  and local scales stay unchanged. Both branch stars and density curves share
+  the implementation/schema. Counts fixed for direct stars; curve starts/budgets
+  fixed but paths and final counts can change. Broad concentration can increase
+  overlap locally; no promise of visual acceptance. No external config edits.
+  Snapshot-preset comparison in build/broad-density-comparison.png: 1408 ->1413
+  stars, pipeline ~1.46 ->1.61s excluding startup, initial one-run comparison.
+
+- `density_filament_curves.py` / `_stable_density_curves.py`: stable exact-zero
+  comparison. Same branch-density A/B/C streams, all pair intersections extracted
+  with existing `_curves.intersect_fields` on a 48^3 tetrahedral grid (24–96 control).
+  Exact within that interpolation, not the continuous Perlin function. Fixed
+  arc-spaced roots (1 unit) grow finite two-way intervals on their original path;
+  lifetime = mean_length*(.5+Beta(2,2))*support*seed_envelope. Mean length 2 units.
+  Support is unfaded density divided by mean density over all candidate
+  roots, clamped to 0..1. Independent XZ/Y seed-region fractions .65 with smooth
+  internal taper confine roots; geometry can extend outside. No density-based
+  seed resampling, pair changes, wandering, joining, or coverage steering.
+  Same-path interval unions prevent duplicate overlap; closed loops wrap.
+  Colors derive from original path IDs, not surviving output indices.
+  Edge fade was corrected after the seed-only implementation left sharp Y edges:
+  POPULATION_AXIS_FADE opts into shared point-stage XZ/Y survival, after merging
+  and warp, with postprocess_bounds fixing actual XZ/Y half-extents. Curves and
+  raw population no longer depend on fade. Stronger fades retain a subset of
+  final stars without moving/recoloring/resizing them. Width 1 tapers from center
+  to zero at the boundary. Long curves still hit the box in the line preview.
+  Shared population unchanged; density/seed-region edits can still resample stars.
+  Saved seed 714462872: Y off/.4/1 gives 1895/1589/944 stars, 265/51/5 in outer
+  20% Y; curve buffers byte-identical. Worker pipeline about .34s excluding startup.
+  Positive Y extent required (UI minimum .01); previous growth retains flat-Y.
+  Saved-scene central seeding reduced outer-20% length 334.9->25.8, stars 630->39,
+  with inner-40% length unchanged at 44.89. Central generation plus sampling ~.23s.
+  See build/stable-fade-comparison.png and README. Visual acceptance is pending.
+
+- `density_filament_growth.py` / `_density_curves.py`: preserved local-alignment
   experiment, now sharing `noise_filaments_branches.build_density` with the direct
   branch sampler (equal AB/AC/BC, clumps, three-regime remap). No layer continuity
   or connectivity. Independent XZ/Y bounds and shared axis density fades apply
@@ -80,6 +121,39 @@ the current implementation, not a commitment to continue any particular experime
   this experiment's historical defaults. No live config writes. Fading changes
   curve placement/length and therefore star counts, not post-star survival.
   Density-sampled roots grow short two-way strands.
+  Each complete path now gets a distinct HSV hue (golden-ratio sequence with
+  independent seed stream 82421 phase); joins retain each path's color. Shared
+  pop_colors optionally passes these to stars. No geometry/count/size changes.
+  CURRENT GUIDANCE: curves now retain an assigned AB/AC/BC family. The builder
+  optionally returns its original A/B/C grids via _return_fields, without new
+  noise calls. Family drawn at birth proportional to the local pair terms,
+  seed stream 82517, fixed for both halves. In 3D PairFilamentShape caches raw
+  physical scalar gradients and reuses _stochastic_curves.guidance for pair
+  cross-product tangent and regularized normal correction. Combined density
+  only supplies roots, coverage and survival envelope, never the tangent.
+  Also stop on a tenfold assigned-pair decline, except explicit final contact.
+  Steering neighbors must share the pair; actual contact permits any pair/angle
+  and terminates the arriving half. No child spawning or silent family changes.
+  Tiny-Y fallback uses three separate pair-density Hessians, retaining heights.
+  Existing direction_scale is now Filament response length; density_pull is
+  Pull toward assigned filament. Finite attraction/wandering remain, not hard
+  centerline projection. Colors/shared population unchanged. Saved scene: 175
+  paths, family counts 62/56/57; full pipeline ~1.18s excluding startup.
+  Mean total strand length now permits 0.2-30 units (formerly capped at 6),
+  still split equally between the two halves. Saved values remain literal.
+  In the user's short-curve scene, 6 ->12 increased median actual length from
+  3.4 ->5.6; box exits and joins dominated stops, not the new pair-support check.
+  Close-parallel overlap fix: pair-mode contact no longer waits for load .75
+  when the target has the same family and abs dot >=cos(25deg). Use existing
+  min(join_radius, join_reach), after two steps, and lower source index priority
+  so both tips do not stop against each other's prefixes. Other contact types
+  keep the coverage gate. No finished-path deletion or screen-space checks.
+  Fixed saved scene: overlapping arc 545 ->285 units (~48% less), total arc
+  966 ->769; 175 starts preserved; density+growth ~1.87 ->1.83s. Shared stars
+  decrease with removed redundant arc. Regression covers underfilled growth,
+  one surviving continuation, radius separation and transverse contacts.
+  The following describes the older density-only fallback retained for callers
+  of trace_density without pair_fields and for shared star alignment:
   Gaussian-smoothed log-density gradient/Hessian are computed on the physical
   grid; interpolate tensors, then diagonalize. Least-curvature eigenvector
   guides where the eigenvalue gap is clear. Launch Perlin vectors are softly

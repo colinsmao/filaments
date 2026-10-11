@@ -157,6 +157,36 @@ The branches generator supports the same density curve and Strand continuity
 controls. Strand continuity defaults to 0 here to retain its older clump
 modulation. **layer_filaments.py** remains the separate cellular experiment.
 
+The branch sampler and Density-guided local strands share an additional broad
+density layer. After the three-regime value curve, multiply the fine density by
+`exp(strength * (B(x)-max(B)))`, where B is one independently seeded Perlin octave
+at `frequency / broad_scale`. Subtracting its maximum is a common normalization
+that cancels during sampling. This changes the large-scale allocation of material
+without changing A/B/C, their detail octaves, strand thickness, or clump noise.
+It does not add another zero-surface constraint or new fine filaments. Curves are
+regenerated in the reweighted field, so individual paths need not stay fixed.
+
+- **Broad density strength (0 off)**: dimensionless, default 4, range 0-12.
+  Higher values favor broad high-density regions and empty out others. Zero
+  bypasses the new noise evaluation and restores the previous density exactly.
+  This remains effective at Strand continuity 1.
+- **Broad density scale (base wavelengths)**: dimensionless multiplier, default
+  2, range 2-8. Two adds variation one octave coarser than the base geometry noise;
+  larger values make broader regions. World-space scale is approximately
+  `extent * broad_scale / frequency`, following the existing noise convention.
+
+The broad field uses a separate seed stream (505); existing random streams stay
+unchanged. Direct sampling retains the requested star count and size draws.
+For curves, the number of attempted starts and length budgets stay unchanged,
+but termination/joining can change total length and sampled star count. Local
+overlap can increase in favored regions; this experiment does not cap it.
+The initial strength-4/scale-2 trial is enabled through schema defaults without
+editing live settings files. Before this experiment, code and saved settings
+were committed as `b9f9455`. A comparison from that preset is saved in
+`build/broad-density-comparison.png`: 1,408 versus 1,413 sampled stars, about
+1.46 versus 1.61 seconds through the pipeline excluding startup in that run.
+These are scene-dependent measurements, not a visual-quality guarantee.
+
 `noise_filaments.py` and `noise_filaments_branches.py` now have independent
 **XZ half-extent (units)** and **Y half-extent (units)**. They define bounds
 `[-XZ, XZ]` in X/Z and `[-Y, Y]` vertically. Defaults are 6 units each; XZ ranges
@@ -539,14 +569,98 @@ scattered stars, smooth away junctions, or promise that every component connects
 Star count has no effect on the skeleton. Star placement and filament widths are
 still deferred. The earlier free vector-steered growth remains in grown_filaments.
 
-## Density-guided local strands (`density_filament_curves.py`)
+## Stable density filament curves (`density_filament_curves.py`)
 
-Select **Density-guided local strands**. This shares
+Select **Density filament curves (stable seeds)**. The previous growth experiment
+is preserved as `density_filament_growth.py` below. Curves use the same A/B/C
+fields and symmetric branch density as `noise_filaments_branches.py`. Extract
+each pair's entire zero intersection on a fixed tetrahedral grid using the
+existing `_curves.intersect_fields`. These are exact zeros of the piecewise-linear
+grid approximation, not exact zeros of continuous Perlin noise. Each family keeps
+its own path through triple intersections; there is no family switching, wandering,
+proximity joining, or density-gradient steering.
+
+Place candidate roots at fixed arc distances `(i+0.5)*seed_spacing` on each
+extracted path (one midpoint for paths shorter than the spacing). Roots are never
+resampled when density or fade changes. Each has a fixed seeded Beta(2,2) lifetime.
+Its total two-way travel is `strand_length * (0.5 + Beta) * support * seed_envelope`.
+`support = min(density_at_root / reference_density, 1)`, where the reference
+is the mean **unfaded** density at all candidate roots, computed before restricting
+the seed region. A common multiplier on density cancels. Density below the reference
+shortens travel smoothly; density above it saturates. This is a visibility/length
+model, not exact reproduction of volume density.
+
+The seed envelope is zero outside a central box, with independent XZ/Y fractions
+(both 0.65 initially). Inside that box it uses smoothstep over the outer 80% of
+each half-extent; the stronger axis attenuation wins. Curves can extend outside
+the seed box, but roots cannot appear there. Union overlapping travel intervals
+on each original path so the same filament is not drawn repeatedly. A loop wraps
+through its arbitrary indexing seam. Colors follow original path IDs, including
+when a visible path splits or disappears. No post-growth curve deletion heuristic
+or redistribution of lost curve length is involved.
+
+The separate XZ/Y edge fades act **only on stars**, after shared appearance
+processing (including merging/warp), using their final positions and the generator's
+fixed half-extents. They never change curve geometry, colors, roots or travel
+budgets. Each enabled axis supplies a smoothstep survival envelope, with its
+existing dense-star suppression; the stronger attenuation wins. Fixed random
+draws make stronger fading retain a subset of the same stars, preserving surviving
+positions, sizes and colors. A width of 1 tapers from the center to zero at the
+boundary; stars beyond that enabled axis's bound are also removed. It reduces
+star count rather than dimming stars. No new control is needed.
+
+Central seeding independently supplies an outer falloff with fades disabled.
+Very long curves can still reach and be clipped by the outer box, especially
+along a thin Y axis; the curve preview deliberately retains those paths while
+the stars fade away. `POPULATION_AXIS_FADE` opts this generator into shared
+`_postprocess.apply_to_stars` axis fading with `postprocess_bounds`.
+
+| Control | Meaning and effect |
+| --- | --- |
+| Zero-surface grid resolution | 48 samples per axis, range 24–96. Higher values refine the zero geometry and cost more. This changes geometry, roots and potentially star count; it is independent of density/fade stability. |
+| Curve seed spacing | 1 world unit along each original path. Smaller values add roots and usually increase covered length/stars. It does not control star spacing or transverse scatter. Root positions are deterministic for fixed geometry and spacing. |
+| Mean travel at full density | 2 world units across both directions before seed attenuation. Fixed Beta draws give 0.5–1.5 times this value; density and seed taper can shorten it further. Increasing it extends the same intervals and usually adds stars. Saved key remains `strand_length`. |
+| XZ / Y seed region | Fraction of the respective half-extent, 0.65 by default. Smaller values confine roots and shorten their travel smoothly; usually fewer outer curves and stars. Neither changes the underlying noise curves. No additional randomness. |
+| Density support width | Saved `width`, in noise-value units. Controls sampled branch-density support and therefore travel; it does not thicken the exact centerlines. Use shared transverse star scatter for displayed thickness. |
+
+Geometry noise, bounds, resolution, seed or root-spacing edits can rearrange the
+source paths/roots. Density remapping, clumping and broad modulation only vary
+covered intervals on those paths. Edge fade affects only stars. Stars use the shared sampler and
+appearance pipeline: less curve length generally means fewer stars. Individual
+star positions/colors can resample when paths split/merge or change length; the
+stability guarantee for density edits concerns curve shape, not persistent individual
+star IDs. Fade-only edits do preserve the individual surviving stars.
+Exact pair-zero lines require positive Y extent (minimum 0.01 units in this
+generator); the previous growth experiment retains its flat-slice heuristic.
+
+Earlier central-seeding verification on saved seed 1650304426, travel 30 units: reducing both seed
+regions from 1 to 0.65 reduced curve length in the outer 20% of the box from
+334.9 to 25.8 units and outer stars from 630 to 39. Inner-40% curve length remained
+44.89 units. The previous root-budget fade in that comparison is superseded by
+star-only fading. Generation plus shared sampling took
+about 0.23 seconds for central seeds, excluding worker startup. These are one-scene
+measurements, not aesthetic acceptance or an all-settings guarantee. Comparison:
+`build/stable-fade-comparison.png`; reproduction: `build/verify_stable_fade.py`.
+That older script compares curve generation and raw population only, excluding
+the current worker's star-fade stage. Current worker verification on saved seed
+714462872: Y fade off / width 0.4 / width 1 produced 1895 / 1589 / 944 stars,
+including 265 / 51 / 5 in the outer 20% of Y. All three curve buffers were byte
+identical; survivors retained their attributes. Full generation and postprocessing
+took about 0.34 seconds, excluding process startup. Visual quality still needs
+user judgment.
+
+## Previous density-guided local strands (`density_filament_growth.py`)
+
+Select **Density-guided strands (previous growth)**. This shares
 `noise_filaments_branches.build_density` with the direct branch sampler: equal
 AB, AC and BC contributions, clump modulation and the three-regime density curve.
 There is no Layer continuity or Connectivity control. It traces short curves within
-that density. It does not construct a new blob network or trace A=B=0. Curve and star
+that density, retaining an assigned original pair (AB, AC or BC). Curve and star
 visibility remain independent; stars and appearance use the shared pipeline.
+Each complete two-way curve has its own bright color, deterministic for the seed
+and output path index. Joined curves retain their separate colors so junctions
+are easier to inspect. Enable **Use curve colors** in Star population to apply
+these colors to stars too. Coloring does not change geometry, sizes or counts.
 The XZ and Y half-extents are independent world-unit bounds. Old presets migrate
 Y to `extent*y_scale`; initial bounds are XZ 9.458 and Y 2.213172. Frequency 2.505,
 width .025, roughness .107, clumping 6.875 and Strand continuity 1 retain the
@@ -557,44 +671,52 @@ lengths and star counts; equal settings reproduce the shared box density taper.
 Bounds/remapping/fade introduce no extra random draws. Physical noise wavelength
 still follows XZ extent through Frequency. No live settings files are overwritten.
 
-Math: smooth the density with a Gaussian of physical standard deviation r, then
-compute `L=log(smoothed_density)` and its symmetric Hessian `H=second_derivatives(L)`.
-Physical XYZ grid spacing is used, including the thin Y domain. At query points,
-interpolate H before diagonalizing it; interpolating signed eigenvectors would
-allow opposite signs to cancel. Sorted eigenvalues `l0 <= l1 <= l2` describe
-local curvature. The l2 eigenvector is the least sharply curved direction.
-Confidence is `clip((l2-l1)/max(abs(l)),0,1)`, zero when l1 is nonnegative.
-Thus tube-like regions guide strongly, while sheets and round peaks guide weakly.
+Roots are sampled from the remapped, broadly modulated, edge-faded density.
+At each root choose one pair with probability proportional to that pair's local
+`exp(-(A*A+B*B)/(2*width*width))` contribution (and its two permutations).
+The choice uses independent seed stream 82517. Both halves keep that pair for
+their entire lives; filling-mode roots choose their pair when they are born.
+The original A/B/C grids are returned from the same density-building call,
+without regenerating noise. Their physical gradients are cached once.
 
-Roots are sampled from the remapped, edge-faded density. Initial directions are shared
-spatial Perlin vectors softly projected into the low-curvature directions:
-each eigenvector component is weighted by `exp(-(l2-li)/(0.2*max(abs(l))))`.
-That permits a plane of directions in sheets instead of arbitrary out-of-plane
-launches. Both halves share the initial axis and a random total budget
-`mean_length*(0.5+Beta(2,2))`; they begin in opposite directions.
+In 3D the tangent is `unit(cross(gradient(A), gradient(B)))` for the assigned
+pair, oriented toward the previous heading. Normal correction reuses the
+regularized pair guidance from `_stochastic_curves.py`:
+`correction = J.T * inverse(J*J.T + lambda*I) * [A,B]`, where J contains the two
+field gradients. Pull is `-correction/r`, projected transverse to the heading
+and capped to unit length. The desired heading combines the pair tangent,
+weighted pull, Perlin wandering and same-family neighbor steering. Degenerate
+pair gradients retain the heading; they never select another family.
+This follows the cached-grid approximation to the original filament with finite
+attraction, not a hard projection of every point onto the zero-intersection line.
 
-At each step, orient the least-curvature tangent t toward the previous heading h.
-The target heading is `unit(h + confidence*(t-h) + pull*u + wander*N(x) + join_strength*j)`.
-Here u is `r*(gradient(L)-h*dot(gradient(L),h))`, capped to magnitude 1: density
-attraction is transverse, not deliberate motion along the strand toward a peak.
-N uses existing vector Perlin steering, 80% shared / 20% per-curve offset, two
-octaves, roughness .35, wavelength 4r. Heading approaches its target with response
-`1-exp(-step/r)`. Growth stops at the box, its finite budget, or a tenfold decline
-in smoothed density from its starting value. There are no assigned connections.
-If the Y half-thickness is below r/20, directional analysis uses Y-averaged XZ
-density and paths retain their sampled heights except for the final local snap
-to a joined strand. Exactly zero Y is supported.
+Perlin steering is 80% shared / 20% per-curve offset, two octaves, roughness .35,
+wavelength 4r. Heading response uses `1-exp(-step/r)`. Both halves share a random
+total budget `mean_length*(0.5+Beta(2,2))` and begin in opposite directions.
+Growth stops at the box, its finite budget, a tenfold decline in smoothed total
+density, or a tenfold decline in its assigned pair density from the root.
+Another family's density cannot sustain a tip after it leaves its own filament;
+an explicit final contact is the only exception to that pair-support check.
+There is no spontaneous family switching or child spawning. Junctions arise
+when an arriving curve attaches to an existing curve and stops.
+
+For Y half-thickness below r/20, a literal slice may not contain 3D intersection
+lines. Each pair then has its own smoothed, Y-averaged XZ density guidance,
+using the earlier Hessian method separately for each pair. It never averages
+directions across the three families. Heights remain fixed except at a final
+contact. The old combined-density tracer remains available to direct helper
+callers without `pair_fields`, and `DensityShape` still supports star alignment.
 
 | New curve control | Meaning and effect on stars |
 | --- | --- |
 | Local strands | 512 density-weighted random starts. More starts generally produce more stars; these are separate short paths, not branches of one graph. |
-| Mean strand length | 2 world units total across both directions; random budget is 0.5â€“1.5 times this value. Longer curves generally produce more stars. Early termination can shorten them. |
-| Density direction radius | 0.3 world units, Gaussian standard deviation for shape estimation and heading response length. Larger suppresses small features and slows turns; Perlin wavelength is 4 times this value. Count can change through early termination. |
-| Transverse density pull | 0.35, dimensionless. Steers sideways toward higher density; zero disables this correction. It can change paths and survival lengths, hence counts. It is not star scatter. |
+| Mean total strand length | 2 world units by default, range 0.2-30, total across both directions; random budget is 0.5-1.5 times this value. Longer curves generally produce more stars. Early termination can shorten them. |
+| Filament response length | Saved `direction_scale`, 0.3 world units. Heading response length and normalization scale for pair attraction; Perlin wavelength is 4 times this value. Also smooths the density survival envelope and tiny-Y per-pair guidance. Larger slows turns; 3D tangents still come from the original scalar fields. Can change lengths/counts. |
+| Pull toward assigned filament | Saved `density_pull`, 0.35, dimensionless. Bounded transverse correction toward the assigned pair's zeros; zero disables correction. Does not switch pairs. Can change paths, survival lengths and counts; independent of star scatter. |
 | Curve Perlin steering | 0.15, dimensionless smooth random steering during growth. Zero disables ongoing noise; starts, initial directions and lengths remain stochastic. It can affect final curve lengths/counts. |
-| Strand joining reach | 0.6 world units. Only deposited parallel strands within this distance steer a growing tip. Zero disables joining entirely. Larger reach can cause earlier joins and fewer stars through shorter paths. |
+| Strand joining reach | 0.6 world units. Only deposited parallel strands of the same pair within this distance steer a growing tip. Zero disables joining entirely. Larger reach can cause earlier joins and fewer stars through shorter paths. |
 | Strand joining strength | 1, dimensionless. Amount of neighbor-directed turning. Zero restores independent growth including no contact termination. No new random draws; it changes paths and can shorten them, reducing stars. |
-| Strand contact radius | 0.08 world units, capped by joining reach. Within this distance, an aligned tip snaps locally onto the existing segment and stops. Zero disables contact termination while retaining steering. Larger values usually shorten paths and reduce stars, but can make joins less smooth. |
+| Strand contact radius | 0.08 world units, capped by joining reach. A tip reaching an existing segment within this 3D distance can attach at any angle or pair and stop. Zero disables contact termination while retaining steering. Larger values usually shorten paths and reduce stars, but can make joins less smooth. |
 | Density coverage | 0 retains the original joining method; 1 (default) uses density-proportional capacity; 2 additionally steers and launches later curves into remaining deficits. Modes 1/2 can either increase or reduce total length/stars compared with unconditional joining. |
 | Coverage radius | 0.5 world units, Gaussian standard deviation used to compare target density and deposited curve length. Larger compares broader neighborhoods and may blur a narrow bottleneck together with an adjacent blob. It can change curve lengths and star count. |
 | Curve capacity multiplier | 1, dimensionless. Total target length is this multiplier times Local strands times Mean strand length. The original density sets relative allocation across space, not an absolute length. Lower values fill sooner and generally shorten curves/reduce stars; higher values allow more material. |
@@ -611,9 +733,17 @@ number of tips arriving or just the number of neighboring curves. Density
 normalization means multiplying all source densities by a constant has no effect.
 
 In mode 1, joining strength ramps from zero at load 0.5 to its normal value at
-load 1; physical contact termination is allowed from load 0.75. When a proposed
+load 1; general junction contact is allowed from load 0.75. Close parallel
+duplicates of the same pair can contact at any load: an underfilled density
+target must not permit repeated tracing almost on top of an existing strand.
+For these contacts, the larger source index yields to the smaller one, retaining
+one continuation instead of both tips stopping against each other. Both halves
+of a source share its priority. This uses the existing contact radius and 25-degree
+parallel criterion; zero contact radius or disabled joining still bypasses it.
+Separated strands and crossings in projection are not considered duplicates.
+When a proposed
 step has load >=1, the tip stops there unless it can actually complete a nearby
-aligned join. It does not inherit or transfer unused length/star budgets. Two
+contact. It does not inherit or transfer unused length/star budgets. Two
 initial steps are allowed so each seed has geometry. Capacity is measured at
 finite spatial resolution and refreshed every four growth steps: simultaneous
 growth, initial steps and final contact snaps can overshoot, so this is a local
@@ -626,7 +756,7 @@ to `T*max(1-C/T, .001)` (a tiny fallback prevents an empty sampler). They use a
 separate seeded random stream. Ongoing headings also receive a bounded transverse
 steering term `coverage_radius * gradient(log(max(1-C/T,.05)))`, clipped to unit
 magnitude. This favors underrepresented directions relative to the target,
-rather than adding another pull toward its densest peak. Density-derived
+rather than adding another pull toward its densest peak. Pair-specific
 tangents, smooth Perlin steering, heading persistence and finite lifetimes still
 operate. Blobs can fill with curved paths where direction is ambiguous; no
 explicit vortex/spiral or inter-blob route is imposed. Later waves see earlier
@@ -642,26 +772,36 @@ does not establish visual superiority or equal star counts. Shared density
 variation, taper, scatter and later appearance processing can further change
 how closely stars reproduce the curve-length density.
 
-Joining acts **during growth** (capacity-gated in coverage modes 1/2); the rejected post-growth overlap-deletion pass
+Joining acts **during growth** (general junctions remain capacity-gated in modes 1/2); the rejected post-growth overlap-deletion pass
 and its controls are no longer used. A global deposited-segment tree refreshes
 every four growth steps. Query up to 48 nearest midpoints within joining distance
 plus the longest segment's half-length, then choose the closest
 eligible segment by exact 3D distance. Eligibility requires a different source
-strand (both halves of one's own strand are excluded) and absolute tangent dot
->= cos(25 degrees). Transverse crossings do not join. This bounded search can
+strand (both halves of one's own strand are excluded). Steering additionally
+requires the same pair and absolute tangent dot >= cos(25 degrees); final
+contact accepts any pair/angle. This bounded search can
 miss eligible segments hidden behind many ineligible neighbors.
 
 Checks use local density-grid interpolation. Neighbor steering searches are
-skipped at load <=0.5, and contact searches are skipped below load 0.75 or before
-the initial two steps. These are the same existing eligibility thresholds.
+skipped at load <=0.5. Contact searches start after two steps; below load 0.75,
+only parallel same-pair duplicates with lower source index are eligible.
 Coverage gradients are only built for filling mode, and proposed-step capacity
-checks interpolate only the scalar load. Density derivatives are built once;
+checks interpolate only the scalar load. Field gradients are built once;
 coverage still refreshes its small grid every four steps. No new controls.
-On one fixed saved branch field with 512 starts, median growth times over three
+Before pair guidance, on one fixed saved branch field with 512 starts, median growth times over three
 runs changed from 0.62 to 0.56 seconds (coverage off), 0.65 to 0.50 (capacity), and
 1.04 to 0.85 (filling), excluding noise construction, stars and process startup.
 All three optimized outputs matched the previous path bytes exactly in this
 comparison. Timings vary with bounds, strand count, length and early termination.
+The initial saved-scene pair-guidance run used 175 paths (62 AB, 56 AC, 57 BC)
+and took about 1.18 seconds through the full star pipeline, excluding startup.
+The later close-parallel contact correction reduced overlapping arc length
+from about 545 to 285 units on a fixed 175-root scene, with total length 966
+to 769 units. Measurement uses same-pair segments within the 0.08-unit contact
+radius and 25 degrees, including short contact approaches. Growth plus density
+took about 1.87 versus 1.83 seconds. All roots remain; fewer duplicate segments
+means fewer sampled stars. No completed paths are deleted. A 3D separation
+greater than the radius remains even if it looks overlapped in projection.
 
 For nearest projection q, oriented neighbor tangent g, current heading h,
 distance d and reach R, define transverse offset `v=(q-x)-h*dot(q-x,h)` and
@@ -669,7 +809,7 @@ distance d and reach R, define transverse offset `v=(q-x)-h*dot(q-x,h)` and
 outside. The ramp avoids abrupt launch steering. Noise and density guidance
 still act, and heading response remains smooth. Contact is tested at the proposed
 new position against deposited geometry; after at least two growth steps, a
-close aligned arrival ends that half on the actual receiving segment. There is
+close arrival ends that half on the actual receiving segment. There is
 no assigned destination and no deletion of complete curves afterward. All tips
 advance together, deposited vertices remain fixed, and unconnected tips retain
 their normal random length/density/domain limits. Joining edits can affect other
@@ -678,8 +818,8 @@ are not redistributed; the shared star sampler is unchanged.
 
 Shared Stars per unit length controls along-path count; Spacing randomness
 controls longitudinal jitter; Transverse spread is independent star scatter.
-Shared tip taper and postprocessing still operate on stars. Edge fade does not
-change source curves. The tracer has a 200k segment-budget scale, increasing
+Shared tip taper and postprocessing still operate on stars. Native axis density
+fade also changes source curves. The tracer has a 200k segment-budget scale, increasing
 step size at extreme settings. It does not preserve the density's exact sampling
 distribution: finite paths can redistribute material and leave gaps. No claim
 of a connected skeleton is made.

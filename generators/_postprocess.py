@@ -108,7 +108,7 @@ def suppress_voids(density, threshold):
 
 
 def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_empty=False,
-                   density_source=None):
+                   density_source=None, axis_fade=False):
     """Optional point-stage processors; masks always travel with star attributes.
 
     Bounds are (center, half_extents) in world coordinates. Without an explicit
@@ -117,7 +117,8 @@ def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_em
     """
     if allow_empty and len(positions) == 0:
         return positions, colors, sizes
-    if not params.get("fade", 0):
+    fading = any(params.get('fade_'+axis, 0) for axis in ('xz', 'y')) if axis_fade else params.get('fade', 0)
+    if not fading:
         return apply_appearance(positions, colors, sizes, seed, params, density_source)
     if bounds is None:
         low, high = positions.min(axis=0), positions.max(axis=0)
@@ -131,11 +132,27 @@ def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_em
     positions, colors, sizes = apply_appearance(positions, colors, sizes, seed, params, density_source)
     normalized = np.divide(positions - center, half_extents,
                            out=np.zeros_like(positions), where=half_extents > 0)
-    weights = edge_envelope(np.max(np.abs(normalized), axis=1), params.get("fade_width", .8))
-    strength = params.get("fade_density_strength", 1.)
-    if strength > 0:
-        density = relative_density_at_stars(normalized)
-        weights = density_fade_weights(weights, density / edge_dense_threshold(density), strength)
+    if axis_fade:
+        weights = np.ones(len(positions))
+        relative = None
+        for axis, indices in (('xz', [0, 2]), ('y', [1])):
+            if not params.get('fade_'+axis, 0) or not np.any(half_extents[indices] > 0):
+                continue
+            radius = np.max(np.abs(normalized[:, indices]), axis=1)
+            local = edge_envelope(radius, params.get('fade_'+axis+'_width', .8))
+            strength = params.get('fade_'+axis+'_density_strength', 1.)
+            if strength > 0:
+                if relative is None:
+                    density = relative_density_at_stars(normalized)
+                    relative = density / edge_dense_threshold(density)
+                local = density_fade_weights(local, relative, strength)
+            weights = np.minimum(weights, local)
+    else:
+        weights = edge_envelope(np.max(np.abs(normalized), axis=1), params.get("fade_width", .8))
+        strength = params.get("fade_density_strength", 1.)
+        if strength > 0:
+            density = relative_density_at_stars(normalized)
+            weights = density_fade_weights(weights, density / edge_dense_threshold(density), strength)
     rng = np.random.default_rng(np.random.SeedSequence([seed, 9401]))
     keep = rng.random(len(positions)) < weights
     if not keep.any() and not allow_empty:
