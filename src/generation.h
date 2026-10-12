@@ -31,14 +31,16 @@ struct GenerationResult {
 };
 
 std::vector<Point> readPointFile(const std::filesystem::path& path, bool allowEmpty = false);
+class GeneratorWorker;
 GenerationResult runGeneration(const GeneratorRuntime& runtime, const nlohmann::json& request,
-                               const std::shared_ptr<std::atomic_bool>& cancel);
+                               const std::shared_ptr<std::atomic_bool>& cancel,
+                               const std::shared_ptr<GeneratorWorker>& worker = {});
 
 // Latest request wins. Python/file IO run on a worker thread; OpenGL stays on
 // the main thread. Polling never waits for a running process.
 class GenerationService {
 public:
-    explicit GenerationService(GeneratorRuntime runtime) : runtime_(std::move(runtime)) {}
+    explicit GenerationService(GeneratorRuntime runtime);
     ~GenerationService();
     void request(nlohmann::json request);
     void cancel();
@@ -46,6 +48,7 @@ public:
     bool busy() const { return future_.valid() || pending_.has_value(); }
 private:
     GeneratorRuntime runtime_;
+    std::shared_ptr<GeneratorWorker> worker_;
     std::future<GenerationResult> future_;
     std::shared_ptr<std::atomic_bool> cancellation_;
     std::optional<nlohmann::json> pending_;

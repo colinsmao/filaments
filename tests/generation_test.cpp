@@ -12,6 +12,15 @@ GenerationResult run(const GeneratorRuntime& runtime, const std::string& name, i
     return runGeneration(runtime, request(name, count), std::make_shared<std::atomic_bool>(false));
 }
 void write(const std::filesystem::path& path, const std::string& source) { std::ofstream(path) << source; }
+GenerationResult serviceRun(GenerationService& service, const nlohmann::json& input) {
+    service.request(input);
+    const auto begin = std::chrono::steady_clock::now();
+    while (std::chrono::steady_clock::now()-begin < std::chrono::seconds(10)) {
+        if (auto result = service.poll()) return *result;
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+    throw std::runtime_error("Persistent worker test timed out");
+}
 
 int main(int argc, char** argv) {
     try {
@@ -54,6 +63,16 @@ int main(int argc, char** argv) {
         require(populated.error.empty(), populated.error);
         require(populated.metadata.at("population") && !populated.stars.empty() &&
                 populated.metadata.at("star_count") == populated.stars.size(), "Missing star layer");
+        auto proxyRequest = populatedRequest;
+        proxyRequest["params"]["pop_block_scale"] = 8;
+        proxyRequest["params"]["pop_rod_fraction"] = 1;
+        const auto proxies = runGeneration(runtime, proxyRequest, std::make_shared<std::atomic_bool>(false));
+        require(proxies.error.empty() && !proxies.stars.empty(), "Proxy transfer failed: " + proxies.error);
+        for (const auto& star : proxies.stars) {
+            require(star.size == 0.125f && star.shape.x * star.shape.y * star.shape.z == 1.f/64,
+                    "Rod dimensions did not survive FSTAR003 transfer");
+        }
+        require(galaxy.points.front().shape == glm::vec3(1), "Legacy point shapes should remain cubes");
         populatedRequest["params"]["pop_density"] = 0;
         const auto emptyPopulation = runGeneration(runtime, populatedRequest, std::make_shared<std::atomic_bool>(false));
         require(emptyPopulation.error.empty() && emptyPopulation.stars.empty() &&
@@ -90,6 +109,34 @@ int main(int argc, char** argv) {
         write(root / "slow.py", "import time\nimport numpy as np\ndef generate(count, seed):\n    time.sleep(10)\n    return np.zeros((count,3)), np.ones((count,3))\n");
         {
             GenerationService service(runtime);
+            const auto first = serviceRun(service, request("hot"));
+            const auto second = serviceRun(service, request("hot"));
+            require(first.error.empty() && second.error.empty(), "Persistent worker failed");
+            require(first.metadata.at("worker_pid") == second.metadata.at("worker_pid"), "Worker was not reused");
+            require(first.points.size() == second.points.size() &&
+                std::memcmp(first.points.data(), second.points.data(), first.points.size()*sizeof(Point)) == 0,
+                "Persistent worker changed deterministic output");
+            write(hot, prefix + "4), np.ones((count,3))\n");
+            const auto changed = serviceRun(service, request("hot"));
+            require(changed.error.empty() && changed.points.front().position.x == 4 &&
+                changed.metadata.at("worker_pid") != first.metadata.at("worker_pid"), "Edited source did not restart worker");
+            write(root / "_hot_helper.py", "VALUE = 7\n");
+            write(hot, "import numpy as np\nfrom _hot_helper import VALUE\ndef generate(count, seed):\n    return np.full((count,3), VALUE), np.ones((count,3))\n");
+            const auto helperFirst = serviceRun(service, request("hot"));
+            require(helperFirst.error.empty() && helperFirst.points.front().position.x == 7, "Helper import failed");
+            write(root / "_hot_helper.py", "VALUE = 9\n");
+            const auto helperChanged = serviceRun(service, request("hot"));
+            require(helperChanged.error.empty() && helperChanged.points.front().position.x == 9 &&
+                helperChanged.metadata.at("worker_pid") != helperFirst.metadata.at("worker_pid"), "Helper edit reused stale module");
+            const auto invalid = serviceRun(service, request("invalid"));
+            require(!invalid.error.empty(), "Persistent worker accepted invalid points");
+            const auto recovered = serviceRun(service, request("hot"));
+            require(recovered.error.empty() && recovered.points.front().position.x == 9, "Worker did not recover after an error");
+            write(hot, prefix + "3), np.ones((count,3))\n");
+        }
+        {
+            GenerationService service(runtime);
+            require(serviceRun(service, request("hot")).error.empty(), "Could not warm worker before cancellation test");
             service.request(request("slow"));
             service.poll();
             std::this_thread::sleep_for(std::chrono::milliseconds(300));
@@ -110,6 +157,20 @@ int main(int argc, char** argv) {
         bool rejected = false;
         try { readPointFile(root / "corrupt.bin"); } catch (const std::exception&) { rejected = true; }
         require(rejected, "Corrupt binary data must be rejected");
+        const auto shapedFile = root / "shaped.bin";
+        auto writeShape = [&](Point point) {
+            std::ofstream stream(shapedFile, std::ios::binary);
+            const std::uint64_t count = 1;
+            stream.write("FSTAR003", 8);
+            stream.write(reinterpret_cast<const char*>(&count), sizeof(count));
+            stream.write(reinterpret_cast<const char*>(&point), sizeof(point));
+        };
+        writeShape({{0, 0, 0}, {1, 1, 1}, 1, {.125f, 1, .125f}});
+        require(readPointFile(shapedFile).front().shape.y == 1, "Valid shaped record rejected");
+        writeShape({{0, 0, 0}, {1, 1, 1}, 1, {0, 1, .125f}});
+        rejected = false;
+        try { readPointFile(shapedFile); } catch (const std::exception&) { rejected = true; }
+        require(rejected, "Zero cuboid dimensions must be rejected");
         std::filesystem::remove_all(root); // only this test's freshly created unique directory
         std::cout << "Python bridge, seed reproducibility, reload/repair, validation, cancellation and timeout checks passed\n";
     } catch (const std::exception& error) { std::cerr << error.what() << '\n'; return 1; }

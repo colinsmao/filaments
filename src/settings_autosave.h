@@ -38,7 +38,7 @@ private:
     static nlohmann::json snapshot(const PlotSettings& plot, const ControlSettings& controls) {
         return {{"plot", plotSettingsJson(plot)}, {"controls", {
             {"mode", controls.cameraMode}, {"sensitivity", controls.sensitivity},
-            {"speed", controls.moveSpeed}, {"zoom", controls.zoomFactor}}}};
+            {"speed", controls.moveSpeed}, {"zoom", controls.zoomFactor}, {"block_units", controls.blockUnits}}}};
     }
     std::filesystem::path plotPath, controlsPath;
     nlohmann::json saved, observed;

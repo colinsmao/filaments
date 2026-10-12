@@ -5,9 +5,334 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Purpose and user preferences
 
-- Latest direction (2026-10-11): stable `density_filament_curves.py`, extracting
-  the symmetric A/B/C pair-zero paths and using fixed arc-spaced central seeds.
-  Density changes shorten fixed travel intervals rather than moving roots;
+- Direction-change checkpoint (2026-10-11): user requested saving this state
+  before changing direction. Both independent field growth and the separate
+  branching script are preserved, along with viewer presets and scar references.
+  Neither experiment has visual acceptance. Await the new direction rather than
+  continuing to tune merging or branching automatically.
+
+- Separate scripts (2026-10-11, supersedes active replacement below): user meant
+  "try branching" as a NEW SCRIPT, not replacing the existing generator. Keep
+  experiments separate unless replacement is explicit. `density_filament_curves.py`
+  restores independent field growth, seed_rate/strand_length and merge controls.
+  `density_filament_branching.py` owns the branching trial and its own preset.
+  Worker treats both as native curve consumers of the same upstream density DAG;
+  block migration/schema/star processing stay shared. No C++ rebuild required.
+  Frozen split check: old field growth4982 vertices/922 stars; new branching1894
+  vertices/378 stars, branch curve/star buffers byte-identical to pre-split trial.
+  Prior replacement autosave removed the old seed/length/join keys; recovered
+  from build/merge-evaluation-settings.json after viewer closed and user explicitly
+  approved config repair. Current branch preset preserved separately, latest camera
+  and shared density retained. Backup: build/plot-before-script-split.json. Both
+  Python suite and native panel checks pass. Never write live settings.
+
+- Rooted branching trial (2026-10-11, supersedes proximity consolidation): user
+  rejected merging and authorized branching. Active shared-density curve path
+  now calls `_branching_field.grow_branches`; new branch_root_rate=.5 mean roots
+  per million blocks, branch_length=1200 total blocks per root, branch_spacing=48
+  blocks, branch_angle=45 degrees. Old seed_rate/strand_length/join controls are
+  removed from active schema, not reinterpreted; helpers/direct API remain for
+  comparison. Same block sampler/seed power/seed zones, sparse roots. Two-way trunk
+  uses coordinate-hashed Beta budget; child gets35% of parent's remaining budget,
+  parent keeps65%, no new budget. Opportunities at seeded .75–1.25*spacing travel;
+  need child budget>=spacing. Eight cone directions, density-weighted selection
+  among in-domain/free coarse occupancy probe cells .75*spacing ahead. Child
+  field guidance ramps quadratically over one spacing; existing wandering stays.
+  Spatial hash size max(response,spacing/4) only gates births and stops tips
+  re-entering their own exited cells. No joins, pair guides, neighbor forces or
+  post-growth deletion. Exact shared parent vertices; root halves combined for
+  shared population/material/taper continuity. Preview colors identify roots.
+  Shared stars/fades reused; per-path material choices still separate on branches.
+  Explicit2m possible-step guard, existing vertex limit. Hash slabs65536 preserve
+  seeds and measured .29->.12s seeding. Frozen scene:4 roots,20 children,arc3856,
+  stars378,growth .06s,warm native total .31–.33s,cold1.09s (not universally<1s).
+  build/branch-camera-comparison.png shows trial; some density reconvergence
+  remains. Python/schema reload only, persistent worker already rebuilt. No live
+  config edits or auto-launch. Tests cover junctions, per-root budgets, bounds,
+  determinism, departure angles and active dispatch away from merging/guides.
+
+- Proximity consolidation / speed (2026-10-11, supersedes same-block-only joins):
+  active `_field_curves.grow_field` uses `_proximity_contacts.py` when exposed
+  growth_join_distance>0 (blocks, default16, range0–64); zero restores old block
+  contacts. Exact proposed/deposited segment distances and existing angle gate;
+  all candidates in radius, no fixed nearest-K cutoff. Fresh fronts yield by
+  coordinate-order owner; targets >=2 batches old allow either priority. Source
+  ancestry prevents a receiver stopping against its feeder; both feeder tips may
+  attach. Six-segment cubic connectors match incident tangents, fit remaining arc
+  budgets and domain, and are deposited exactly as rendered. No neighbor forces,
+  guides, deleted prefixes, seed changes or budget transfer. Direct helper default
+  distance0 preserves legacy tests; active generator default16. Saved85-root scene:
+  arc14369->9179, sustained parallel arc4408->958 (-78%, distance8/angle30/runs24+),
+  joins69->112, stars1429->922, growth .21->.12s. Saved-camera comparison in
+  build/merge-camera-comparison.png; residual separate curves/loops remain.
+  `_block_population.unique_cells` packs lexicographic keys for faster unions,
+  preserving cell order/inverse indices/probes/random draws; wide-domain fallback.
+  GenerationService now owns a persistent stdin-driven Python worker. Source
+  fingerprint change (helpers included), cancel, timeout or crash restarts it;
+  job close kills descendants. Atomic responses, serial jobs, latest request wins.
+  Standalone runGeneration remains one-shot. Warm native total about .9s on scene,
+  occasional1.02s with background viewer load; cold about2s, not a universal bound.
+  Requires rebuilt viewer for worker reuse. No live config writes or auto-launch.
+
+- Zone region lengths (2026-10-11): range bars now show three labeled positive
+  spans in blocks: lower excluded/seed span/upper excluded or lower fade/unfaded
+  span/upper fade. Values are (1-neg,neg+pos,1-pos)*halfExtent, summing to full
+  axis length even across zero. No-extent fallback is percent of full span.
+  Signed coordinate editors remain, now explicitly labeled Lower/Upper. No math,
+  saved setting, sampling or layout-group changes; viewer rebuild required.
+
+- Cross-zero ranges / common Y fade (2026-10-11, supersedes earlier UI constraints):
+  asymmetric handles may cross zero, never each other. seed_y_pos/neg min=-1,
+  lower=-seed_y_neg, upper=seed_y_pos; offset seed intervals use the same sampler.
+  Y fade has one fade_y_enabled toggle above its paired bar in Y edge fade group.
+  Widths0–2 map to lower=neg_width-1 and upper=1-pos_width. Width0 bypasses that
+  end exactly; width>1 starts fading beyond zero. Shared star fade evaluates signed
+  directional coordinates without half-space masks, preserving widths<=1 output.
+  Old side toggles migrate to common OR; if either was on, disabled ends get width0;
+  if both off, saved widths remain. Legacy direct calls with side toggles still work.
+  Same hashed draws, per-curve fade thresholds and clump suppression retained.
+  Display header now DefaultOpen. Tests:126 Python pass, native range interaction
+  and startup pass, cross-zero hidden preview checked in build/zone-bars.png.
+
+- Zone UI correction (2026-10-11, supersedes UI notes below): user rejected
+  logarithmic seed rate. Linear slider now 0–100 via slider_max metadata; numeric
+  validation/default remain0–10000/500 so existing settings are not clamped.
+  Zone numeric inputs now edit signed absolute coordinates from schema zone_extent,
+  with percentages underneath; active DAG uses blocks, legacy uses generator units
+  or percent fallback without a fixed extent. Stored fractions unchanged. Restored
+  separate +Y/-Y fade groups; paired bar at former +Y width slot. Signed seed pair
+  inserted at former seed_y slot beside XZ rather than appended. Rebuilt, native
+  interaction/startup and Python schema/migration tests pass. Hidden render checked.
+
+- Zone range bars (2026-10-11): `_zone_controls.annotate_zones` marks all existing
+  seed-region/fade-width schemas for `src/zone_slider.h`. Signed Y pairs share one
+  independent two-handle bar; symmetric controls mirror handles automatically.
+  Percent positions span -100..100 with a zero tick, blue central seed interval,
+  orange outer fade bands. Fade handles show 1-width, saved semantics unchanged.
+  Each side stays on its side of zero, with exact Ctrl-click numeric entry below.
+  Y fade groups combined; side toggles and suppression retained. Disabled side
+  handles/fields cannot edit. Geometry/RNG/defaults/config untouched by UI change.
+  Rebuilt viewer now includes these bars and previously pending log seed slider.
+  Hidden widget rendering saved build/zone-bars.png; interaction tests cover
+  independent/linked dragging and bounds. Shared-settings panel fixture explicitly
+  uses rate5, since mean-normalized default500 with length300 exceeded its10s budget.
+  No viewer auto-launch or live config writes. No viewport-edge overview added.
+
+- Signed Y seed bounds (2026-10-11): active DAG UI replaces seed_y with
+  seed_y_pos/neg, fractions0–1/default.65, labeled reach from center. Allowed
+  central Y interval is [-neg*halfY,+pos*halfY]; roots are excluded outside,
+  but curves/stars can extend beyond it. No new taper. Legacy seed_y copies to
+  both unless explicit signed values exist; legacy non-DAG retains symmetric UI.
+  Equal signed settings exactly preserve old seeds. Region edits affect expected
+  count and normalized density weights, not coordinate hashes. Tests cover both
+  one-sided bounds, asymmetric normalization, zero volume and migration priority.
+  Python reload only. Logarithmic rate slider remains pending native relink while
+  viewer is open. Edge seed/fade bars discussed for feasibility, not implemented.
+
+- Seed normalization (2026-10-11, supersedes peak-rate interpretation below):
+  seed_rate is now Mean seeds per million blocks. Acceptance is
+  hash < rate/1e6 * w/mean(w), w=(trilinear density/peak)^power; mean is over
+  all block centers in the fractional seed region. Probabilities saturate at1;
+  no refill or forced count. Empty positive-power density gives no seeds. Power0
+  is byte-identical uniform sampling. Exact mean uses separable plane interpolation
+  with bounded temporary arrays, and hash prefilter uses rate/1e6/mean(w).
+  Hash streams, defaults, limits, growth and joining unchanged. Region/power edits
+  can redistribute seeds; increasing rate remains nested. Saved rate50/power1:
+  0->668 seeds, sampler .40s, worker success4.39s/1336 stars. Focused tests compare
+  direct block-center probabilities and fractional-region means across powers.
+  Python reload only; no live config writes. Log slider still needs native relink.
+
+- Seed-rate UI (2026-10-11): seed_rate now requests a logarithmic slider via
+  schema hint logarithmic=true. Range 0–10000, default500 and sampling are
+  unchanged; small positive rates are now mouse-selectable. The old linear
+  slider's first pixel could mean ~52 seeds/million. Ctrl-click permits exact
+  numeric entry in either viewer. C++ panel change requires rebuild/restart.
+
+- Block contact joining (2026-10-11): _field_curves now uses incremental
+  _block_contacts.BlockContacts during active direct growth. growth_join toggle
+  defaults on; growth_join_angle degrees 0–90/default30 accepts abs tangent dot,
+  including opposite headings. Larger angles permit more contacts/count changes;
+  no new RNG. Every positive-length cell span is traversed with DDA, including
+  long steps and negative coordinates; mere corner touches are excluded.
+  All accepted segments per cell retained, with shared segment records and
+  per-cell clipping parameters. First eligible block attaches arriving tip to
+  closest target point to entry, clipped to that block and remaining budget.
+  Tip stops, existing geometry stays fixed, own source (both halves) excluded.
+  Stable seed/half order deposits only accepted proposals immediately, including
+  same-step targets. No forces, proximity search radius, speculative segments,
+  global tree rebuild, root resampling, post-growth deletion or budget refill.
+  Connected branches keep separate path/material identities; contact does NOT
+  impose the old guide-interval max-budget bound on entire connected components.
+  Saved current scene rate52.083 uniform, length140.193:690 paths retained,
+  236 joins, arc91415.56->86476.28; growth .17s off/.89s on. Population remains
+  a separate cost; full worker3.42s off/4.27s on, stars15861/15074 after tests.
+  Earlier 6557-root timings below predate joins. Tests cover
+  DDA, crossing/anti-alignment, long steps, own source, multiple occupants,
+  budget refusal, deterministic contacts and surviving outward continuations.
+  Python reload only; no configuration edits or viewer launch.
+
+- Guide removal (2026-10-11, supersedes block seed trial geometry below): active
+  density_graph requests for density_filament_curves use _field_curves.grow_field.
+  Accepted block centers stay as actual roots. No extract_paths, projection,
+  interval union, pair assignment, repulsion or child spawning. Block contacts
+  were subsequently added as described above. Finite
+  two-way growth samples DensityShape's local log-density gradient/Hessian with
+  heading persistence and optional VectorNoise. Budgets retain coordinate-hashed
+  Beta variation, half per tip; stop only on budget/domain, clipping final segments.
+  Density affects births and steering, not lifetime. Three exposed controls:
+  growth_response blocks 1–128/default8 (smoothing, response, step=response/2),
+  growth_pull 0–2/default.35 (transverse density attraction, not neighbors),
+  growth_wander 0–1/default.15 (coherent Perlin perturbation). Each changes
+  geometry/counts, never seed draws. No native code changes/config writes.
+  Legacy non-DAG callers retain old arc-root geometry for comparison/tests.
+  Hash selection now uses axis-product batches, avoiding full XYZ arrays until
+  hash acceptance, and samples density only for candidates; identical old seeds.
+  Saved density-power1: 69 roots/curves, field .05s, seeds .33s, growth .08s,
+  population .55s. Uniform power0 retains6557 curves instead of old131 merged
+  intervals, greatly increasing star-population cost; performance there remains
+  unresolved. Never silently lower seed rate. 8m possible tip-step guard, plus
+  existing binary vertex limit. No visual equivalence/acceptance claimed.
+
+- Block seed trial (2026-10-11): active shared-density-graph curve requests now
+  use _grid_density_curves.py instead of arc roots. Hash every unit-block center
+  in the existing fractional seed box; accept against rate*1e-6*(rho/peak)^power.
+  seed_rate defaults 500 per million peak-density blocks (0–10000),
+  seed_density_power defaults 1 (0–4); 0 is uniform, including empty-density cells.
+  Selection occurs before guide extraction. Only accepted seeds project onto
+  nearest pair-zero guide segments. Thus block centers are sampling identities,
+  not the final projected root positions. No taper or post-growth selection.
+  Each root's coordinate hash gives Beta(2,2) budget mean*(1+v*(2*Beta-1));
+  existing strand_length is now Mean curve length (blocks), and length_variation
+  is exposed (0–1, default .5). Density no longer scales these budgets.
+  Simultaneous two-tip intervals join on the SAME guide only if combined length
+  fits max(component budgets), never their sum. Failed contacts stop tips;
+  exhausted tips never restart. Loops wrap. Winning budget's block gives color.
+  No fixed curve count; saved scene default gave 69 seeds/40 curves vs old40,
+  power0 gave6557/131 (~2.7s seeding/projection/growth each, excluding field/stars).
+  Seeds, curve lengths and star counts vary with these controls. Hashes are stable;
+  extent/resolution can still alter normalized field and guide projections.
+  Guards reject >100m tested cells or >8192 accepted seeds rather than truncate.
+  Legacy non-DAG requests retain arc roots. Python reload only; no config writes.
+  Seed power is separate from pop_source_density, which controls stars on curves.
+
+- Original density population influence (2026-10-11): stable curves expose
+  pop_source_density, dimensionless exponent 0-3, default1. Zero exactly bypasses.
+  generate_population_density_source returns the already-built (density, half)
+  with the usual source triple; worker uses it only when influence is positive.
+  _population_field.field_profiles samples pre-fade density on unwarped curve
+  centerlines, raises it to the exponent and normalizes once across all arc
+  length. Combined with normalized existing along-curve noise, profile integrals
+  change per-curve expected counts and CDFs change local placement in BOTH samplers.
+  Dense curves can gain stars; no per-curve normalization erases their contrast.
+  Existing variation/material multipliers/taper/occupancy can change final counts.
+  No new RNG, geometry, scatter-width or seed changes. Integration uses 4 samples
+  per field cell along each path and existing 32 samples per finest density-noise
+  scale, each bounded to 262144 intervals per curve plus its vertices. Slider0 keeps previous
+  output byte-identical. Python/schema reload only; no config writes/rebuild.
+
+- Corrected upstream density DAG (2026-10-11): _density_field.py owns the
+  physical field schema and build_field. Both branches direct sampling and stable
+  curve extraction consume identical A/B/C and density arrays at a shared
+  field_resolution (migrated from curve_resolution; default48, range24–96).
+  The rebuilt viewer sends density_graph=true and one density_field object;
+  GeneratorPanel directly edits that object through schema scope=density_field.
+  Consumer presets contain only local controls; upstream keys are removed once,
+  and no capture/apply bidirectional sync remains. density_settings.h is legacy
+  import/removal only. Existing density_field wins; otherwise import curve preset.
+  Branches' local sizes/postprocessing lengths migrate once using legacy display
+  scale; both active consumers thereafter generate/render directly in blocks.
+  Frequency is replaced by the upstream block wavelength. Legacy worker requests
+  without density_graph remain compatible with a still-running older viewer.
+  Other comparison experiments retain their adapters. Grid resolution now affects
+  both consumers; their algorithms/output distributions still differ. Camera and
+  curve seed logic unchanged. Rebuild/restart needed; no external config writes.
+
+- Block-coordinate migration (2026-10-11): the rebuilt viewer requests
+  world_units=blocks. Active density_filament_curves presets migrate once via
+  _world_units.py: lengths multiply by old pop_block_scale (16 if continuous),
+  population density divides by it; fractions and random streams stay unchanged.
+  Its viewer schema now exposes lengths in blocks and pop_blocks (on/off), with
+  no scale control. _block_units=1 is stored preset metadata, not a UI parameter.
+  Curve math receives block lengths directly; population uses unit cells and
+  emits their centers/sizes directly, with no inverse display conversion.
+  Legacy worker requests/direct Python APIs and comparison generators retain
+  their old units; the new viewer adapts comparison output at the boundary.
+  Plot/control unit flags independently guard one-time camera target/distance,
+  clip-plane and movement-speed migration, including partial autosave recovery.
+  Only normal viewer autosave writes settings. Rebuild/restart required; an old
+  running viewer keeps the legacy protocol until restarted. Saved scene check:
+  scale16, 30,404 curve vertices and 2,835 cells/colors/shapes preserved exactly.
+  The later block seed trial above replaces arc roots in the active DAG path.
+
+- Material edge fade now shares a seeded threshold per selected source curve
+  (2026-10-11 user request), equally for candles, rods and full blocks, carried as
+  private _fade_groups through the worker. Low thresholds keep objects farther
+  into fade regions. Continuous/unit-cube modes retain independent draws. Existing
+  envelopes/clump suppression still apply; no changes to geometry or tip taper.
+  Per-star marginal survival stays the same, but correlated decisions change
+  fixed-scene counts. Stable density curves now expose fade_y_pos/neg with separate
+  width/suppression controls. migrate_signed_y copies old symmetric Y controls into
+  both, explicit side keys win. World +Y above / -Y below, not camera-relative.
+  Shared star fade accepts both schemas; older density/growth experiments keep
+  symmetric controls. Defaults match previous settings; Python reload only.
+- Shared transverse spread now has independent pop_spread_xz/pop_spread_y controls
+  (2026-10-11 user request), each std-dev scale in generator units, default .035,
+  range 0-.5. Old pop_spread migrates to both; explicit new keys win. Continuous
+  and block samplers share normal-plane anisotropic Gaussian scaling, keeping
+  offsets perpendicular to the tangent. Y=0 adds no vertical scatter; equal values
+  exactly preserve old draws/positions. No geometry/count-budget/RNG changes;
+  discrete cell occupancy and position-based fading can change final counts.
+  Python reload only; no config files edited externally.
+- Material proxies (2026-10-11): block sampling defaults to one seeded material
+  and candle palette color per source path. Candle/rod/full-block curve weights
+  82/15/3 normalize to material probabilities, not final object ratios. At least
+  one positive weight required. Old pop_rod_fraction migrates to equivalent weights
+  preserving prior seeded material choices. Rod intensity multiplier .4; full-block
+  multiplier .05 now makes block curves extremely sparse, per user direction to
+  keep everything curve-based. Both apply before integration; 0 removes that type's
+  population, 1 matches candles. Shape/scatter/geometry unchanged. Python reload only.
+  Crossings choose one source proportional to its cell mass, no mixed materials.
+  Per-cell candles 1-4 use widths 2/4/5/6 sixteenths, height 6/16; group probabilities
+  .50/.27/.15/.08 (truncate/renormalize at maximum). Rods 1 by 2/16 by 2/16,
+  independently equal XYZ axes. Full blocks unit cubes. All cell-centered; no
+  flames, caps, placement support, lighting or planets yet. pop_colors overrides
+  palette only. pop_block_proxies=0 restores unit-cube comparison. Curve generation
+  and continuous sampler unaffected. Fading preserves shape attributes.
+  FSTAR003 adds three shape floats; C++ Point/GPU stride40, legacy FSTAR002 stride28
+  still read with unit shape. Python parameter limit96 (formerly64). Renderer needs
+  rebuild/restart; subsequent Python edits reload. Never overwrite live config.
+- Extent correction (2026-10-11): active `density_filament_curves.py` now exposes
+  `noise_scale` (generator units, default 9.458/2.505, range .1-60) instead of
+  normalized `frequency`. Presets migrate once as extent/frequency; the shared
+  density builder receives frequency=extent/noise_scale. XZ/Y bounds therefore
+  sample more of a fixed world-space field instead of stretching its features.
+  Other generators keep prior conventions; explicit legacy Python frequency
+  calls still work. Saved pre-migration scene geometry/colors remain identical.
+  Fixed-resolution interpolation, path IDs/root phases, support normalization,
+  and fractional seed/fade regions can still change interiors on extent edits:
+  this is not immutable append-only star generation. No config writes/rebuild.
+- Minecraft direction (2026-10-11): all 21 screenshots in `scar/` are the visual
+  target: shallow patchy canopy, fine pale objects, occasional bright rods/cubes,
+  dark gaps. Planets are a future milestone and may be larger than stars.
+  Keep fitted generator units, then uniformly scale into block coordinates.
+  `_population.py` now dispatches an optional cell sampler in `_block_population.py`:
+  `pop_block_scale` 0 retains continuous stars exactly; 1-128 is blocks per unit.
+  Sobol integration estimates mass per cell from the same curve density/scatter;
+  contributions combine before Bernoulli occupancy p=1-exp(-mass). No fixed-count
+  promise, finished-star snapping, or collision refill. Half-integer centers,
+  unit base sizes and stable per-cell seeded draws inside the sampler. The worker
+  divides final block positions/sizes by scale for display; curve preview and
+  camera stay in generator units. Scale16 displays a block as 1/16 viewer unit.
+  Warp precedes integration cell assignment; point fade follows using scaled bounds.
+  Merge/sparse-star alignment must be off (explicit error). Jitter and continuous
+  size controls do not apply. Sampler default off, no external config edits.
+  Scale changes no longer enlarge the scene. Use display size multiplier 1 for blocks.
+  Integration is approximate, globally capped at 2,097,152 probes with a warning;
+  very fine grids/large scatter can under-resolve masses even below the cap.
+  Saved scene seed 934903968: scale16 yields 1693 cells vs1668 continuous stars,
+  ~.94s vs.28s excluding startup. See README; visual acceptance pending.
+- Latest direction (2026-10-11): `density_filament_curves.py` grows directly in
+  shared density from coordinate-hashed block seeds (see guide removal above).
   XZ/Y edge fade now thins only stars, leaving curves byte-identical.
   Earlier growth is retained as `density_filament_growth.py`; appearance still
   needs user judgment. Shared stars/postprocessing remain the baseline.
@@ -62,6 +387,7 @@ the current implementation, not a commitment to continue any particular experime
   validates schemas/arrays, appends shared postprocessing controls, runs generation
   and postprocessing, and writes `FSTAR002` binary data. Header: 8-byte magic plus
   uint64 count, followed by count XYZ/RGB/size float32 records (28 bytes/star).
+  Block proxies use FSTAR003, adding XYZ shape multipliers (40 bytes/star).
   Input count is 1â€“1,000,000. Actual output may be smaller after merging/fading.
   Zero-point primary clouds are rejected. Curve population sidecars may be empty.
   Job timeout defaults to 60 seconds.
@@ -87,15 +413,17 @@ the current implementation, not a commitment to continue any particular experime
   Snapshot-preset comparison in build/broad-density-comparison.png: 1408 ->1413
   stars, pipeline ~1.46 ->1.61s excluding startup, initial one-run comparison.
 
-- `density_filament_curves.py` / `_stable_density_curves.py`: stable exact-zero
-  comparison. Same branch-density A/B/C streams, all pair intersections extracted
+- Legacy arc-root path in `density_filament_curves.py` / `_stable_density_curves.py`
+  (active DAG path now uses the block seed trial above): same branch-density A/B/C streams, all pair intersections extracted
   with existing `_curves.intersect_fields` on a 48^3 tetrahedral grid (24–96 control).
   Exact within that interpolation, not the continuous Perlin function. Fixed
   arc-spaced roots (1 unit) grow finite two-way intervals on their original path;
-  lifetime = mean_length*(.5+Beta(2,2))*support*seed_envelope. Mean length 2 units.
+  lifetime = mean_length*(.5+Beta(2,2))*support. Mean length 2 units.
   Support is unfaded density divided by mean density over all candidate
-  roots, clamped to 0..1. Independent XZ/Y seed-region fractions .65 with smooth
-  internal taper confine roots; geometry can extend outside. No density-based
+  roots, clamped to 0..1. Independent XZ/Y seed-region fractions .65 confine roots;
+  geometry can extend outside. User requested removal of the unrequested internal
+  length taper (2026-10-11): seed regions now only admit/exclude roots, preserving
+  travel of retained roots. Star edge fades and density support unchanged. No density-based
   seed resampling, pair changes, wandering, joining, or coverage steering.
   Same-path interval unions prevent duplicate overlap; closed loops wrap.
   Colors derive from original path IDs, not surviving output indices.
@@ -280,7 +608,7 @@ the current implementation, not a commitment to continue any particular experime
   random streams preserve surviving attributes when size/taper/color changes.
   The worker appends a Star population panel (`pop_` reserved prefix), runs star
   postprocessing and writes `points.stars.bin` alongside the unchanged curve
-  buffer. Both use FSTAR002; only the sidecar allows zero records. The viewer
+  buffer. Both use FSTAR002 except block proxies' FSTAR003; only the sidecar allows zero records. The viewer
   validates both before publishing, uses separate GPU buffers, and persists
   `show_curves` / `show_stars` renderer-only toggles. Population edits regenerate
   deterministic curves; visibility edits do not queue Python jobs.

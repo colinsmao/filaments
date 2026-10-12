@@ -3,7 +3,6 @@ from itertools import combinations
 import numpy as np
 from scipy.ndimage import map_coordinates
 from _curves import intersect_fields
-from _postprocess import edge_envelope
 
 
 def extract_paths(fields, half):
@@ -57,15 +56,14 @@ def seeded_paths(paths, density, half, seed, spacing=1., length=2.,
         if total <= 1e-9:
             continue
         normalized = np.abs(points / half)
-        envelope = np.minimum(
-            edge_envelope(np.maximum(normalized[:, 0], normalized[:, 2])/seed_xz, .8),
-            edge_envelope(normalized[:, 1]/seed_y, .8))
+        inside = ((np.maximum(normalized[:, 0], normalized[:, 2]) <= seed_xz)
+                  & (normalized[:, 1] <= seed_y))
         support = np.clip(sample_support(density, points, half)/scale, 0, 1)
         rng = np.random.default_rng(np.random.SeedSequence([seed, 92617, owner]))
-        reach = .5*length*(.5+rng.beta(2., 2., len(roots)))*support*envelope
+        reach = .5*length*(.5+rng.beta(2., 2., len(roots)))*support
         closed = np.linalg.norm(path[0]-path[-1]) < 1e-8
         intervals = []
-        for root, radius in zip(roots, reach):
+        for root, radius in zip(roots[inside], reach[inside]):
             if radius <= 1e-9:
                 continue
             a, b = root-radius, root+radius

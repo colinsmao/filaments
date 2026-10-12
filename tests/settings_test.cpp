@@ -51,8 +51,39 @@ int main(int argc, char** argv) {
         plot.camera.pitch = -22;
         plot.camera.distance = 12;
         plot.hasCamera = true;
+        plot.generator["density_field"] = {{"extent", 256.}, {"noise_scale", 64.}, {"width", .025}};
         require(savePlotSettings(plotPath, plot), "Could not save plot");
         const auto restored = loadPlotSettings(plotPath);
+        {
+            auto migrated = plot;
+            migrated.generator["parameters"]["filaments"]["pop_block_scale"] = 32;
+            auto movedControls = original;
+            const auto oldEye = migrated.camera.eye();
+            migrateWorldUnits(migrated, movedControls);
+            require(migrated.camera.eye() == oldEye * 32.0f &&
+                    movedControls.moveSpeed == original.moveSpeed * 32.0f &&
+                    migrated.camera.nearClip == plot.camera.nearClip * 32 &&
+                    migrated.camera.farClip == plot.camera.farClip * 32,
+                    "World migration must preserve camera view and movement");
+            const auto once = plotSettingsJson(migrated);
+            migrateWorldUnits(migrated, movedControls);
+            require(plotSettingsJson(migrated) == once && movedControls.moveSpeed == original.moveSpeed * 32,
+                    "Migration must not apply twice");
+            require(savePlotSettings(plotPath, migrated) && saveControlSettings(path, movedControls), "Migration save failed");
+            auto reloaded = loadPlotSettings(plotPath);
+            auto reloadedControls = loadControlSettings(path);
+            migrateWorldUnits(reloaded, reloadedControls);
+            require(plotSettingsJson(reloaded) == once && reloadedControls.moveSpeed == movedControls.moveSpeed,
+                    "Migrated settings must survive reload");
+            auto staleControls = original;
+            migrateWorldUnits(reloaded, staleControls);
+            require(staleControls.moveSpeed == movedControls.moveSpeed, "Partial autosave must recover old controls");
+            auto stalePlot = plot;
+            stalePlot.generator["parameters"]["filaments"]["pop_block_scale"] = 32;
+            migrateWorldUnits(stalePlot, reloadedControls);
+            require(plotSettingsJson(stalePlot) == once && reloadedControls.moveSpeed == movedControls.moveSpeed,
+                    "Partial autosave must recover old plot without doubling speed");
+        }
         require(restored.generator == plot.generator && restored.renderMode == 1 && restored.sizeScale == 2.25f &&
                 !restored.round && !restored.showAxes && !restored.vsync && !restored.showCurves && restored.showStars && restored.background[0] == 0.25f &&
                 restored.hasCamera && restored.camera.target == plot.camera.target && restored.camera.yaw == 160 &&

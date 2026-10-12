@@ -55,6 +55,7 @@ public:
 layout(location=0) in vec3 position;
 layout(location=1) in vec3 color;
 layout(location=2) in float starSize;
+layout(location=5) in vec3 shape;
 uniform mat4 viewProjection;
 uniform float pointSize;
 uniform float projectionScale;
@@ -65,7 +66,7 @@ void main() {
     // Each star's world-space diameter is multiplied by the display scale.
     // clip.w is positive camera depth
     // for visible points in our perspective projection.
-    float pixels = starSize * pointSize * projectionScale / max(gl_Position.w, 0.0001);
+    float pixels = starSize * max(shape.x, max(shape.y, shape.z)) * pointSize * projectionScale / max(gl_Position.w, 0.0001);
     gl_PointSize = clamp(pixels, sizeLimits.x, sizeLimits.y);
     vertexColor = color;
 })";
@@ -97,6 +98,8 @@ void main() {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
+        glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Point), reinterpret_cast<void*>(offsetof(Point, shape)));
+        glEnableVertexAttribArray(5);
 
         cubeProgram = renderProgram(R"(#version 330 core
 layout(location=0) in vec3 position;
@@ -104,11 +107,12 @@ layout(location=1) in vec3 color;
 layout(location=2) in float starSize;
 layout(location=3) in vec3 corner;
 layout(location=4) in vec3 normal;
+layout(location=5) in vec3 shape;
 uniform mat4 viewProjection;
 uniform float sizeScale;
 out vec3 vertexColor;
 void main() {
-    gl_Position = viewProjection * vec4(position + corner * starSize * sizeScale, 1.0);
+    gl_Position = viewProjection * vec4(position + corner * shape * starSize * sizeScale, 1.0);
     // Fixed block-face tones: opposite horizontal faces have identical shading.
     // X = east/west, Z = north/south, Y = top/bottom. No directional light.
     float light = abs(normal.x) > 0.5 ? 0.82
@@ -146,6 +150,9 @@ void main() {
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Point), reinterpret_cast<void*>(offsetof(Point, color)));
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Point), reinterpret_cast<void*>(offsetof(Point, size)));
         for (GLuint i = 0; i < 3; ++i) { glEnableVertexAttribArray(i); glVertexAttribDivisor(i, 1); }
+        glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Point), reinterpret_cast<void*>(offsetof(Point, shape)));
+        glEnableVertexAttribArray(5);
+        glVertexAttribDivisor(5, 1);
         glGenBuffers(1, &cubeMesh);
         glBindBuffer(GL_ARRAY_BUFFER, cubeMesh);
         glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertices.size() * sizeof(Vertex)), vertices.data(), GL_STATIC_DRAW);

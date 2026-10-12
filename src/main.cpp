@@ -24,7 +24,11 @@ int render(GLFWwindow* window, bool smoke) {
     PointRenderer cloud, stars, axes;
     int pointCount = 0, starCount = 0;
     auto plot = smoke ? PlotSettings{} : loadPlotSettings(plotSettingsPath());
-    GeneratorPanel generator(plot.generator);
+    const auto settingsPath = controlSettingsPath();
+    auto savedControls = smoke ? ControlSettings{} : loadControlSettings(settingsPath);
+    SettingsAutosave autosave(plotSettingsPath(), settingsPath, plot, savedControls);
+    if (!smoke) migrateWorldUnits(plot, savedControls);
+    GeneratorPanel generator(plot.generator, plot.blockUnits, plot.legacyDisplayScale);
     if (smoke) std::fprintf(stderr, "Smoke: generator queued\n");
     glm::vec3 cloudCenter(0.0f);
     float cloudRadius = 5.0f;
@@ -32,12 +36,11 @@ int render(GLFWwindow* window, bool smoke) {
     axes.setPoints({{{0,0,0},{1,0.3f,0.3f}},{{5,0,0},{1,0.3f,0.3f}},
                     {{0,0,0},{0.3f,1,0.5f}},{{0,5,0},{0.3f,1,0.5f}},
                     {{0,0,0},{0.4f,0.5f,1}},{{0,0,5},{0.4f,0.5f,1}}});
-    Camera camera = plot.hasCamera ? plot.camera : Camera{};
+    Camera camera = plot.camera;
     CameraControls controls;
     // Smoke tests use defaults and never read or overwrite personal preferences.
-    const auto settingsPath = controlSettingsPath();
     if (!smoke) {
-        const auto saved = loadControlSettings(settingsPath);
+        const auto& saved = savedControls;
         controls.mode = static_cast<CameraControls::Mode>(saved.cameraMode);
         controls.sensitivity = saved.sensitivity;
         controls.speed = saved.moveSpeed;
@@ -45,7 +48,7 @@ int render(GLFWwindow* window, bool smoke) {
         // A restored first-person mode starts with the mouse free for the GUI.
     }
     auto currentControls = [&]() -> ControlSettings {
-        return {controls.mode, controls.sensitivity, controls.speed, controls.zoomFactor};
+        return {controls.mode, controls.sensitivity, controls.speed, controls.zoomFactor, plot.blockUnits};
     };
     auto currentPlot = [&]() {
         auto snapshot = plot;
@@ -55,7 +58,6 @@ int render(GLFWwindow* window, bool smoke) {
         snapshot.hasCamera = plot.hasCamera || pointCount > 0;
         return snapshot;
     };
-    SettingsAutosave autosave(plotSettingsPath(), settingsPath, plot, currentControls());
     auto& size = plot.sizeScale;
     auto& showAxes = plot.showAxes;
     auto& round = plot.round;
@@ -90,7 +92,7 @@ int render(GLFWwindow* window, bool smoke) {
             pointCount = static_cast<int>(points->size());
             starCount = static_cast<int>(starPoints.size());
             if (smoke) std::fprintf(stderr, "Smoke: uploaded %d stars\n", pointCount);
-            if (firstCloud && !plot.hasCamera) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 2000.0f); }
+            if (firstCloud && !plot.hasCamera) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 256000.0f); }
         }
         if (smoke && !generator.lastError().empty()) throw std::runtime_error(generator.lastError());
         if (smoke && glfwGetTime() - started > 30.0) throw std::runtime_error("Generator smoke test timed out");
@@ -116,14 +118,14 @@ int render(GLFWwindow* window, bool smoke) {
         if (ImGui::Combo("Camera (F)", &mode, "Drag / orbit\0First person\0"))
             controls.setMode(window, static_cast<CameraControls::Mode>(mode));
         ImGui::SliderFloat("Sensitivity", &controls.sensitivity, 0.02f, 0.5f, "%.2f");
-        ImGui::SliderFloat("Move speed", &controls.speed, 0.1f, 50.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
+        ImGui::SliderFloat("Move speed (blocks/s)", &controls.speed, 0.1f, 6400.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
         ImGui::SliderFloat("Right-click zoom", &controls.zoomFactor, 1.0f, 10.0f, "%.1fx", ImGuiSliderFlags_AlwaysClamp);
         ImGui::Separator();
         if (generator.drawsLines()) ImGui::Text("%d segments | %d stars | %.1f FPS", pointCount / 2, starCount, io.Framerate);
         else ImGui::Text("%d points | %.1f FPS", pointCount, io.Framerate);
         ImGui::Text("GPU buffers: %.1f MiB", (pointCount + starCount) * sizeof(Point) / (1024.0 * 1024.0));
         ImGui::Text("Upload (CPU): %.1f ms", uploadMs);
-        if (ImGui::CollapsingHeader("Display")) {
+        if (ImGui::CollapsingHeader("Display", ImGuiTreeNodeFlags_DefaultOpen)) {
             if (generator.hasPopulation()) {
                 ImGui::Checkbox("Show curves", &plot.showCurves);
                 ImGui::Checkbox("Show stars", &plot.showStars);
@@ -139,7 +141,7 @@ int render(GLFWwindow* window, bool smoke) {
         }
         if (ImGui::Button("Reset camera (R)")) camera = Camera{};
         ImGui::SameLine();
-        if (ImGui::Button("Fit cloud")) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 2000.0f); }
+        if (ImGui::Button("Fit cloud")) { camera.target = cloudCenter; camera.distance = std::min(cloudRadius * 2.8f, 256000.0f); }
         ImGui::EndDisabled();
         if (autosave.failed()) ImGui::TextColored(ImVec4(1, 0.5f, 0.4f, 1), "Settings save failed; retrying");
         else ImGui::TextDisabled(autosave.pending() ? "Saving settings..." : "Settings saved automatically");

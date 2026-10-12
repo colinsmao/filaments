@@ -68,6 +68,27 @@ int main() {
         points.drawCubes(projection, 1);
         checkSizeRatio();
 
+        // A rod must change its visible footprint when switching X/Y/Z axes.
+        for (int axis = 0; axis < 3; ++axis) {
+            glm::vec3 shape(.125f);
+            shape[axis] = 1;
+            points.setPoints({{{0, 0, -4}, {1, 1, 1}, 1, shape}});
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            points.drawCubes(projection, 1);
+            read();
+            int minX = width, maxX = -1, minY = height, maxY = -1;
+            for (int y = 0; y < height; ++y) for (int x = 0; x < width; ++x) {
+                if (pixels[(y * width + x) * 3] > 100) {
+                    minX = std::min(minX, x); maxX = std::max(maxX, x);
+                    minY = std::min(minY, y); maxY = std::max(maxY, y);
+                }
+            }
+            const int w = maxX-minX+1, h = maxY-minY+1;
+            if (w < 4 || h < 4 || (axis == 0 && w < 6*h) || (axis == 1 && h < 6*w) ||
+                (axis == 2 && (w != h || w > 16)))
+                throw std::runtime_error("Rod XYZ dimension multipliers did not control the rendered cuboid");
+        }
+
         points.setPoints({{{0, 0, 0}, {1, 1, 1}, 1}});
         // Turning to the opposite horizontal faces must keep the same block tones.
         for (float side : {1.0f, -1.0f}) {

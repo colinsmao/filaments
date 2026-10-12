@@ -41,14 +41,14 @@ def neighbor_spacing(positions):
     return tree, spacing
 
 
-def coherent_warp(positions, seed, amount, wavelength):
+def coherent_warp(positions, seed, amount, wavelength, spread=None):
     rng = np.random.default_rng(np.random.SeedSequence([seed, 9410]))
     wavevectors = rng.normal(size=(4, 3))
     wavevectors /= np.linalg.norm(wavevectors, axis=1)[:, None]
     direction = np.cross(wavevectors, rng.normal(size=(4, 3)))
     direction /= np.maximum(np.linalg.norm(direction, axis=1)[:, None], 1e-12)
     # Retain a thin cloud's anisotropy rather than blowing up its short axis.
-    spread = np.std(positions, axis=0)
+    spread = np.std(positions, axis=0) if spread is None else np.asarray(spread)
     direction *= spread / max(float(spread.max()), 1e-12)
     phases = positions @ (wavevectors * (2 * np.pi / wavelength)).T + rng.uniform(0, 2*np.pi, 4)
     return (positions + (amount / 4) * np.sin(phases) @ direction).astype(np.float32)

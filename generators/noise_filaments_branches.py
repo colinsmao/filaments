@@ -6,9 +6,9 @@ the same three-dimensional field without weakening any constraint.
 There are no junction lists, line segments, or precomputed curve paths.
 """
 import numpy as np
-from _postprocess import remap_density
-from _noise import fractal_noise, grid, sample_density, star_appearance, fade_density
-from noise_filaments import _clump_log_weight, PARAMETERS as FILAMENT_PARAMETERS
+from _noise import sample_density, star_appearance, fade_density
+from noise_filaments import PARAMETERS as FILAMENT_PARAMETERS
+from _density_field import build_density, build_field, _strand_log_density
 from _axis_controls import EXTENT_PARAMETERS, FADE_PARAMETERS, migrate_parameters, fade_density_axes
 
 NAME = "Noise filaments with branches"
@@ -31,41 +31,6 @@ PARAMETERS = [
 ]
 
 
-def _strand_log_density(a, b, c, width):
-    denominator = 2 * width * width
-    # Symmetric union of all three pairs. Log space avoids underflow in voids.
-    ab = -(a * a + b * b) / denominator
-    ac = -(a * a + c * c) / denominator
-    bc = -(b * b + c * c) / denominator
-    return np.logaddexp(ab, np.logaddexp(ac, bc))
-
-
-def build_density(seed, frequency=2.0, width=0.065, octaves=2, roughness=0.22,
-                  clumping=3.0, y_scale=1.0, strand_continuity=0.0,
-                  density_low=1.0, density_mid=1.0, density_high=1.0,
-                  broad_strength=4.0, broad_scale=2.0, _return_fields=False, _resolution=96):
-    """Shared symmetric three-field density, remapped but not edge-faded."""
-    resolution = int(_resolution)
-    points = grid(resolution, y_scale)
-    a = fractal_noise(points, np.random.SeedSequence([seed, 101]), frequency, octaves, roughness)
-    b = fractal_noise(points, np.random.SeedSequence([seed, 202]), frequency, octaves, roughness)
-    c = fractal_noise(points, np.random.SeedSequence([seed, 404]), frequency, octaves, roughness)
-    knots = fractal_noise(points, np.random.SeedSequence([seed, 303]), frequency * 0.6, 2)
-    log_density = (_strand_log_density(a, b, c, width)
-                   + _clump_log_weight(knots, clumping, strand_continuity))
-    density = np.exp(log_density - log_density.max()).reshape((resolution,) * 3)
-    density = remap_density(density, density_low, density_mid, density_high)
-    if broad_strength > 0:
-        # A separate coarser octave reweights existing fine structures. Keep
-        # A/B/C and clump streams untouched, and bypass exactly at strength 0.
-        broad = fractal_noise(points, np.random.SeedSequence([seed, 505]),
-                              frequency/broad_scale, 1).reshape(density.shape)
-        # The common scale cancels when sampling; subtract max for stability.
-        density = density * np.exp(broad_strength*(broad-broad.max()))
-    if _return_fields:
-        return density, np.stack((a, b, c)).reshape((3, resolution, resolution, resolution))
-    return density
-
 
 def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
              octaves=2, roughness=0.22, clumping=3.0, star_size=0.04, size_variation=0.4,
@@ -74,12 +39,15 @@ def generate(count, seed, extent=6.0, frequency=2.0, width=0.065,
              _return_density=False, y_extent=None,
              fade_xz=None, fade_xz_width=None, fade_xz_density_strength=None,
              fade_y=None, fade_y_width=None, fade_y_density_strength=None,
-             broad_strength=4.0, broad_scale=2.0):
+             broad_strength=4.0, broad_scale=2.0, noise_scale=None, field_resolution=96):
     half_y = extent*y_scale if y_extent is None else y_extent
     y_scale = half_y / extent
-    density = build_density(seed, frequency, width, octaves, roughness, clumping,
-                            y_scale, strand_continuity, density_low, density_mid, density_high,
-                            broad_strength, broad_scale)
+    density, _, _ = build_field(seed, extent, half_y,
+        extent/frequency if noise_scale is None else noise_scale, resolution=field_resolution,
+        width=width, octaves=octaves, roughness=roughness, clumping=clumping,
+        strand_continuity=strand_continuity, density_low=density_low,
+        density_mid=density_mid, density_high=density_high,
+        broad_strength=broad_strength, broad_scale=broad_scale)
     guidance = density
     if fade_xz is None and fade_y is None and fade:
         density = fade_density(density, fade_width, fade_density_strength)

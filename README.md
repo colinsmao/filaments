@@ -5,6 +5,257 @@ Windows runs directly against the installed graphics driver; WSL is not required
 
 For development context and workflow preferences, read [AGENTS.md](AGENTS.md).
 
+## Shared noise stage and block coordinates
+
+**density_filament_curves**, **density_filament_branching**, and
+**noise_filaments_branches** consume one upstream
+noise/density configuration, stored only in `generator.density_field`. There is
+no preset-to-preset syncing. The **Noise / density field** section edits that
+same object from each generator. All three use block coordinates throughout their
+active pipelines; wavelength and XZ/Y half-extents are in blocks.
+
+`_density_field.py` owns the common schema and evaluates A/B/C noise plus density.
+The direct path samples that density; the active curve path grows finite curves
+directly through that density, then populates them. It no longer extracts zero
+guides or projects seeds. The existing grid-resolution control
+now belongs to the upstream stage as **Noise grid resolution** (24–96 samples
+per axis, dimensionless). Both paths therefore use the same evaluated arrays at
+matching settings, rather than different resolutions. Resolution edits affect
+interpolation and may change curves and stars. There is no new randomness.
+
+On first launch, the viewer imports the saved curve field (or an already-saved
+shared field) and its grid resolution, then removes duplicate upstream keys
+from the two consumer presets. Branches' old dimensional settings convert once
+to blocks; its old normalized frequency becomes physical wavelength. Subsequent
+edits require no copying, coordinate adapter, or restart. Legacy external worker
+requests retain compatibility, as do the other historical experiments.
+
+Curve growth, star population, materials, fading and appearance remain local to
+each consumer. **Block population** selects unit-cell occupancy for curve stars;
+turning it off uses continuous positions in the same block coordinates. Full
+blocks have side one; proxy dimensions are fractions of a block. Along-curve
+population density is stars per block of curve. Curve seeds now use deterministic
+block-center sampling, described below, separately from star population.
+
+**Star population -> Original density influence** controls how the stable curve
+population follows the upstream density. It is a dimensionless exponent, range
+0-3, default 1: 0 bypasses exactly, 1 gives linear dependence, and 2 squares the
+density contrast. The field is sampled along the unwarped curve centerline,
+before transverse scatter. A single arc-length-weighted normalization across all
+curves preserves the base average intensity, so dense parts and dense curves
+gain population at the expense of sparse ones. Existing per-curve variation,
+along-curve noise, material multipliers, taper and occupancy still apply; final
+counts can change. No new random stream, source-curve change or transverse-width
+change is introduced. Both continuous and block samplers use the same weighted
+arc profiles. The already-computed upstream field is reused. Python reload only.
+
+Camera position, orbit distance, clipping distances and movement speed use blocks;
+their prior one-time migration is retained. Normal viewer autosave writes these
+settings. Python does not overwrite live configuration files.
+
+## Rooted branching (separate experiment)
+
+Select **density_filament_branching.py** for the `_branching_field.py` trial.
+It has its own local preset. **density_filament_curves.py** retains independent
+field growth and its seed-rate, curve-length and joining controls. Switching
+scripts does not replace either algorithm or copy their local settings; only
+the upstream density field is shared.
+Sparse, coordinate-hashed block roots each grow a two-way trunk. New branches
+begin at actual parent vertices, forming one connected tree per root, without
+guide extraction or any merge search. Existing density guidance, block star
+population, materials, scatter and fading remain shared. Independent trees can
+cross but do not merge. This is a branching trial, not visual equivalence to the
+Minecraft references.
+
+| Control | Meaning and effect |
+| --- | --- |
+| Mean roots per million blocks | Default .5; linear slider 0–5, numeric range 0–100. Same mean-normalized density-weighted block hash sampler as before. More roots produce more independent structures and usually more stars. No fixed-count promise or fallback root when none pass. Uses a new key `branch_root_rate`; the retired curve seed rate is not reused. |
+| Mean total length per root | Default 1200 blocks, range 1–10000; key `branch_length`. Total arc budget for the entire tree, initially divided between the two trunk tips. Existing coordinate-hashed Beta variation applies per root. Longer budgets generally allow longer trunks, more branches and more stars. Old independent-curve `strand_length` is not reused. |
+| Branch opportunity spacing | Default 48 blocks, range 4–256. Opportunities occur after seeded distances .75–1.25 times this value along each tip. Smaller spacing permits more, shorter branches from the same finite budget; actual star counts can change. A child needs at least one spacing of remaining budget. |
+| Branch departure angle | Default 45 degrees, range 15–80. Initial angle from parent heading. Eight cone directions are tested .75 spacings ahead; seeded selection favors smoothed density among in-domain, unoccupied probe cells. Larger angles spread branches farther sideways; geometry, stops and star counts can change. |
+
+At a successful birth, the child receives 35% of its parent's remaining budget;
+the parent retains 65%. No budget is added or recycled after a stop. The child
+starts with its departure heading, then restores ordinary density attraction and
+alignment quadratically over one branch spacing of travel. Existing coherent
+wandering remains. Descendants can branch under the same rules. A coarse spatial
+hash (cell size max(response, spacing/4)) rejects crowded birth probes, without
+moving or deleting deposited geometry. A tip stops before re-entering its own
+previously exited hash cell, limiting loops. Domain exits clip the last step.
+These are local occupancy checks, not exhaustive clearance tests; some near
+parallel growth can remain where density guidance reconverges.
+
+Field samples are batched. Each tip's random stream is keyed by root block and
+branch identity. The two trunk halves are combined into one population path, so
+the root does not introduce an artificial material/taper seam. Preview colors
+identify root structures; star materials still belong to population paths.
+Total possible growth above two million steps fails explicitly rather than
+silently truncating or reducing roots. The ordinary binary vertex limit remains.
+
+Frozen-scene trial: four roots, 20 child branches, 3,856 blocks of total arc,
+378 stars. Each child start exactly matches a parent vertex and each root's
+actual arc stays within its budget. Growth ~.06s; repeated native generation
+.31–.33s including request transfer and buffer loading, cold first run ~1.09s.
+The smaller 65,536-cell hash batches retain identical seed choices and improve
+the saved seed-selection benchmark .29s -> .12s. Performance is scene-dependent;
+cold startup is still not reliably under one second. Preview comparison:
+`build/branch-camera-comparison.png`. Python/schema reload only; worker reuse
+requires the already-rebuilt viewer. No live config writes or viewer auto-launch.
+
+## Independent field growth (density_filament_curves.py)
+
+**Mean seeds per million blocks** uses a linear slider from 0–100.
+The existing default 500 and saved larger rates remain valid: `slider_max=100`
+only limits the mouse track, while the parameter retains its 0–10000 numeric
+range. Ctrl-click the value to type an exact rate. Lower rates retain a deterministic
+subset of seed blocks, reducing curve starts and generally star counts. This
+changes only the slider mapping, not the sampler or saved values. The slider
+update requires a viewer rebuild/restart.
+
+Seed density weights are now normalized by their mean over every eligible block
+center: `p = min(1, rate/1e6 * w/mean(w))`, where
+`w = (density/peak)**seed_density_power`. Thus the expected number is
+`rate * eligible_blocks / 1e6` unless probabilities saturate at one. Power zero
+retains the original uniform sampler exactly. Higher powers concentrate placement
+without intentionally reducing the expected count; actual counts still vary with
+the coordinate hash. Positive power on an entirely empty field yields no seeds.
+The normalization uses the same trilinear density as acceptance, with separable
+plane interpolation to avoid allocating coordinates for the whole block volume.
+Region edits also change the normalization, so existing seed membership can change.
+This Python change reloads without restarting; it does not modify joining.
+
+**Y seed bounds** independently set the interval eligible
+for seed births: `[-seed_y_neg * Y half-extent, +seed_y_pos * Y half-extent]`.
+Saved reaches are fractions -1–1, default .65; the lower coordinate is the
+negative of `seed_y_neg`. Either displayed boundary can cross zero, so the entire
+interval can lie above or below the origin. Handles cannot pass each other.
+The highlighted interval is allowed, not excluded. Within this region,
+the density weighting controls placement, with no additional center taper.
+Curves can grow outside the seed region and carry stars there; star fading is
+separate. Larger fractions increase eligible volume and expected seed count,
+and change density normalization. Hash draws stay fixed. Old symmetric `seed_y`
+copies to both controls, with explicit signed settings taking precedence.
+Equal signed values preserve the symmetric sampler exactly. Python reload only.
+
+Zone controls use a two-handle bar spanning -100% to +100%, with zero marked.
+Seed bars highlight the allowed interval in blue. Asymmetric Y controls
+move independently across zero, stopping at the other handle. Symmetric XZ/Y controls
+link both handles: dragging either changes the same reach on both sides.
+Each bar labels the lengths of its three regions in blocks: lower excluded / seed
+span / upper excluded, or lower fade / unfaded span / upper fade. These are positive
+lengths and sum to the full axis extent, including when handles cross zero.
+These are axis lengths, not counts of seeds or stars. Without a fixed physical
+extent, region lengths instead use percentages of the full span.
+The Lower/Upper fields below show editable signed block coordinates, with percentage
+labels underneath; dragging and Ctrl-click numeric entry work in blocks. Legacy
+generators use their own units, or percentages when no fixed axis extent exists.
+Fade bars instead mark where the edge fade **starts**, with orange
+outer bands fading toward the boundaries; moving inward increases fade width.
+Y widths now span 0–2 (`upper start=1-pos_width`, `lower start=neg_width-1`),
+so fading can begin on either side of zero. A width of zero disables that end;
+move its handle to the outer boundary. One **Fade Y edges** checkbox sits above
+the paired bar in the Y fade section; clump suppression remains separate per end.
+Old enabled sides keep their widths, and an old disabled side becomes width zero
+when the other side was enabled. If both were disabled, the common toggle stays
+off and their saved widths are retained. The Y seed bar occupies
+the former symmetric Y seed slot beside XZ, rather than being appended at the end.
+The Y bar is dimmed while its common toggle is off. The shading
+shows the configured zone, not measured star occupancy or density suppression.
+Shared `_zone_controls.py` schema metadata selects these widgets across all
+existing seed/fade zone controls, including symmetric comparison generators.
+The range widgets and linear 0–100 seed-rate slider require the rebuilt viewer;
+this UI change adds no randomness and does not alter geometry by itself.
+The Display section opens by default on launch.
+
+The independent growth script uses `_field_curves.py`. Accepted hashed
+block centers are the actual roots. Each grows in two directions with the existing
+coordinate-keyed mean-length/variation budget, divided equally between its tips.
+The shared density's smoothed log gradient and Hessian supply local transverse
+attraction and a preferred direction where the field is elongated. Headings turn
+gradually, with optional coherent Perlin wandering. There are no extracted
+polylines, nearest-guide projections, pair-family assignments, neighbor forces,
+coverage constraints or child spawning. Curves stop at their budgets, the box
+boundary, or an eligible nearby segment contact; density is not a lifetime multiplier.
+
+| Control | Meaning and effect |
+| --- | --- |
+| Growth response length | Blocks, default 8, range 1–128. Sets heading response and density-derivative smoothing; geometric steps are half this value. Larger values produce a coarser, slower-turning response. Changes geometry and potentially star count, without changing seed selection or assigned length budgets. |
+| Transverse density attraction | Dimensionless, default .35, range 0–2. Bounded steering toward higher density perpendicular to the current heading. Zero disables that pull; local directional alignment remains. No neighbor attraction. Changes geometry and possibly final counts. |
+| Growth wandering | Dimensionless, default .15, range 0–1. Strength of coherent vector noise, with wavelength four response lengths. Its independent component is keyed by the root block. Zero removes wandering. Changes trajectories and possibly counts, not births or budgets. |
+| Join nearby curves | On by default. An arriving tip attaches to an accepted segment and stops. Turning it off restores independent growth. No new randomness; shorter geometry changes star counts. |
+| Join distance | Blocks, default 16, range 0–64. Positive values permit contact within this 3D distance; zero restores the previous shared-block algorithm. Larger distances consolidate more nearby paths and generally reduce arc length/stars. Seed selection and assigned budgets stay unchanged; no new random draws. |
+| Join alignment angle | Degrees, default 30, range 0–90. Maximum difference between unoriented tangents, so opposite headings also qualify. Larger angles permit more contacts, potentially shortening more curves and reducing stars. At 90 even perpendicular crossings qualify. No additional random draws. |
+
+For positive join distance, `_proximity_contacts.py` queries all deposited
+segments in range using a midpoint tree and exact segment distances. It tests
+the full proposed step, so long steps cannot skip short targets. Same-source
+segments are excluded. Fresh parallel fronts yield in coordinate-seed order;
+segments at least two batches old can receive either priority. A source ancestry
+record prevents a receiving route from subsequently stopping against its own
+feeder. Both tips of a feeder may join the receiver. This preserves onward
+growth while consolidating independent arrivals.
+
+An arriving tip ends with a short cubic connector matching its incoming heading
+and the receiving tangent. The six-piece polyline is the exact geometry deposited,
+rendered and populated. Its arc length must fit the remaining tip budget; its
+control points stay inside the domain. Targets come from previously accepted
+batches. No target geometry moves, no neighbor force bends ongoing growth, and
+no already-grown geometry is deleted. Branch material identities stay separate,
+and contact neither sums nor replenishes budgets.
+
+At distance zero, `_block_contacts.py` keeps an incremental dictionary of occupied unit blocks.
+Each step traverses every positive-length block span, including intermediate
+blocks on long steps. Exact boundary/corner-only touches are not occupancy;
+negative coordinates and travel use the same half-open grid convention. All
+accepted segments in a block are retained, so a transverse crossing cannot hide
+an aligned target. Both halves of the same seed are excluded from contact checks.
+
+At the first block with an eligible contact, the tip attaches to the closest
+target point to its cell-entry position, constrained to the target's span inside
+that block and to the tip's remaining travel budget. No target geometry moves.
+Proposals are processed in coordinate-sorted seed order and fixed half order;
+later proposals see only geometry already accepted, including earlier proposals
+in the same step. No speculative targets, tree rebuilding or long-range attraction.
+An attachment creates a geometric junction, not an extra copy of the receiving
+path. Already-grown branch paths/material identities remain separate; connected
+components do not sum or replenish growth budgets. This does not restore the old
+same-guide rule limiting a whole connected component to one seed's maximum budget.
+
+Saved-scene comparison (85 roots, mean length 240.188, saved join angle 90 degrees):
+shared-block contacts versus 16-block proximity contacts reduce total arc from
+14,369 to 9,179 blocks, with 69 versus 112 stopped tips. Sustained parallel overlap
+falls from 4,408 to 958 blocks (78%): measured as runs at least 24 blocks long,
+within 8 blocks of another path, with unoriented tangents within 30 degrees.
+All 85 roots remain. Stars fall from 1,429 to 922 because redundant arc is removed.
+Growth takes about .12s versus .21s. The saved-camera comparison is
+`build/merge-camera-comparison.png`. Residual parallel paths and loops remain;
+local contact cannot collapse arbitrarily separated paths or delete old prefixes.
+
+No post-growth consolidation is used. Before block contacts were added, uniform seed sampling at rate 500 in the
+saved scene produces 6557 curves rather than the earlier 131 merged intervals.
+At density power 1 it produces 69 curves. This makes the shared star population
+substantially more expensive for the uniform case; guide removal does not solve
+that separate cost. Measured power-1 stages: field .05s, seed selection .33s,
+growth .08s, population .55s, excluding worker startup. Seed hashing now evaluates
+axis products and constructs full XYZ records only for survivors, preserving the
+previous hash and selection exactly. Density is sampled only for hash candidates.
+
+Block-contact check on the later saved scene (uniform seed rate 52.083, mean
+length 140.193): 690 starts retained, 236 tip contacts, total length
+91415.56 -> 86476.28 blocks. Growth off/on measured about .17/.89 seconds.
+Full worker generation after tests completed measured 3.42s off / 4.27s on,
+with 15861 / 15074 stars respectively (excluding process startup).
+Returning 690 paths is expected: contact stops extension, not removal of existing
+branches. Those timings exclude field/seeds/population/startup. Visual judgment
+is still required; same-cell near-parallel paths can deliberately become junctions
+even if their continuous lines never intersect exactly.
+
+Growth rejects more than 8 million possible tip steps rather than silently
+reducing seed counts, travel, or resolution. The worker's existing line-vertex
+limit still applies. Existing stars/materials/postprocessing are reused. Python
+reload only. The old non-DAG arc-root comparison is retained for compatibility;
+its historical guide-based description below does not describe the active path.
+
 ## Build and run on Windows
 
 From this directory in PowerShell:
@@ -364,6 +615,118 @@ no viewer rebuild or additional dependency is required.
   Coloring does not change positions. Star size and size variation remain
   independent per-star attributes.
 
+## Minecraft block population trial
+
+The visual target is the reference collection in `scar/`: a shallow, patchy
+star canopy, many tiny pale objects, fewer bright rods/cubes, and large dark
+gaps. Planets are a future milestone; physical size relationships are not a
+constraint. Block mode now includes candle, end-rod and full-block cuboid proxies.
+
+For the active stable curve generator, **Star population -> Block population**
+selects cell sampling; turning it off selects continuous stars in the same block
+coordinates. Older comparison generators retain **Blocks per unit
+(0 = continuous stars)** and their legacy parameter conventions.
+Choose **Shaded cubes** with **Star size scale = 1** for
+block geometry. The display multiplier and Points mode remain available
+but are not a literal block preview. Later palette/control edits reload from
+Python without a rebuild. The cuboid renderer itself requires a rebuild
+and viewer restart. Saved settings are not modified externally.
+
+**Minecraft material proxies** defaults on when block sampling is used. Turning
+it off restores the plain unit-cube comparison; continuous sampling is unaffected.
+Each source path receives one material and one candle color from a muted cream,
+lavender and gray palette. These are artistic approximations, not block textures.
+**Use curve colors** overrides the palette for diagnostics without changing types.
+At a shared cell, one contributing curve wins with probability proportional to
+its integrated mass, so materials and colors are not blended at crossings.
+Path identities can change when the generator changes its paths.
+
+| Control | Meaning and count effect |
+| --- | --- |
+| Candle / Rod / Full-block curve weight | Three dimensionless weights, each 0-100, defaults 82/15/3. Normalize by their sum to obtain the probability of assigning an entire curve to each material. For example 6/3/1 means 60%/30%/10% of curves in expectation. Zero excludes a material; at least one weight must be positive. Changing the mix can change counts through the density multipliers. These are not exact final object ratios: curve lengths, intensity, taper and occupancy also matter. |
+| Rod density multiplier | Dimensionless, default .4, range 0-1. Multiplies a rod curve's population intensity before cell integration; 0 removes its population, 1 matches candle density. Changes counts, without changing transverse scatter. Occupancy saturation means final counts need not be exactly 40%. |
+| Full-block density multiplier | Dimensionless, default .05, range 0-1. Makes full-block curves extremely sparsely populated, giving sporadic blocks while retaining the same curve-based pipeline. Zero removes their population; 1 matches candle density. Changes count, not scatter or source geometry. |
+| Maximum candles per cell | Integer 1-4, default 4. Per-cell group weights are .50/.27/.15/.08, truncated and renormalized at this maximum. Higher values permit wider groups; no positions, colors, rod shapes, or occupied-cell counts change. |
+
+**Stars per block of curve** is the common intensity before these multipliers.
+At .25 per block, candles use .25, rods default to .1, and full blocks to .0125
+(one object per 80 blocks of curve before taper/occupancy). Candle palette colors
+are still chosen equally per candle curve. Previous `pop_rod_fraction` presets
+migrate to three weights preserving their prior material probabilities and seeded
+assignments; full-block sparsity is the intentional appearance change. New controls
+and migration reload from Python without restarting the rebuilt cuboid viewer.
+
+Candle proxies are upright cuboids with height 6/16 block and XZ width
+2/16, 4/16, 5/16 or 6/16 block for groups of one through four. No individual
+candles or flames are drawn. Rods are 1 block long and 2/16 thick, independently
+and equally oriented along X, Y or Z per occupied cell. Opposite facings are
+visually identical until a directional end cap is added. Full blocks are 1 cubed.
+All proxies remain centered within their selected block cell and fit inside it;
+these are visual stand-ins, not support/attachment-aware Minecraft placements.
+Fading preserves each surviving cell's color, dimensions and orientation.
+
+Material **edge fading** shares one seeded survival threshold across the occupied
+cells owned by each source curve, equally for candles, rods and full blocks.
+A curve with a low threshold reaches farther into the fading region; one with
+a high threshold stops nearer the center. This correlates fading along the curve
+instead of independently removing its objects. The existing positional envelope
+and clump suppression still determine the local survival weight, and ordinary
+sampling/tip taper can still leave gaps. Marginal survival probability is unchanged,
+but a fixed scene's surviving count can change. Continuous stars and the unit-cube
+comparison retain independent star fade draws. A crossing uses its selected source
+owner. No source curves move or shorten, and no new coherence control is added.
+
+The active generator now receives block-valued parameters directly. Its curves,
+sampler, fade bounds, renderer and camera share those coordinates. A full cube
+has side one, and a half-extent of 262.496 means a width of 524.992 blocks.
+The one-time preset migration scales lengths and inversely scales density,
+preserving the intended population and existing cell choices. The legacy
+comparison path retains its conversion adapter; the active path has no ongoing
+sampler/display scale conversion.
+
+Block mode uses a separate sampler in `generators/_block_population.py`,
+dispatched by `_population.py`. It integrates the existing curve intensity into
+cells using scrambled Sobol probes: the shared along-curve density CDF,
+per-curve density multiplier, Gaussian transverse scatter, and tip taper all
+contribute. Probes are integration samples, not generated stars. Contributions
+from all paths sum before selection. A cell with integrated expected population
+`lambda` is occupied with probability `1-exp(-lambda)`, using a stable seeded
+hash of its integer XYZ. This is Poisson occupancy, not fixed-count sampling,
+rounding a finished star cloud, or refilling collisions elsewhere. At low mass
+the probability is approximately lambda; crowded cells saturate at one object.
+With proxies off, overlapping sources retain the earlier mass-weighted colors.
+
+Cell `(x,y,z)` spans `[x,x+1)` etc., with center `(x+.5,y+.5,z+.5)` and side
+one. Proxy dimensions are fractions of that cell. Floor handles negative coordinates consistently. A zero-thickness layer
+on a cell boundary chooses the positive-side cell. The sampler introduces its
+own reproducible randomness. **Spacing randomness (continuous)** and continuous
+star size/variation do not affect block mode. Along-curve density variation is
+still supported, but individual spacing follows cell occupancy rather than
+the continuous sampler's stratified quantiles.
+
+Swirl/wave warp acts on integration positions before cell
+assignment, using the same transform for the curve preview. Wave
+anisotropy uses a fixed spread measured from source path vertices. Shared
+point-stage edge fading follows selection in block coordinates with matching
+bounds; it only removes cells. The current star-based **Merge dense stars** and
+**Align sparse stars** must be off in block mode; incompatible settings report
+an error instead of moving blocks off-grid. Direct-star generators and plain
+line previews do not expose this sampler.
+
+Cell integration is approximate. It requests at least 128 probes per expected
+star and 8 per block of arc, rounded to powers of two per path, with a total
+2,097,152-probe budget. The response warns if this budget is reached. Very fine
+grids or large transverse spreads can under-resolve individual cell masses even
+below the cap. The existing one-million-object output limit still applies.
+Exact voxel integration, lighting and export are later work. Proxies use the
+extended FSTAR003 format described below; unit-cube/continuous data stays FSTAR002.
+
+Initial saved-scene check (seed 934903968): continuous 1,668 stars; scales
+8/16/32 produced 1,587/1,693/1,614 occupied cells, each unique and grid aligned.
+Scale 16 used 467,072 integration probes; the pipeline took about .94 seconds
+excluding startup (continuous .28 seconds). Counts fluctuate because these are
+different discrete samples. Appearance still needs visual judgment.
+
 ## Shared postprocessing
 
 The collapsible **Postprocessing** panel offers three independent appearance
@@ -569,7 +932,35 @@ scattered stars, smooth away junctions, or promise that every component connects
 Star count has no effect on the skeleton. Star placement and filament widths are
 still deferred. The earlier free vector-steered growth remains in grown_filaments.
 
-## Stable density filament curves (`density_filament_curves.py`)
+## Historical guide-based density curves (legacy non-DAG path)
+
+The current viewer uses direct field growth, described above. This section records
+the preceding arc-root and block-seed/guide experiments; their projection and
+interval-joining rules no longer run in the active viewer path.
+
+**XZ/Y half-extent** now selects the sampled region of a world-space noise
+field. **Noise scale (units)** independently sets its base spatial scale:
+larger values make broader features, smaller values make finer features.
+The old normalized **Noise frequency** control is replaced only in this active
+stable-curves experiment. Existing presets migrate once with
+`noise_scale = extent / frequency`, preserving their current field and fit.
+Subsequent extent edits leave that scale fixed; the worker returns/saves the
+new parameter through normal viewer settings, with no external config edits.
+The default is 9.458/2.505 (about 3.776 units), range .1-60. This is a noise
+coordinate scale, not an exact periodic wavelength. Clump/detail/broad fields
+retain their existing relative scales. No new random stream is introduced;
+larger bounds or changes to feature size can change total curve length/star count.
+
+This removes whole-pattern stretching; it does not yet make extent edits append
+an immutable set of stars. The fixed sample count per grid axis changes physical
+interpolation spacing when bounds change. Increase grid resolution for larger
+domains if needed. Re-extraction can change guide paths and seed projections;
+density normalization and fractional seed/fade regions also depend on the box.
+Consequently individual intervals, colors and star samples can still change.
+Shared world-coordinate A/B/C values are invariant (within floating-point
+precision); exact interior mesh/star identity is not promised. Older comparison
+generators retain their existing frequency/extent conventions. Explicit legacy
+Python calls with `frequency` and no `noise_scale` retain their old meaning.
 
 Select **Density filament curves (stable seeds)**. The previous growth experiment
 is preserved as `density_filament_growth.py` below. Curves use the same A/B/C
@@ -580,26 +971,37 @@ grid approximation, not exact zeros of continuous Perlin noise. Each family keep
 its own path through triple intersections; there is no family switching, wandering,
 proximity joining, or density-gradient steering.
 
-Place candidate roots at fixed arc distances `(i+0.5)*seed_spacing` on each
-extracted path (one midpoint for paths shorter than the spacing). Roots are never
-resampled when density or fade changes. Each has a fixed seeded Beta(2,2) lifetime.
-Its total two-way travel is `strand_length * (0.5 + Beta) * support * seed_envelope`.
-`support = min(density_at_root / reference_density, 1)`, where the reference
-is the mean **unfaded** density at all candidate roots, computed before restricting
-the seed region. A common multiplier on density cancels. Density below the reference
-shortens travel smoothly; density above it saturates. This is a visibility/length
-model, not exact reproduction of volume density.
+Test block centers `(x+.5, y+.5, z+.5)` inside the XZ/Y seed-region fractions
+(both 0.65 initially), before extracting guides. Hash the integer coordinates and
+scene seed to a fixed uniform value `u`; accept when
+`u < seed_rate * 1e-6 * w / mean(w)`, with
+`w = (density / field_peak)**seed_density_power` and the mean taken over eligible
+block centers (updated normalization shared with the active field-growth path).
+Power 0 bypasses density entirely, including zero-density cells. Changing the
+power reuses the same hashes; higher powers redistribute seeds toward dense parts.
+A larger region tests additional coordinates without reshuffling existing hashes,
+but changes the weight mean. Extent edits can also change density interpolation.
+There is no seed-region taper or curve-count quota. Empty samples report an error
+and keep the previous viewer cloud. Work guards reject regions above 100 million
+block centers or more than 8192 accepted seeds, without silently truncating them.
 
-The seed envelope is zero outside a central box, with independent XZ/Y fractions
-(both 0.65 initially). Inside that box it uses smoothstep over the outer 80% of
-each half-extent; the stronger axis attenuation wins. Curves can extend outside
-the seed box, but roots cannot appear there. Union overlapping travel intervals
-on each original path so the same filament is not drawn repeatedly. A loop wraps
-through its arbitrary indexing seam. Colors follow original path IDs, including
-when a visible path splits or disappears. No post-growth curve deletion heuristic
-or redistribution of lost curve length is involved.
+Only accepted block centers project to the nearest segment of an extracted guide.
+These projected roots grow both ways simultaneously. Each block identity has a
+fixed Beta(2,2) draw and total budget
+`strand_length * (1 + length_variation * (2*Beta - 1))`.
+Density controls births, not this budget. The central region restricts sampled
+blocks; projection and subsequent growth can extend outside it.
 
-The separate XZ/Y edge fades act **only on stars**, after shared appearance
+On contact along the same guide, merge only if the combined length fits the
+**maximum** of the two budgets, never their sum. The joined curve inherits only
+still-active outer tips. Exhausted tips never restart. Failed joins stop the
+contacting tips and leave separate curves. Closed guides wrap at their indexing
+seam. No cross-guide joins, coverage targets, post-growth deletion or budget
+redistribution are added. Colors follow the block identity of the largest budget
+in each joined curve. Legacy worker requests without the shared density graph
+retain the earlier arc-root experiment.
+
+The separate XZ/+Y/-Y edge fades act **only on stars**, after shared appearance
 processing (including merging/warp), using their final positions and the generator's
 fixed half-extents. They never change curve geometry, colors, roots or travel
 budgets. Each enabled axis supplies a smoothstep survival envelope, with its
@@ -607,9 +1009,19 @@ existing dense-star suppression; the stronger attenuation wins. Fixed random
 draws make stronger fading retain a subset of the same stars, preserving surviving
 positions, sizes and colors. A width of 1 tapers from the center to zero at the
 boundary; stars beyond that enabled axis's bound are also removed. It reduces
-star count rather than dimming stars. No new control is needed.
+star count rather than dimming stars.
 
-Central seeding independently supplies an outer falloff with fades disabled.
+In this stable-curve generator, **+Y (above)** and **-Y (below)** each have their
+own toggle, fade width and edge clump suppression. They refer to world Y, not the
+camera. Width is a fraction of the Y half-extent on that side (default .8, range
+.05–1); increasing it starts fading closer to the center and usually removes more
+stars. Clump suppression is dimensionless (default 1, range 0–4); increasing it
+further reduces dense populations within that side's fade. Neither adds randomness
+or changes the opposite side's settings. Toggles default off. Previous symmetric
+Y presets copy to both sides; explicit new side values take precedence. Earlier
+direct-density/growth experiments retain their symmetric Y controls.
+
+Central seeding limits root locations; it does not add an outer length falloff.
 Very long curves can still reach and be clipped by the outer box, especially
 along a thin Y axis; the curve preview deliberately retains those paths while
 the stars fade away. `POPULATION_AXIS_FADE` opts this generator into shared
@@ -617,21 +1029,31 @@ the stars fade away. `POPULATION_AXIS_FADE` opts this generator into shared
 
 | Control | Meaning and effect |
 | --- | --- |
-| Zero-surface grid resolution | 48 samples per axis, range 24–96. Higher values refine the zero geometry and cost more. This changes geometry, roots and potentially star count; it is independent of density/fade stability. |
-| Curve seed spacing | 1 world unit along each original path. Smaller values add roots and usually increase covered length/stars. It does not control star spacing or transverse scatter. Root positions are deterministic for fixed geometry and spacing. |
-| Mean travel at full density | 2 world units across both directions before seed attenuation. Fixed Beta draws give 0.5–1.5 times this value; density and seed taper can shorten it further. Increasing it extends the same intervals and usually adds stars. Saved key remains `strand_length`. |
-| XZ / Y seed region | Fraction of the respective half-extent, 0.65 by default. Smaller values confine roots and shorten their travel smoothly; usually fewer outer curves and stars. Neither changes the underlying noise curves. No additional randomness. |
-| Density support width | Saved `width`, in noise-value units. Controls sampled branch-density support and therefore travel; it does not thicken the exact centerlines. Use shared transverse star scatter for displayed thickness. |
+| Noise scale (blocks) | Base spatial noise scale, independent of extent. Larger means broader features; no extra randomness. Can change path length and star count. Existing frequency presets migrate as described above. |
+| Noise grid resolution | Shared upstream control: 48 samples per axis, range 24–96. Higher values refine the zero geometry and cost more. Changes geometry, projected roots and potentially star count. |
+| Mean seeds per million blocks | Default 500, range 0–10000. Expected starts per million eligible blocks, with density weights normalized to mean one; probabilities cap at one. Higher rates retain a superset of starts and usually increase stars. |
+| Seed density power (0 = uniform) | Dimensionless, default 1, range 0–4. Zero samples uniformly; 1 follows density linearly; higher values concentrate starts while preserving expected count before probability saturation. Actual curves and star counts change. Separate from Original density influence in star population. |
+| Mean curve length (blocks) | Default 32, range 0.2–3840, across both directions; saved key `strand_length`. A budget before box exits/contacts. Longer budgets generally add curve length/stars; joins cannot add budgets together. |
+| Curve length variation | Dimensionless, default 0.5, range 0–1. Fixed Beta draws span mean*(1-v) to mean*(1+v); 0 gives equal budgets. Increasing variation shortens some budgets and lengthens others, potentially changing joins/counts. |
+| XZ / Y seed region | Fraction of the respective half-extent, 0.65 by default. Smaller values exclude more roots; retained roots keep the same travel. Neither changes the underlying noise curves. No additional randomness. |
+| Density support width | Saved `width`, in noise-value units. Controls sampled branch-density support and therefore seed acceptance and density-weighted star population; it does not thicken the exact centerlines. Use shared transverse star scatter for displayed thickness. |
 
-Geometry noise, bounds, resolution, seed or root-spacing edits can rearrange the
-source paths/roots. Density remapping, clumping and broad modulation only vary
-covered intervals on those paths. Edge fade affects only stars. Stars use the shared sampler and
+Geometry noise, bounds, resolution or scene-seed edits can rearrange the
+source paths/roots. Density remapping, clumping and broad modulation change
+seed acceptance and covered intervals on those paths. Edge fade affects only stars. Stars use the shared sampler and
 appearance pipeline: less curve length generally means fewer stars. Individual
 star positions/colors can resample when paths split/merge or change length; the
 stability guarantee for density edits concerns curve shape, not persistent individual
 star IDs. Fade-only edits do preserve the individual surviving stars.
-Exact pair-zero lines require positive Y extent (minimum 0.01 units in this
+Exact pair-zero lines require positive Y extent (minimum 0.01 blocks in this
 generator); the previous growth experiment retains its flat-slice heuristic.
+
+Saved-scene check: the former arc-root method produced 40 curves; default rate
+500/power 1 accepted 69 blocks and produced 40 curves (about 1.7 seeds per curve).
+Power 0 accepted 6557 blocks and produced 131 curves at the same rate. Seed
+selection plus projection/growth took about 2.7 seconds in each case, excluding
+field extraction, stars and worker startup. No length exceeded its budget.
+These are measurements, not an adaptive count target or visual acceptance.
 
 Earlier central-seeding verification on saved seed 1650304426, travel 30 units: reducing both seed
 regions from 1 to 0.65 reduced curve length in the outer 20% of the box from
@@ -1018,11 +1440,16 @@ into the tip can still reduce the final surviving count.
 | Density noise octaves | Number of frequency layers, 1â€“6, default 3. Each additional layer has twice the frequency. |
 | Density noise roughness | Amplitude multiplier between layers, 0â€“1, default 0.5. Zero keeps only the first layer; 1 gives equal amplitudes. The sum is amplitude-normalized. |
 | Spacing randomness | Jitter within equal-probability intervals, 0â€“1, default 0.8. Zero gives regular spacing at uniform density, or regularly spaced density quantiles with variation enabled. One randomizes within each interval. |
-| Transverse spread | Gaussian standard deviation in each of the two local perpendicular directions, default 0.035 world units. Zero stays on the curve. Unbounded tails allow rare outliers, with no separate tail control. |
+| Transverse spread XZ / Y | Independent horizontal/vertical Gaussian spread scales, each default 0.035 generator units, range 0–0.5. Larger values widen scatter in the respective directions. Offsets stay perpendicular to the curve: on sloping curves the actual component deviations depend on tangent direction. Zero Y adds no vertical scatter; both zero stay on the curve. Equal values reproduce the former isotropic spread exactly. Continuous candidate count is unchanged; block occupancy and subsequent fading can change final counts. |
 | Tip taper fraction | Final fraction of each path subject to smooth survival falloff, default 0.3. Zero disables thinning; curves remain full length. |
 | Star size | Base cube side length or point diameter, default 0.04 world units, before the Display multiplier. |
 | Size variation | Uniform relative size variation, default 0.4 gives 60%â€“140% of base size. Independent of positions/count. |
 | Use curve colors | Inherit source curve colors when enabled; otherwise pale blue. Postprocessing can override colors. |
+
+Both spread controls apply to continuous and block sampling, before warp, and
+do not change source geometry, along-curve sampling or material assignment.
+Old `pop_spread` presets migrate to the same value on both axes; explicitly set
+new axis values take precedence. The Gaussian has unbounded tails as before.
 
 The old saved clump-strength/scale keys retain their values under the new density
 labels. Outlier frequency/width controls have not been added; such controls belong
@@ -1327,8 +1754,8 @@ switches between **Shaded cubes** (default) and **Points (fast)**. Cubes have
 fixed block-style face shading and depth testing to distinguish
 overlaps. Top faces retain full color; north/south faces use 92% brightness,
 east/west 82%, and bottom faces 85%. Opposite horizontal faces match, with no
-directional light or edge outlines. They are world-aligned, with equal side
-lengths for now. A small center crosshair stays visible in both camera modes.
+directional light or edge outlines. They are world-aligned; material proxies
+can supply different X/Y/Z dimensions. A small center crosshair stays visible in both camera modes.
 Points can be
 round or square. **Star size scale** multiplies each star's own size without
 regeneration; axes, background color, and VSync are also adjustable.
@@ -1342,12 +1769,13 @@ The GUI supports
 
 ## Data and rendering
 
-`src/point.h` defines `Point { position, color, size }`.
+`src/point.h` defines `Point { position, color, size, shape }`.
 `src/point_renderer.h` owns GPU buffers/shaders and accepts any `std::vector<Point>`.
 `src/generation.cpp` handles background jobs, cancellation and validated binary
 transfer; `src/generator_panel.h` handles discovery, sliders and file watching.
 `python/worker.py` loads the independent modules in `generators/`.
-Each star occupies 28 bytes on the GPU (two vec3s and one float).
+Each star occupies 40 bytes on the GPU (three vec3s and one float). Shape defaults
+to (1,1,1); cuboid dimensions are size times shape. Points use the largest dimension.
 Generators may declare `PRIMITIVE = "lines"` to return independent endpoint pairs
 in the same buffer format. Their output has a geometry-controlled even vertex
 count (2 to 1,000,000); `count` remains the requested star budget and can be ignored.
@@ -1380,9 +1808,27 @@ for small parameter/schema messages. Populated curve jobs use `points.bin` for
 lines and `points.stars.bin` for stars, with the same binary layout. Only the star
 sidecar may have zero records; response `star_count` must match it. Both buffers
 must validate before the viewer replaces either layer.
+Block material proxies use `FSTAR003` with the same header and ten floats per
+record: XYZ/RGB/size followed by three positive dimension multipliers in (0,1].
+The viewer reads both formats and supplies shape (1,1,1) for FSTAR002. An older
+viewer cannot read the proxy format and retains its prior cloud on that error.
 Each job uses its own temporary directory,
-cleaned after completion. A fresh Python process loads the saved source on each
-run, with no interpreter/GIL integration or per-frame Python calls.
+cleaned after completion. The viewer reuses one Python subprocess across completed
+requests, keeping imports warm. It waits on stdin while idle. A source-file change
+(including helpers), cancellation, timeout or process failure discards the worker;
+the next request starts a fresh process. The native job object kills descendants
+when the worker closes. Requests remain serialized and latest-request-wins, with
+no embedded interpreter/GIL integration or per-frame Python calls. Standalone
+`runGeneration` and the one-shot worker CLI retain fresh-process operation.
+
+Cell population now groups occupied XYZ cells through lexicographically packed
+integer keys, retaining the previous cell ordering, mass sums and random draws.
+Very wide integer domains fall back to the previous axis-wise union. Probe counts,
+seed rates and field resolution are not reduced for speed. Warm native generation
+on the 85-root scene is approximately .9s including request transfer and buffer
+loading, with occasional runs around 1.02s under background viewer load. Cold
+startup still costs roughly two seconds; this is not a universal subsecond bound.
+Worker reuse needs the rebuilt viewer; Python geometry changes alone reload live.
 
 ## Validation
 

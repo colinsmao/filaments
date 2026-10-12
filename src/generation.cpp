@@ -14,6 +14,10 @@ struct Handle {
     HANDLE value = nullptr;
     explicit Handle(HANDLE handle = nullptr) : value(handle) {}
     ~Handle() { if (value && value != INVALID_HANDLE_VALUE) CloseHandle(value); }
+    void reset(HANDLE handle = nullptr) {
+        if (value && value != INVALID_HANDLE_VALUE) CloseHandle(value);
+        value = handle;
+    }
     Handle(const Handle&) = delete;
     Handle& operator=(const Handle&) = delete;
 };
@@ -112,6 +116,84 @@ void runPython(const GeneratorRuntime& runtime, const JobDirectory& directory,
 }
 }
 
+// Owned by one GenerationService; only its single background job accesses this.
+// A killed or edited worker is discarded, never reused with partial state.
+class GeneratorWorker {
+    Handle job_, process_, input_;
+    std::unique_ptr<JobDirectory> directory_;
+    std::string fingerprint_;
+    void reset() {
+        job_.reset(); // JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE also kills descendants.
+        if (process_.value) WaitForSingleObject(process_.value, 5000);
+        process_.reset();
+        input_.reset();
+        directory_.reset();
+    }
+    void start(const GeneratorRuntime& runtime) {
+        directory_ = std::make_unique<JobDirectory>();
+        SECURITY_ATTRIBUTES attributes{sizeof(SECURITY_ATTRIBUTES), nullptr, TRUE};
+        Handle log(CreateFileW((directory_->path / "python.log").c_str(), GENERIC_WRITE, FILE_SHARE_READ,
+            &attributes, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr));
+        HANDLE reader = nullptr, writer = nullptr;
+        if (log.value == INVALID_HANDLE_VALUE || !CreatePipe(&reader, &writer, &attributes, 0))
+            throw std::runtime_error("Cannot create persistent Python IO");
+        Handle readHandle(reader);
+        input_.reset(writer);
+        if (!SetHandleInformation(writer, HANDLE_FLAG_INHERIT, 0))
+            throw std::runtime_error("Cannot configure Python input pipe");
+        job_.reset(CreateJobObjectW(nullptr, nullptr));
+        JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
+        limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        if (!job_.value || !SetInformationJobObject(job_.value, JobObjectExtendedLimitInformation, &limits, sizeof(limits)))
+            throw std::runtime_error("Cannot create a managed Python job");
+        std::wstring command = quote(runtime.python.wstring()) + L" -u -X utf8 -B " + quote(runtime.worker.wstring()) +
+            L" --serve --generators " + quote(runtime.generators.wstring());
+        STARTUPINFOW startup{};
+        startup.cb = sizeof(startup);
+        startup.dwFlags = STARTF_USESTDHANDLES;
+        startup.hStdInput = readHandle.value;
+        startup.hStdOutput = startup.hStdError = log.value;
+        PROCESS_INFORMATION process{};
+        if (!CreateProcessW(runtime.python.c_str(), command.data(), nullptr, nullptr, TRUE,
+            CREATE_NO_WINDOW | CREATE_SUSPENDED, nullptr, directory_->path.c_str(), &startup, &process))
+            throw std::runtime_error("Could not start Python (Windows error " + std::to_string(GetLastError()) + ")");
+        process_.reset(process.hProcess);
+        Handle thread(process.hThread);
+        if (!AssignProcessToJobObject(job_.value, process_.value)) {
+            TerminateProcess(process_.value, 1);
+            throw std::runtime_error("Could not attach Python to its cancellation job");
+        }
+        if (ResumeThread(thread.value) == static_cast<DWORD>(-1))
+            throw std::runtime_error("Could not resume Python process");
+    }
+public:
+    ~GeneratorWorker() { reset(); }
+    void run(const GeneratorRuntime& runtime, const JobDirectory& directory,
+             const std::shared_ptr<std::atomic_bool>& cancel) {
+        try {
+            const auto fingerprint = runtime.sourceFingerprint();
+            if (process_.value && (fingerprint != fingerprint_ || WaitForSingleObject(process_.value, 0) != WAIT_TIMEOUT)) reset();
+            if (!process_.value) { start(runtime); fingerprint_ = fingerprint; }
+            const nlohmann::json command = {{"request", (directory.path / "request.json").u8string()},
+                {"response", (directory.path / "response.json").u8string()},
+                {"points", (directory.path / "points.bin").u8string()}};
+            const auto message = command.dump() + "\n";
+            DWORD written = 0;
+            if (!WriteFile(input_.value, message.data(), static_cast<DWORD>(message.size()), &written, nullptr) || written != message.size())
+                throw std::runtime_error("Cannot send request to Python worker");
+            const auto started = std::chrono::steady_clock::now();
+            while (!std::filesystem::exists(directory.path / "response.json")) {
+                const auto wait = WaitForSingleObject(process_.value, 5);
+                if (wait != WAIT_TIMEOUT)
+                    throw std::runtime_error("Python worker exited before returning a response\n" + readLog(directory_->path / "python.log"));
+                const bool timedOut = std::chrono::steady_clock::now() - started > runtime.timeout;
+                if (*cancel || timedOut)
+                    throw std::runtime_error(*cancel ? "Generation cancelled" : "Generation timed out (60 second default limit)");
+            }
+        } catch (...) { reset(); throw; }
+    }
+};
+
 GeneratorRuntime GeneratorRuntime::defaults() {
     GeneratorRuntime result;
     if (const char* python = std::getenv("FILAMENTS_PYTHON")) result.python = std::filesystem::u8path(python);
@@ -145,16 +227,29 @@ std::vector<Point> readPointFile(const std::filesystem::path& path, bool allowEm
     std::uint64_t count = 0;
     stream.read(magic, sizeof(magic));
     stream.read(reinterpret_cast<char*>(&count), sizeof(count));
-    if (!stream || std::string(magic, 8) != "FSTAR002" || (!allowEmpty && count == 0) || count > 1000000 ||
-        size != std::streamoff(16 + count * sizeof(Point)))
+    const bool shaped = std::string(magic, 8) == "FSTAR003";
+    const size_t stride = shaped ? sizeof(Point) : 28;
+    if (!stream || (!shaped && std::string(magic, 8) != "FSTAR002") || (!allowEmpty && count == 0) || count > 1000000 ||
+        size != std::streamoff(16 + count * stride))
         throw std::runtime_error("Invalid point buffer header, count or length");
     std::vector<Point> points(static_cast<size_t>(count));
-    stream.read(reinterpret_cast<char*>(points.data()), static_cast<std::streamsize>(points.size() * sizeof(Point)));
+    if (shaped) {
+        stream.read(reinterpret_cast<char*>(points.data()), static_cast<std::streamsize>(points.size() * sizeof(Point)));
+    } else {
+        std::vector<float> packed(points.size() * 7);
+        stream.read(reinterpret_cast<char*>(packed.data()), static_cast<std::streamsize>(packed.size() * sizeof(float)));
+        for (size_t i = 0; i < points.size(); ++i) {
+            const auto* p = packed.data() + i * 7;
+            points[i] = {{p[0], p[1], p[2]}, {p[3], p[4], p[5]}, p[6]};
+        }
+    }
     if (!stream) throw std::runtime_error("Incomplete point buffer");
     for (const auto& point : points) {
         if (!std::isfinite(point.size) || point.size <= 0 || point.size > 1000)
             throw std::runtime_error("Invalid star size");
         for (int i = 0; i < 3; ++i) {
+            if (!std::isfinite(point.shape[i]) || point.shape[i] <= 0 || point.shape[i] > 1)
+                throw std::runtime_error("Invalid star shape");
             if (!std::isfinite(point.position[i]) || std::abs(point.position[i]) > 1e6f ||
                 !std::isfinite(point.color[i]) || point.color[i] < 0 || point.color[i] > 1)
                 throw std::runtime_error("Invalid point coordinates or colors");
@@ -164,7 +259,8 @@ std::vector<Point> readPointFile(const std::filesystem::path& path, bool allowEm
 }
 
 GenerationResult runGeneration(const GeneratorRuntime& runtime, const nlohmann::json& request,
-                               const std::shared_ptr<std::atomic_bool>& cancel) {
+                               const std::shared_ptr<std::atomic_bool>& cancel,
+                               const std::shared_ptr<GeneratorWorker>& worker) {
     GenerationResult result;
     result.request = request;
     const auto started = std::chrono::steady_clock::now();
@@ -176,7 +272,8 @@ GenerationResult runGeneration(const GeneratorRuntime& runtime, const nlohmann::
             file << request.dump();
             if (!file) throw std::runtime_error("Cannot write generation request");
         }
-        runPython(runtime, directory, cancel);
+        if (worker) worker->run(runtime, directory, cancel);
+        else runPython(runtime, directory, cancel);
         std::ifstream file(directory.path / "response.json");
         if (!file) throw std::runtime_error("Python returned no response\n" + readLog(directory.path / "python.log"));
         result.metadata = nlohmann::json::parse(file);
@@ -198,6 +295,9 @@ GenerationResult runGeneration(const GeneratorRuntime& runtime, const nlohmann::
     result.elapsedMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
     return result;
 }
+
+GenerationService::GenerationService(GeneratorRuntime runtime)
+    : runtime_(std::move(runtime)), worker_(std::make_shared<GeneratorWorker>()) {}
 
 GenerationService::~GenerationService() {
     cancel();
@@ -227,8 +327,8 @@ std::optional<GenerationResult> GenerationService::poll() {
         cancellation_ = std::make_shared<std::atomic_bool>(false);
         auto request = std::move(*pending_);
         pending_.reset();
-        future_ = std::async(std::launch::async, [runtime = runtime_, request = std::move(request), cancel = cancellation_] {
-            return runGeneration(runtime, request, cancel);
+        future_ = std::async(std::launch::async, [runtime = runtime_, request = std::move(request), cancel = cancellation_, worker = worker_] {
+            return runGeneration(runtime, request, cancel, worker);
         });
     }
     return completed;

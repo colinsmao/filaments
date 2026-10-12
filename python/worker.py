@@ -14,10 +14,12 @@ MAX_POINTS = 1_000_000
 # Bundled shared processors are available even for external generator folders.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "generators"))
 from _postprocess import FADE_PARAMETER, FADE_WIDTH_PARAMETER, FADE_DENSITY_PARAMETER, APPEARANCE_PARAMETERS, apply_to_stars
-from _population import PARAMETERS as POPULATION_PARAMETERS, populate_curves
+from _population import PARAMETERS as POPULATION_PARAMETERS, FIELD_PARAMETER, populate_curves, migrate_parameters as migrate_population
+from _world_units import NATIVE_GENERATOR, NATIVE_CURVE_GENERATORS, block_schema, migrate_to_blocks
+from _density_field import PARAMETERS as FIELD_PARAMETERS, KEYS as FIELD_KEYS
 
 
-def load_catalog(directory):
+def load_catalog(directory, block_units=False, density_graph=False):
     catalog, modules, errors = [], {}, []
     # Keep compiled dependencies available when generators are copied or overridden.
     local_packages = Path(__file__).resolve().parents[1] / ".tools" / "noise-python"
@@ -59,7 +61,7 @@ def load_catalog(directory):
                 keys.add(key)
                 parameters.append(dict(key=key, label=str(entry.get("label", key)), type=kind,
                                        min=lo, max=hi, default=default))
-                for hint in ('group', 'enabled_if', 'toggle'):
+                for hint in ('group', 'enabled_if', 'toggle', 'logarithmic', 'slider_max'):
                     if hint in entry:
                         parameters[-1][hint] = entry[hint]
             axis_fade = getattr(module, 'NATIVE_AXIS_FADE', False)
@@ -97,8 +99,27 @@ def load_catalog(directory):
                 parameters = [p for p in parameters if p["key"] in keys]
             if population:
                 parameters.extend(dict(entry) for entry in POPULATION_PARAMETERS)
-            if len(parameters) > 64:
-                raise ValueError("Maximum 64 parameters per generator")
+                if callable(getattr(module, 'generate_population_density_source', None)):
+                    parameters.append(dict(FIELD_PARAMETER))
+            field_consumer = density_graph and path.stem in NATIVE_CURVE_GENERATORS | {'noise_filaments_branches'}
+            if block_units and (path.stem in NATIVE_CURVE_GENERATORS or field_consumer):
+                module._legacy_parameters = parameters
+                parameters = block_schema(parameters)
+            if field_consumer:
+                parameters = [p for p in parameters if p['key'] not in FIELD_KEYS | {'frequency', 'curve_resolution'}]
+                parameters = [dict(p) for p in FIELD_PARAMETERS] + parameters
+                if path.stem in NATIVE_CURVE_GENERATORS:
+                    signed_seeds = [dict(p) for p in module.GRID_PARAMETERS if p['key'] in ('seed_y_pos', 'seed_y_neg')]
+                    parameters = [replacement for p in parameters if p['key'] != 'seed_spacing'
+                                  for replacement in (signed_seeds if p['key'] == 'seed_y' else [p])]
+                    parameters.extend(dict(p) for p in module.GRID_PARAMETERS if p['key'] not in ('seed_y_pos', 'seed_y_neg'))
+                    for entry in parameters:
+                        if entry['key'] == 'strand_length':
+                            entry['label'] = 'Mean curve length (blocks)'
+            from _zone_controls import annotate_zones
+            parameters = annotate_zones(parameters)
+            if len(parameters) > 96:
+                raise ValueError("Maximum 96 parameters per generator")
             catalog.append(dict(id=path.stem, name=str(getattr(module, "NAME", path.stem)),
                                 primitive=primitive, population=population, parameters=parameters))
             modules[path.stem] = module
@@ -110,7 +131,9 @@ def load_catalog(directory):
 def generate_request(request, directory, output):
     import numpy as np
 
-    catalog, modules, errors = load_catalog(directory)
+    block_units = request.get('world_units') == 'blocks'
+    density_graph = block_units and request.get('density_graph', False)
+    catalog, modules, errors = load_catalog(directory, block_units=block_units, density_graph=density_graph)
     response = dict(catalog=catalog, warnings=errors)
     selected = request.get("generator", "")
     if not selected and catalog:
@@ -128,9 +151,35 @@ def generate_request(request, directory, output):
         supplied = request.get("params", {})
         if not isinstance(supplied, dict):
             raise ValueError("params must be an object")
+        field_consumer = density_graph and selected in NATIVE_CURVE_GENERATORS | {'noise_filaments_branches'}
+        native_blocks = block_units and (selected in NATIVE_CURVE_GENERATORS or field_consumer)
+        if native_blocks and not supplied and schema['population']:
+            supplied = {'pop_block_scale': 16}
         migrate = getattr(modules[selected], 'migrate_parameters', None)
         if callable(migrate):
             supplied = migrate(supplied)
+        if schema['population']:
+            supplied = migrate_population(supplied)
+        if native_blocks:
+            supplied = migrate_to_blocks(supplied, modules[selected]._legacy_parameters,
+                direct_scale=float(request.get('legacy_display_scale', 16)) if not schema['population'] else None)
+        if field_consumer:
+            upstream = request.get('density_field', {})
+            if not isinstance(upstream, dict):
+                raise ValueError('density_field must be an object')
+            supplied.update({p['key']: p['default'] for p in FIELD_PARAMETERS})
+            supplied.update({key: value for key, value in upstream.items() if key in FIELD_KEYS})
+        if request.get('shared_density_field') and selected in ('density_filament_curves', 'noise_filaments_branches'):
+            # Equivalent physical settings can exceed the other consumer's old
+            # slider range. Include inherited distances instead of silently
+            # clipping the shared field when switching generators.
+            for entry in schema['parameters']:
+                if entry['key'] not in ('extent', 'y_extent', 'noise_scale', 'frequency'):
+                    continue
+                value = supplied.get(entry['key'])
+                if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and 0 < value <= 1e6:
+                    entry['min'] = min(entry['min'], value)
+                    entry['max'] = max(entry['max'], value)
         params = {}
         for entry in schema["parameters"]:
             value = supplied.get(entry["key"], entry["default"])
@@ -138,17 +187,40 @@ def generate_request(request, directory, output):
                 raise ValueError(f"Invalid value for {entry['key']}")
             value = max(entry["min"], min(entry["max"], value))
             params[entry["key"]] = int(value) if entry["type"] == "int" else float(value)
+        if native_blocks:
+            params['_block_units'] = 1
+        returned_params = {k: v for k, v in params.items() if not field_consumer or k not in FIELD_KEYS}
+        if field_consumer:
+            response['density_field'] = {k: params[k] for k in FIELD_KEYS}
+        # Normalize settings even if subsequent geometry generation fails. The
+        # UI must never draw native sliders over an unconverted saved preset.
+        response.update(generator=selected, params=returned_params)
         started = time.perf_counter()
         module = modules[selected]
         primitive = schema["primitive"]
+        block_scale = params.get('pop_blocks', params.get('pop_block_scale', 0)) if schema['population'] else 0
+        # Only comparison experiments retain an output adapter. Native curves,
+        # population and postprocessing already share block coordinates.
+        display_scale = float(request.get('legacy_display_scale', 16)) if block_units and not native_blocks else 1.
+        if not math.isfinite(display_scale) or not 1 <= display_scale <= 128:
+            raise ValueError('Invalid legacy display scale')
+        if block_scale and (params.get('pp_merge', 0) or params.get('pp_curves', 0)):
+            raise ValueError('Block sampling requires Merge dense stars and Align sparse stars off; these edit continuous stars')
         requested_count = count
         native_keys = {entry["key"] for entry in getattr(module, "PARAMETERS", [])}
+        if field_consumer:
+            native_keys |= FIELD_KEYS
+            native_keys |= {p['key'] for p in getattr(module, 'GRID_PARAMETERS', [])}
         # Existing density generators own their fade stage; all others receive
         # the shared point-stage fallback without changing their signatures.
         native_params = {key: value for key, value in params.items() if key in native_keys}
         density_source = None
+        population_density = None
         if schema["population"]:
-            generated, paths, path_colors = module.generate_population_source(count=count, seed=seed, **native_params)
+            if params.get('pop_source_density', 0) > 0:
+                generated, paths, path_colors, population_density = module.generate_population_density_source(count=count, seed=seed, **native_params)
+            else:
+                generated, paths, path_colors = module.generate_population_source(count=count, seed=seed, **native_params)
         elif primitive == "points" and params.get('pp_curves', 0) and callable(getattr(module, 'generate_density_source', None)):
             generated, density, half_extents = module.generate_density_source(count=count, seed=seed, **native_params)
             density_source = (density, half_extents)
@@ -191,19 +263,63 @@ def generate_request(request, directory, output):
                     or not np.isfinite(sizes).all() or (np.abs(positions) > 1e6).any()
                     or ((colors < 0) | (colors > 1)).any() or ((sizes <= 0) | (sizes > 1000)).any()):
                 raise ValueError("Postprocessing produced invalid star attributes")
+        block_bounds = None
+        if block_scale:
+            from _block_population import warp_positions
+            bounds_function = getattr(module, 'postprocess_bounds', None)
+            if callable(bounds_function):
+                center, half = bounds_function(**native_params)
+            else:
+                low, high = positions.min(axis=0), positions.max(axis=0)
+                center, half = (low+high)*.5, (high-low)*.5
+            block_bounds = ((np.asarray(center), np.asarray(half)) if native_blocks else
+                            (np.asarray(center)*block_scale, np.asarray(half)*block_scale))
+            positions = warp_positions(positions.astype(float), paths, seed, params)
+            if (not np.isfinite(positions).all() or (np.abs(positions) > 1e6).any()
+                    or not np.isfinite(sizes).all() or (sizes > 1000).any()):
+                raise ValueError('Warped curve preview exceeds coordinate/size limits')
         count = len(positions)
         points = np.empty((count, 7), dtype="<f4")
         points[:, :3], points[:, 3:6], points[:, 6] = positions, colors, sizes
+        if display_scale != 1:
+            points[:, :3] *= display_scale
+            points[:, 6] *= display_scale
         with output.open("wb") as stream:
             stream.write(struct.pack("<8sQ", b"FSTAR002", count))
             stream.write(points.tobytes())
         if schema["population"]:
-            stars, stats = populate_curves(paths, path_colors, seed, params, limit=MAX_POINTS)
+            stars, stats = populate_curves(paths, path_colors, seed, params, limit=MAX_POINTS,
+                                          density_source=population_density)
+            star_shapes = stats.pop('_block_shapes', None)
+            fade_groups = stats.pop('_fade_groups', None)
+            source_positions = stars[0]
             bounds_function = getattr(module, 'postprocess_bounds', None)
             bounds = bounds_function(**native_params) if callable(bounds_function) else None
-            stars = apply_to_stars(*stars, seed, params, bounds=bounds, allow_empty=True,
-                                   axis_fade=getattr(module, 'POPULATION_AXIS_FADE', False))
+            post_params = params
+            if block_scale:
+                # Geometry was warped before cell integration.
+                # Only survival/appearance operations may follow block selection.
+                bounds = block_bounds
+                post_params = dict(params, pp_warp=0)
+                if stats['block_integration_limited']:
+                    errors.append('Block integration probe budget reached; fine cell probabilities are approximate. Reduce scale, spread, or curve density.')
+            stars = apply_to_stars(*stars, seed, post_params, bounds=bounds, allow_empty=True,
+                                   axis_fade=getattr(module, 'POPULATION_AXIS_FADE', False),
+                                   fade_groups=fade_groups)
             star_positions, star_colors, star_sizes = (np.asarray(a, dtype=np.float32) for a in stars)
+            if star_shapes is not None:
+                # Block postprocessing only removes cells. Preserve each survivor's
+                # shape by matching its sorted XYZ cell center before display scaling.
+                xyz = np.dtype([('x', '<f4'), ('y', '<f4'), ('z', '<f4')])
+                original = np.ascontiguousarray(source_positions, dtype='<f4').view(xyz).reshape(-1)
+                surviving = np.ascontiguousarray(star_positions, dtype='<f4').view(xyz).reshape(-1)
+                star_shapes = star_shapes[np.searchsorted(original, surviving)]
+            if block_scale and not native_blocks:
+                star_positions = star_positions / block_scale
+                star_sizes = star_sizes / block_scale
+            if display_scale != 1:
+                star_positions = star_positions * display_scale
+                star_sizes = star_sizes * display_scale
             star_count = len(star_positions)
             if (star_count > MAX_POINTS or star_positions.shape != (star_count, 3)
                     or star_colors.shape != (star_count, 3) or star_sizes.shape != (star_count,)
@@ -212,11 +328,18 @@ def generate_request(request, directory, output):
                     or ((star_sizes <= 0) | (star_sizes > 1000)).any()):
                 raise ValueError("Invalid populated star attributes")
             packed = np.column_stack((star_positions, star_colors, star_sizes)).astype("<f4")
+            magic = b"FSTAR002"
+            if star_shapes is not None:
+                if (star_shapes.shape != (star_count, 3) or not np.isfinite(star_shapes).all()
+                        or ((star_shapes <= 0) | (star_shapes > 1)).any()):
+                    raise ValueError("Invalid block proxy dimensions")
+                packed = np.column_stack((packed, star_shapes)).astype('<f4')
+                magic = b"FSTAR003"
             with output.with_suffix(".stars.bin").open("wb") as stream:
-                stream.write(struct.pack("<8sQ", b"FSTAR002", star_count))
+                stream.write(struct.pack("<8sQ", magic, star_count))
                 stream.write(packed.tobytes())
             response.update(star_count=star_count, **stats)
-        response.update(ok=True, generator=selected, params=params, primitive=primitive,
+        response.update(ok=True, generator=selected, params=returned_params, primitive=primitive,
                         population=schema["population"],
                         count=count, requested_count=requested_count,
                         generation_ms=(time.perf_counter() - started) * 1000)
@@ -227,11 +350,30 @@ def generate_request(request, directory, output):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--request", type=Path, required=True)
-    parser.add_argument("--response", type=Path, required=True)
-    parser.add_argument("--points", type=Path, required=True)
+    parser.add_argument("--request", type=Path)
+    parser.add_argument("--response", type=Path)
+    parser.add_argument("--points", type=Path)
+    parser.add_argument("--serve", action='store_true')
     parser.add_argument("--generators", type=Path, required=True)
     args = parser.parse_args()
+    if args.serve:
+        # Native service serializes requests and restarts us on source changes,
+        # cancellation or timeout. Idle workers block on stdin without polling.
+        for line in sys.stdin:
+            command = json.loads(line)
+            response_path = Path(command['response'])
+            try:
+                request = json.loads(Path(command['request']).read_text(encoding='utf-8'))
+                response = generate_request(request, args.generators.resolve(), Path(command['points']))
+            except Exception:
+                response = dict(ok=False, error=traceback.format_exc(limit=8), catalog=[], warnings=[])
+            response['worker_pid'] = __import__('os').getpid()
+            temporary = response_path.with_suffix('.tmp')
+            temporary.write_text(json.dumps(response, allow_nan=False), encoding='utf-8')
+            temporary.replace(response_path)
+        return
+    if args.request is None or args.response is None or args.points is None:
+        parser.error('--request, --response and --points are required without --serve')
     try:
         request = json.loads(args.request.read_text(encoding="utf-8"))
         response = generate_request(request, args.generators.resolve(), args.points)

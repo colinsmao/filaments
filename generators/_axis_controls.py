@@ -19,6 +19,37 @@ for axis in ('xz', 'y'):
              default=1., min=0., max=4., group=group, enabled_if=toggle),
     ])
 
+# The stable curve generator fades its stars after population, so it can use
+# separate upper/lower controls without changing the older density experiments.
+SIGNED_Y_FADE_PARAMETERS = [
+    dict(key='fade_y_enabled', label='Fade Y edges', type='int', default=0,
+         min=0, max=1, group='Y edge fade', toggle=True),
+]
+for side, label in (('pos', '+Y (above)'), ('neg', '-Y (below)')):
+    toggle = f'fade_y_{side}'
+    group = 'Y edge fade'
+    SIGNED_Y_FADE_PARAMETERS.extend([
+        dict(key=f'{toggle}_width', label=f'{label} fade width (fraction)', type='float',
+             default=.8, min=0., max=2., group=group, enabled_if='fade_y_enabled'),
+        dict(key=f'{toggle}_density_strength', label=f'{label} edge clump suppression', type='float',
+             default=1., min=0., max=4., group=group, enabled_if='fade_y_enabled'),
+    ])
+
+
+def migrate_signed_y(params):
+    result = migrate_parameters(params)
+    for side in ('pos', 'neg'):
+        for suffix in ('', '_width', '_density_strength'):
+            result.setdefault(f'fade_y_{side}{suffix}', result[f'fade_y{suffix}'])
+    if 'fade_y_enabled' not in result:
+        enabled = bool(result['fade_y_pos'] or result['fade_y_neg'])
+        result['fade_y_enabled'] = int(enabled)
+        if enabled:
+            for side in ('pos', 'neg'):
+                if not result[f'fade_y_{side}']:
+                    result[f'fade_y_{side}_width'] = 0.
+    return result
+
 
 def migrate_parameters(params):
     """Migrate old presets in the worker, without editing live settings files."""

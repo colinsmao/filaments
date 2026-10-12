@@ -107,8 +107,21 @@ def suppress_voids(density, threshold):
     return density * squared / (squared + threshold * threshold)
 
 
+def axis_fade_settings(params):
+    """Signed Y settings fall back to the former symmetric controls for callers."""
+    result = []
+    for axis, legacy, indices in (('xz', 'xz', [0, 2]), ('y_pos', 'y', [1]), ('y_neg', 'y', [1])):
+        key, old = 'fade_'+axis, 'fade_'+legacy
+        enabled = (params['fade_y_enabled'] if axis.startswith('y_') and 'fade_y_enabled' in params
+                   else params.get(key, params.get(old, 0)))
+        result.append((axis, indices, enabled,
+                       params.get(key+'_width', params.get(old+'_width', .8)),
+                       params.get(key+'_density_strength', params.get(old+'_density_strength', 1.))))
+    return result
+
+
 def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_empty=False,
-                   density_source=None, axis_fade=False):
+                   density_source=None, axis_fade=False, fade_groups=None):
     """Optional point-stage processors; masks always travel with star attributes.
 
     Bounds are (center, half_extents) in world coordinates. Without an explicit
@@ -117,7 +130,8 @@ def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_em
     """
     if allow_empty and len(positions) == 0:
         return positions, colors, sizes
-    fading = any(params.get('fade_'+axis, 0) for axis in ('xz', 'y')) if axis_fade else params.get('fade', 0)
+    settings = axis_fade_settings(params) if axis_fade else []
+    fading = any(setting[2] for setting in settings) if axis_fade else params.get('fade', 0)
     if not fading:
         return apply_appearance(positions, colors, sizes, seed, params, density_source)
     if bounds is None:
@@ -135,12 +149,12 @@ def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_em
     if axis_fade:
         weights = np.ones(len(positions))
         relative = None
-        for axis, indices in (('xz', [0, 2]), ('y', [1])):
-            if not params.get('fade_'+axis, 0) or not np.any(half_extents[indices] > 0):
+        for axis, indices, enabled, width, strength in settings:
+            if not enabled or width <= 0 or not np.any(half_extents[indices] > 0):
                 continue
-            radius = np.max(np.abs(normalized[:, indices]), axis=1)
-            local = edge_envelope(radius, params.get('fade_'+axis+'_width', .8))
-            strength = params.get('fade_'+axis+'_density_strength', 1.)
+            radius = (normalized[:, 1] if axis == 'y_pos' else -normalized[:, 1]
+                      if axis == 'y_neg' else np.max(np.abs(normalized[:, indices]), axis=1))
+            local = edge_envelope(radius, width)
             if strength > 0:
                 if relative is None:
                     density = relative_density_at_stars(normalized)
@@ -154,7 +168,17 @@ def apply_to_stars(positions, colors, sizes, seed, params, bounds=None, allow_em
             density = relative_density_at_stars(normalized)
             weights = density_fade_weights(weights, density / edge_dense_threshold(density), strength)
     rng = np.random.default_rng(np.random.SeedSequence([seed, 9401]))
-    keep = rng.random(len(positions)) < weights
+    draws = rng.random(len(positions))
+    if fade_groups is not None:
+        groups = np.asarray(fade_groups)
+        if groups.shape != (len(positions),) or groups.dtype.kind not in 'iu':
+            raise ValueError('Curve fade groups must match the unchanged star population')
+        grouped = groups >= 0
+        owners, inverse = np.unique(groups[grouped], return_inverse=True)
+        shared = np.array([np.random.default_rng(np.random.SeedSequence([seed, 9471, int(owner)])).random()
+                           for owner in owners])
+        draws[grouped] = shared[inverse]
+    keep = draws < weights
     if not keep.any() and not allow_empty:
         # The current viewer protocol requires a nonempty buffer. Report this
         # explicitly rather than inventing a survivor outside the envelope.

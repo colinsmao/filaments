@@ -1,6 +1,8 @@
 #pragma once
 #include "generation.h"
 #include "plot_settings.h"
+#include "density_settings.h"
+#include "zone_slider.h"
 #include <imgui.h>
 #include <map>
 #include <limits>
@@ -10,20 +12,34 @@
 
 class GeneratorPanel {
 public:
-    explicit GeneratorPanel(const nlohmann::json& saved = PlotSettings{}.generator)
-        : runtime(GeneratorRuntime::defaults()), service(runtime), fingerprint(runtime.sourceFingerprint()) {
+    explicit GeneratorPanel(const nlohmann::json& saved = PlotSettings{}.generator,
+                            bool blockUnits = false, float legacyDisplayScale = 16)
+        : runtime(GeneratorRuntime::defaults()), service(runtime), fingerprint(runtime.sourceFingerprint()),
+          blockUnits(blockUnits), legacyDisplayScale(legacyDisplayScale) {
         selected = saved.at("script").get<std::string>();
         count = saved.at("count").get<int>();
         seed = saved.at("seed").get<int>();
         parameters = saved.at("parameters").get<std::map<std::string, nlohmann::json>>();
         autoApply = saved.at("auto_apply").get<bool>();
         watchFiles = saved.at("watch_files").get<bool>();
+        if (saved.contains("density_field") && saved["density_field"].is_object()) {
+            densitySettings.field = saved["density_field"];
+            if (!densitySettings.field.contains("field_resolution") && parameters.count("density_filament_curves") &&
+                parameters["density_filament_curves"].contains("curve_resolution"))
+                densitySettings.field["field_resolution"] = parameters["density_filament_curves"]["curve_resolution"];
+        } else {
+            // The requested initial copy is curves -> direct density. Once saved,
+            // the shared field is authoritative regardless of selected script.
+            const auto source = parameters.count("density_filament_curves") ? "density_filament_curves" : "noise_filaments_branches";
+            if (parameters.count(source)) densitySettings.importLegacy(source, parameters[source], blockUnits, legacyDisplayScale);
+        }
+        if (blockUnits) densitySettings.removePresetFields(parameters);
         queue();
     }
 
     nlohmann::json settings() const {
         return {{"script", selected}, {"count", count}, {"seed", seed}, {"parameters", parameters},
-                {"auto_apply", autoApply}, {"watch_files", watchFiles}};
+                {"auto_apply", autoApply}, {"watch_files", watchFiles}, {"density_field", densitySettings.field}};
     }
 
     std::optional<std::vector<Point>> tick(double now) {
@@ -41,14 +57,15 @@ public:
             warnings.clear();
             for (const auto& warning : result->metadata.value("warnings", nlohmann::json::array()))
                 warnings += warning.get<std::string>() + "\n";
-            if (!result->error.empty()) { error = result->error; return {}; }
-            error.clear();
-            // A job can finish while the user is still dragging a slider.
-            // Normalize returned values only if no newer edits have occurred.
-            if (result->request.value("ui_revision", 0ULL) == editRevision) {
+            if (result->request.value("ui_revision", 0ULL) == editRevision &&
+                result->metadata.contains("params") && result->metadata.contains("generator")) {
                 selected = result->metadata.at("generator").get<std::string>();
                 parameters[selected] = result->metadata.at("params");
+                if (result->metadata.contains("density_field"))
+                    densitySettings.field = result->metadata["density_field"];
             }
+            if (!result->error.empty()) { error = result->error; return {}; }
+            error.clear();
             mathMs = result->metadata.at("generation_ms").get<double>();
             totalMs = result->elapsedMs;
             lines = result->metadata.value("primitive", std::string("points")) == "lines";
@@ -88,36 +105,101 @@ public:
         for (const auto& item : catalog) {
             if (item.at("id") != selected) continue;
             auto& params = parameters[selected];
+            if (!params.is_object()) params = nlohmann::json::object();
+            if (blockUnits && DensitySettings::participates(selected) && params.value("_block_units", 0) != 1) {
+                ImGui::TextUnformatted("Converting saved settings to blocks...");
+                continue;
+            }
             const auto drawParameter = [&](const nlohmann::json& entry) {
+                if (entry.value("zone_hidden", false)) return;
+                auto& values = entry.value("scope", std::string{}) == "density_field" ? densitySettings.field : params;
                 const auto key = entry.at("key").get<std::string>();
                 const auto label = entry.at("label").get<std::string>() + "##" + key;
+                if (entry.contains("zone_kind")) {
+                    const auto pair = entry.value("zone_pair", key);
+                    const auto* other = &entry;
+                    for (const auto& candidate : item.at("parameters"))
+                        if (candidate.at("key") == pair) { other = &candidate; break; }
+                    const bool fade = entry.at("zone_kind") == "fade";
+                    const auto reach = [fade](float value) { return fade ? 1-value : value; };
+                    const auto value = [&](const nlohmann::json& e) {
+                        return static_cast<float>(plotNumber(values, e.at("key").get<std::string>().c_str(),
+                            e.at("default").get<double>(), e.at("min").get<double>(), e.at("max").get<double>()));
+                    };
+                    const auto enabled = [&](const nlohmann::json& e) {
+                        const auto toggle = e.value("enabled_if", std::string{});
+                        return toggle.empty() || plotNumber(values, toggle.c_str(), 0, 0, 1) != 0;
+                    };
+                    float negative = reach(value(*other)), positive = reach(value(entry));
+                    float halfExtent = 0;
+                    const auto extentKey = entry.value("zone_extent", std::string{});
+                    for (const auto& candidate : item.at("parameters")) {
+                        if (candidate.at("key") != extentKey) continue;
+                        const auto& extentValues = candidate.value("scope", std::string{}) == "density_field"
+                            ? densitySettings.field : params;
+                        halfExtent = static_cast<float>(plotNumber(extentValues, extentKey.c_str(),
+                            candidate.at("default").get<double>(), 0, 1e6));
+                        break;
+                    }
+                    const char* units = blockUnits && DensitySettings::participates(selected) ? "blocks" : "units";
+                    ImGui::PushID(key.c_str());
+                    if (ZoneSlider::draw(entry.at("zone_label").get<std::string>().c_str(),
+                        negative, positive, pair == key, fade, enabled(*other), enabled(entry),
+                        reach(other->at(fade ? "max" : "min").get<float>()),
+                        reach(other->at(fade ? "min" : "max").get<float>()),
+                        reach(entry.at(fade ? "max" : "min").get<float>()),
+                        reach(entry.at(fade ? "min" : "max").get<float>()), halfExtent, units)) {
+                        values[pair] = reach(negative);
+                        values[key] = reach(positive);
+                        edited = true;
+                    }
+                    ImGui::PopID();
+                    return;
+                }
+                double minimum = entry.at("min").get<double>(), maximum = entry.at("max").get<double>();
+                if (DensitySettings::participates(selected) &&
+                    (key == "extent" || key == "y_extent" || key == "noise_scale" || key == "frequency") &&
+                    values.contains(key) && values[key].is_number()) {
+                    const double inherited = values[key].get<double>();
+                    if (std::isfinite(inherited) && inherited > 0 && inherited <= 1e6) {
+                        minimum = std::min(minimum, inherited);
+                        maximum = std::max(maximum, inherited);
+                    }
+                }
                 // Saved values may predate edits to a script's parameter schema.
-                const double bounded = plotNumber(params, key.c_str(), entry.at("default").get<double>(),
-                                                   entry.at("min").get<double>(), entry.at("max").get<double>());
+                const double bounded = plotNumber(values, key.c_str(), entry.at("default").get<double>(),
+                                                   minimum, maximum);
                 const auto enabledBy = entry.value("enabled_if", std::string{});
-                const bool enabled = enabledBy.empty() || plotNumber(params, enabledBy.c_str(), 0, 0, 1) != 0;
+                const bool enabled = enabledBy.empty() || plotNumber(values, enabledBy.c_str(), 0, 0, 1) != 0;
                 ImGui::BeginDisabled(!enabled);
                 if (entry.value("toggle", false)) {
                     bool value = bounded != 0;
-                    params[key] = value ? 1 : 0;
+                    values[key] = value ? 1 : 0;
                     if (ImGui::Checkbox(label.c_str(), &value)) {
-                        params[key] = value ? 1 : 0; edited = true;
+                        values[key] = value ? 1 : 0; edited = true;
                     }
                 } else if (entry.at("type") == "int") {
                     int value = static_cast<int>(bounded);
-                    params[key] = value;
+                    values[key] = value;
                     if (ImGui::SliderInt(label.c_str(), &value, entry.at("min").get<int>(), entry.at("max").get<int>())) {
-                        params[key] = value; edited = true;
+                        values[key] = value; edited = true;
                     }
                 } else {
                     float value = static_cast<float>(bounded);
-                    params[key] = value;
-                    if (ImGui::SliderFloat(label.c_str(), &value, entry.at("min").get<float>(), entry.at("max").get<float>(), "%.3f")) {
-                        params[key] = value; edited = true;
+                    values[key] = value;
+                    const ImGuiSliderFlags flags = entry.value("logarithmic", false)
+                        ? ImGuiSliderFlags_Logarithmic : ImGuiSliderFlags_None;
+                    const float sliderMaximum = entry.value("slider_max", static_cast<float>(maximum));
+                    if (ImGui::SliderFloat(label.c_str(), &value, static_cast<float>(minimum), sliderMaximum, "%.3f", flags)) {
+                        values[key] = value; edited = true;
                     }
                 }
                 ImGui::EndDisabled();
             };
+            if (blockUnits && DensitySettings::participates(selected) && ImGui::CollapsingHeader("Noise / density field", ImGuiTreeNodeFlags_DefaultOpen)) {
+                for (const auto& entry : item.at("parameters"))
+                    if (entry.value("scope", std::string{}) == "density_field") drawParameter(entry);
+            }
             if (!selectedPopulation || ImGui::CollapsingHeader("Curve generation", ImGuiTreeNodeFlags_DefaultOpen)) {
                 for (const auto& entry : item.at("parameters"))
                     if (entry.value("group", std::string{}).empty()) drawParameter(entry);
@@ -131,7 +213,7 @@ public:
                 ImGui::Indent();
                 std::vector<std::string> groups;
                 for (const auto& entry : item.at("parameters")) {
-                    if (entry.value("section", std::string{}) == "population") continue;
+                    if (entry.value("section", std::string{}) == "population" || entry.value("section", std::string{}) == "field") continue;
                     const auto group = entry.value("group", std::string{});
                     if (!group.empty() && std::find(groups.begin(), groups.end(), group) == groups.end())
                         groups.push_back(group);
@@ -188,11 +270,14 @@ private:
     GenerationService service;
     nlohmann::json catalog = nlohmann::json::array();
     std::map<std::string, nlohmann::json> parameters;
+    DensitySettings densitySettings;
     std::string selected, fingerprint, error, warnings;
     int count = 100000, seed = 42;
     bool watchFiles = true, autoApply = true, dirty = false;
     bool lines = false; // Describes the last successful buffer, not the pending selection.
     bool population = false, populationLimited = false;
+    bool blockUnits = false;
+    float legacyDisplayScale = 16;
     std::vector<Point> starLayer;
     double lastScan = 0, lastEdit = 0;
     unsigned long long editRevision = 0;
@@ -210,6 +295,9 @@ private:
     void queue() {
         auto params = selected.empty() ? nlohmann::json::object() : parameters[selected];
         if (params.is_null()) params = nlohmann::json::object();
-        service.request({{"generator", selected}, {"count", count}, {"seed", seed}, {"params", params}, {"ui_revision", editRevision}});
+        service.request({{"generator", selected}, {"count", count}, {"seed", seed}, {"params", params},
+                         {"ui_revision", editRevision}, {"world_units", blockUnits ? "blocks" : "legacy"},
+                         {"density_graph", blockUnits}, {"density_field", densitySettings.field},
+                         {"legacy_display_scale", legacyDisplayScale}});
     }
 };
