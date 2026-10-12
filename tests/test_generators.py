@@ -14,6 +14,133 @@ spec.loader.exec_module(worker)
 
 
 class Generators(unittest.TestCase):
+    def test_block_light_matches_brute_force_manhattan_maximum(self):
+        from _block_lighting import light_levels
+        rng = np.random.default_rng(481)
+        positions = rng.integers(-20, 21, (300, 3)).astype(float)+.5
+        kinds = rng.choice([0, 1, 2], len(positions), p=[.85, .1, .05])
+        sources = kinds > 0
+        emission = np.where(kinds[sources] == 1, 14, 15)
+        distance = np.abs(positions[:, None]-positions[sources]).sum(axis=2)
+        expected = np.maximum(0, (emission-distance).max(axis=1))
+        np.testing.assert_array_equal(light_levels(positions, kinds), expected)
+        # L1 diagonal distance, exact cutoff, negative positions, no light relay.
+        points = np.array([[0,0,0], [3,4,5], [-13,0,0], [14,0,0], [15,0,0]])+.5
+        np.testing.assert_array_equal(light_levels(points, [1,0,0,0,0]), [14,2,1,0,0])
+        np.testing.assert_array_equal(light_levels(points, np.zeros(5)), 0)
+        self.assertEqual(light_levels(np.empty((0,3)), np.empty(0)).shape, (0,))
+        # More than one query batch, without an all-pairs reference allocation.
+        points = np.column_stack((np.arange(65540), np.zeros((65540,2))))+.5
+        kinds = np.zeros(len(points), dtype=int)
+        kinds[-1] = 2
+        np.testing.assert_array_equal(light_levels(points, kinds),
+                                      np.maximum(0, 15-(len(points)-1-np.arange(len(points)))))
+
+    def test_block_light_brightness_bypass_and_material_identity(self):
+        from _block_lighting import apply_lighting, light_colors
+        points = np.array([[0,0,0], [1,0,0], [8,0,0], [20,0,0], [40,0,0]])+.5
+        kinds = np.array([1,0,0,0,2])
+        colors = np.tile(np.array([.8,.6,.4], np.float32), (5,1))
+        before = colors.copy()
+        lit = apply_lighting(points, colors, kinds, dict(pop_light_ambient=.1,
+                            pop_light_sky=0, pop_light_brightness=0))
+        np.testing.assert_allclose(lit[[0,4]], colors[[0,4]]*light_colors(np.array([14,15]),
+                                  dict(pop_light_ambient=.1, pop_light_sky=0, pop_light_brightness=0)))
+        self.assertTrue((lit[1] > lit[2]).all())
+        self.assertTrue((lit[2] > lit[3]).all())
+        np.testing.assert_allclose(lit[3], .1548*colors[3])
+        np.testing.assert_array_equal(colors, before)
+        self.assertIs(apply_lighting(points, colors, kinds, dict(pop_lighting=0)), colors)
+        self.assertIs(apply_lighting(points, colors, kinds, dict(pop_light_ambient=1)), colors)
+        # Identical colors do not make a candle emit. The lightmap has a baseline.
+        dark = apply_lighting(points, colors, np.zeros(5), dict(pop_light_ambient=0,
+                             pop_light_sky=0, pop_light_brightness=0))
+        np.testing.assert_allclose(dark, colors*.0588, atol=1e-7)
+
+    def test_unlit_candles_receive_sky_without_nearby_emitters(self):
+        from _block_lighting import light_colors, apply_lighting
+        points = np.array([[.5,.5,.5], [1000.5,.5,.5]])
+        colors = np.ones((2,3), np.float32)
+        sky_only = dict(pop_light_ambient=0, pop_light_sky=.2, pop_light_brightness=0)
+        lit = apply_lighting(points, colors, np.zeros(2), sky_only)
+        raw = .2*np.array([.8,.82,1.])*.96+.03
+        np.testing.assert_allclose(lit, np.tile(raw*.96+.03, (2,1)), atol=1e-7)
+        lifted = apply_lighting(points, colors, np.zeros(2), dict(sky_only, pop_light_brightness=1))
+        self.assertTrue((lifted > lit).all())
+        np.testing.assert_allclose(lifted, np.tile((1-(1-raw)**4)*.96+.03,(2,1)), atol=1e-7)
+        # Brightness stays bounded/monotone and the cold tint fades in strong light.
+        ramp = light_colors(np.arange(16), {})
+        self.assertTrue((np.diff(ramp, axis=0) >= 0).all())
+        self.assertTrue(((ramp >= 0) & (ramp <= 1)).all())
+        self.assertGreater(ramp[0,2], ramp[0,0])
+        np.testing.assert_allclose(ramp[-1], .99)
+
+    def test_scar_lighting_preset_migration_and_gpu_reference(self):
+        from _block_lighting import light_colors, migrate_parameters
+        # Values read from the unmodified Minecraft 1.21.8 shader on the GPU:
+        # sky factor .35, sky RGB (.8,.82,1), brightness 1, no extra ambient.
+        expected = np.array([[.7579195,.766689,.8348941],
+                             [.9356154,.9078372,.906943],
+                             [.98999995,.98999995,.98999995]])
+        np.testing.assert_allclose(light_colors(np.array([0,8,15]),dict(pop_light_ambient=0)),
+                                   expected, atol=2e-6)
+        for ambient in (.03, .07999999821186066):
+            old=dict(pop_light_ambient=ambient,pop_light_sky=.2,pop_light_brightness=.5,pop_lighting=0)
+            new=migrate_parameters(old)
+            self.assertEqual(new['pop_light_sky'],.35)
+            self.assertEqual(new['pop_light_brightness'],1.)
+            self.assertEqual(new['pop_lighting'],0)
+            self.assertEqual(migrate_parameters(new),new)
+            self.assertEqual(old['pop_light_sky'],.2)
+        custom=dict(pop_light_ambient=.1,pop_light_sky=.1,pop_light_brightness=.4)
+        self.assertEqual(migrate_parameters(custom),custom)
+
+    def test_block_light_worker_uses_surviving_materials_before_display_conversion(self):
+        from unittest.mock import patch
+        from _block_lighting import apply_lighting, light_colors
+        points = np.array([[.5,.5,.5], [2.5,.5,.5], [3.5,.5,.5], [30.5,.5,.5]], np.float32)
+        colors = np.tile(np.array([.8,.7,.6], np.float32), (4,1))
+        kinds = np.array([1,0,2,0], np.int8)
+        shapes = np.array([[1,.125,.125], [.125,.375,.125], [1,1,1], [.25,.375,.25]], np.float32)
+        sizes = np.ones(4, np.float32)
+        def population(*args, **kwargs):
+            return (points.copy(), colors.copy(), sizes.copy()), dict(
+                _block_shapes=shapes.copy(), _block_kinds=kinds.copy(),
+                _fade_groups=np.arange(4), block_integration_limited=False)
+        params = dict(curve_resolution=24, strand_length=5., extent=6., y_extent=2.,
+                      pop_block_scale=8, pop_block_proxies=1, fade_xz=0, fade_y=0)
+        with tempfile.TemporaryDirectory() as temp, patch.object(worker, 'populate_curves', population):
+            output = Path(temp)/'points.bin'
+            def run(keep, changes=None, native=False):
+                def fade(*args, **kwargs):
+                    return tuple(a[keep] for a in args[:3])
+                with patch.object(worker, 'apply_to_stars', fade):
+                    response = worker.generate_request(dict(generator='density_filament_curves', count=100,
+                        seed=42, world_units='blocks' if native else '', params=dict(params, **(changes or {}))),
+                        ROOT/'generators', output)
+                self.assertTrue(response['ok'], response.get('error'))
+                self.assertFalse(any(k.startswith('_') for k in response))
+                return output.read_bytes(), np.frombuffer(output.with_suffix('.stars.bin').read_bytes()[16:], '<f4').reshape(-1,10)
+            _, complete = run(np.arange(4))
+            # Remove the full block: its nearby candle must lose that source's light.
+            keep = np.array([0,1,3])
+            lines, faded = run(keep)
+            np.testing.assert_array_equal(faded[:,:3], points[keep]/8)
+            np.testing.assert_array_equal(faded[:,7:], shapes[keep])
+            np.testing.assert_array_equal(faded[:,3:6], apply_lighting(points[keep], colors[keep], kinds[keep], {}))
+            self.assertTrue((faded[1,3:6] < complete[1,3:6]).all())
+            same_lines, unlit = run(keep, dict(pop_lighting=0))
+            self.assertEqual(lines, same_lines)
+            np.testing.assert_array_equal(faded[:,[0,1,2,6,7,8,9]], unlit[:,[0,1,2,6,7,8,9]])
+            np.testing.assert_array_equal(unlit[:,3:6], colors[keep])
+            _, native = run(keep, native=True)
+            np.testing.assert_array_equal(native[:,:3], points[keep])
+            np.testing.assert_array_equal(native[:,3:6], faded[:,3:6])
+            _, no_sources = run(np.array([1,3]))
+            np.testing.assert_allclose(no_sources[:,3:6], colors[[1,3]]*light_colors(np.zeros(2), {}))
+            _, empty = run(np.array([], dtype=int))
+            self.assertEqual(empty.shape, (0,10))
+
     def test_branching_connectivity_budget_bounds_and_determinism(self):
         from unittest.mock import patch
         from _branching_field import grow_branches
@@ -770,7 +897,7 @@ class Generators(unittest.TestCase):
         import struct
         params = dict(curve_resolution=24, strand_length=5., extent=6., y_extent=2.,
                       pop_block_scale=8, pop_block_proxies=1, pop_density=10.,
-                      pop_spread=.2, fade_xz=0, fade_y=0)
+                      pop_spread=.2, fade_xz=0, fade_y=0, pop_lighting=0)
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp)/'points.bin'
             def run(changes):

@@ -15,6 +15,7 @@ MAX_POINTS = 1_000_000
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "generators"))
 from _postprocess import FADE_PARAMETER, FADE_WIDTH_PARAMETER, FADE_DENSITY_PARAMETER, APPEARANCE_PARAMETERS, apply_to_stars
 from _population import PARAMETERS as POPULATION_PARAMETERS, FIELD_PARAMETER, populate_curves, migrate_parameters as migrate_population
+from _block_lighting import PARAMETERS as LIGHTING_PARAMETERS, apply_lighting, migrate_parameters as migrate_lighting
 from _world_units import NATIVE_GENERATOR, NATIVE_CURVE_GENERATORS, block_schema, migrate_to_blocks
 from _density_field import PARAMETERS as FIELD_PARAMETERS, KEYS as FIELD_KEYS
 
@@ -99,6 +100,7 @@ def load_catalog(directory, block_units=False, density_graph=False):
                 parameters = [p for p in parameters if p["key"] in keys]
             if population:
                 parameters.extend(dict(entry) for entry in POPULATION_PARAMETERS)
+                parameters.extend(dict(entry) for entry in LIGHTING_PARAMETERS)
                 if callable(getattr(module, 'generate_population_density_source', None)):
                     parameters.append(dict(FIELD_PARAMETER))
             field_consumer = density_graph and path.stem in NATIVE_CURVE_GENERATORS | {'noise_filaments_branches'}
@@ -160,6 +162,7 @@ def generate_request(request, directory, output):
             supplied = migrate(supplied)
         if schema['population']:
             supplied = migrate_population(supplied)
+            supplied = migrate_lighting(supplied)
         if native_blocks:
             supplied = migrate_to_blocks(supplied, modules[selected]._legacy_parameters,
                 direct_scale=float(request.get('legacy_display_scale', 16)) if not schema['population'] else None)
@@ -291,6 +294,7 @@ def generate_request(request, directory, output):
             stars, stats = populate_curves(paths, path_colors, seed, params, limit=MAX_POINTS,
                                           density_source=population_density)
             star_shapes = stats.pop('_block_shapes', None)
+            star_kinds = stats.pop('_block_kinds', None)
             fade_groups = stats.pop('_fade_groups', None)
             source_positions = stars[0]
             bounds_function = getattr(module, 'postprocess_bounds', None)
@@ -313,7 +317,11 @@ def generate_request(request, directory, output):
                 xyz = np.dtype([('x', '<f4'), ('y', '<f4'), ('z', '<f4')])
                 original = np.ascontiguousarray(source_positions, dtype='<f4').view(xyz).reshape(-1)
                 surviving = np.ascontiguousarray(star_positions, dtype='<f4').view(xyz).reshape(-1)
-                star_shapes = star_shapes[np.searchsorted(original, surviving)]
+                survivors = np.searchsorted(original, surviving)
+                star_shapes = star_shapes[survivors]
+                star_kinds = star_kinds[survivors]
+                # Still in actual block coordinates, after all source-removing fades.
+                star_colors = apply_lighting(star_positions, star_colors, star_kinds, params)
             if block_scale and not native_blocks:
                 star_positions = star_positions / block_scale
                 star_sizes = star_sizes / block_scale

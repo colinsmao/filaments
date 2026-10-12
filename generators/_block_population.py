@@ -14,8 +14,8 @@ MAX_PROBES = 2_097_152
 
 # Artistic material proxies, in blocks. Palette/type belongs to a whole path;
 # grouping and rod axis belong to a cell. These streams never drive placement.
-CANDLE_COLORS = np.array([[.84, .79, .68], [.72, .65, .79], [.61, .64, .70],
-                         [.88, .86, .80], [.57, .48, .65]])
+CANDLE_COLORS = np.array([[.96, .92, .83], [.84, .80, .90], [.66, .68, .75],
+                         [.99, .97, .92], [.60, .53, .72]])
 
 
 def curve_materials(count, seed, params):
@@ -34,8 +34,8 @@ def curve_materials(count, seed, params):
         rod, block, tint = rng.random(3)
         kinds[i] = 1 if rod < rod_probability else (2 if block < block_probability else 0)
         colors[i] = CANDLE_COLORS[min(int(tint * len(CANDLE_COLORS)), len(CANDLE_COLORS)-1)]
-    colors[kinds == 1] = [.94, .92, .85]
-    colors[kinds == 2] = [.71, .68, .79]
+    colors[kinds == 1] = [.98, .97, .90]
+    colors[kinds == 2] = [1., .97, .82]
     return kinds, colors
 
 
@@ -240,6 +240,7 @@ def populate_blocks(paths, path_colors, seed, params, limit=1_000_000, density_s
     owners = stats.pop('_block_owners', None)
     if kinds is not None:
         stats['_block_shapes'] = proxy_shapes(cells[selected], kinds[selected], seed, params)
+        stats['_block_kinds'] = kinds[selected]
         stats['_fade_groups'] = owners[selected]
     return ((cells[selected].astype(np.float32)+.5, colors[selected].astype(np.float32),
              np.ones(len(selected), dtype=np.float32)), stats)

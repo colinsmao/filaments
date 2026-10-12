@@ -663,7 +663,64 @@ and equally oriented along X, Y or Z per occupied cell. Opposite facings are
 visually identical until a directional end cap is added. Full blocks are 1 cubed.
 All proxies remain centered within their selected block cell and fit inside it;
 these are visual stand-ins, not support/attachment-aware Minecraft placements.
-Fading preserves each surviving cell's color, dimensions and orientation.
+Fading preserves each surviving cell's base color, dimensions and orientation.
+With lighting enabled, removing a source can darken nearby surviving candles.
+
+### Block lighting
+
+**Postprocessing -> Block lighting** applies to Minecraft material proxies.
+End rods emit level 14, full blocks emit level 15, and candles are unlit.
+At each surviving cell center, light is the maximum of zero and
+`emission - (abs(dx) + abs(dy) + abs(dz))` over surviving sources, in blocks.
+Block sources combine by maximum, and candles do not relay light. A separate
+uniform cool sky contribution illuminates the exposed canopy even where block
+light is zero. This first pass has no shadows, occlusion, sky-light propagation,
+per-source colored light or bloom.
+
+- **Block lighting** (`pop_lighting`): on by default. Off returns the previous
+  base colors exactly. Continuous stars and the unit-cube comparison bypass it.
+- **Ambient brightness** (`pop_light_ambient`): dimensionless fraction, 0-1,
+  default .03. Adds neutral illumination above the lightmap's baseline, before brightness adjustment.
+  Higher values brighten dark regions; 1 restores base colors everywhere.
+- **Night sky illumination** (`pop_light_sky`): dimensionless strength, 0-1,
+  default .35. Adds a uniform cool tint (.8, .82, 1) times this strength, independent
+  of nearby sources. Higher values brighten exposed candles; 0 disables sky light.
+  This does not draw a sky or moon. The lightmap retains a dim neutral baseline
+  even with ambient, sky and block light all zero, as Minecraft's shader does.
+- **Shadow brightness lift** (`pop_light_brightness`): dimensionless blend, 0-1,
+  default 1. Higher values lift dark/middle illumination values after combining
+  sky, ambient and block light. Zero uses the unlifted result. This approximates
+  the effect of Minecraft's brightness setting; it adds no light sources.
+
+None of these controls changes random draws, geometry, material assignment,
+occupied-cell counts, sizes or orientations. The earlier untouched trial preset
+(ambient .03 or .08, sky .2, brightness .5) migrates once to .03/.35/1 through
+the normal worker response and viewer autosave. Custom combinations stay literal.
+
+The preview uses the normal path of the
+[Java 1.21.8 lightmap shader](https://mcasset.cloud/1.21.8/assets/minecraft/shaders/core/lightmap.fsh);
+the rational light ramp feeds Minecraft's warm block RGB ramp, then sky light,
+the first 4% neutral mix, extra ambient, clamping, the quartic brightness lift,
+and the final 4% neutral mix. With extra ambient zero this matches the original
+shader's GPU output to about 1e-7 for all 16 block levels at the chosen sky inputs.
+The canopy assumes exposed sky level 15; its tint and strength were visually
+tuned against the night screenshots in `scar/`, not recovered game settings.
+The material palette now has brighter cream candles alongside dim gray/lavender,
+near-white rods and pale cream luminous blocks. Three sky-strength trials were
+rendered with the native renderer; .35 keeps the candles visible and dark gaps
+intact. Before/after and below-canopy renders are in `build/scar-lighting-*.png`.
+Minecraft separately maps sky and block light to screen color, as described in
+[Mojang's lightmap notes](https://feedback.minecraft.net/hc/en-us/articles/42011663817357-Minecraft-Java-Edition-26-1-Snapshot-1).
+The preview omits time of day, weather, exposure occlusion and status effects.
+Emitting rods and blocks use the same mapping at their own light level, without
+a full-bright override. Existing renderer face
+shading applies to all proxies. One illumination color is baked into each object's
+RGB, equally in cube and point modes; this is not a complete Minecraft lightmap.
+Lighting runs after warp, occupancy and all survival fades, before any legacy
+display conversion. Per-material nearest-neighbor trees query exact Manhattan
+distance without a dense light volume or all-pairs source/receiver allocation.
+The material IDs remain private worker metadata; FSTAR003 is unchanged.
+Python reload only: no viewer rebuild/restart or external settings edits.
 
 Material **edge fading** shares one seeded survival threshold across the occupied
 cells owned by each source curve, equally for candles, rods and full blocks.
@@ -718,7 +775,7 @@ star and 8 per block of arc, rounded to powers of two per path, with a total
 2,097,152-probe budget. The response warns if this budget is reached. Very fine
 grids or large transverse spreads can under-resolve individual cell masses even
 below the cap. The existing one-million-object output limit still applies.
-Exact voxel integration, lighting and export are later work. Proxies use the
+Exact voxel integration, occluded lighting and export are later work. Proxies use the
 extended FSTAR003 format described below; unit-cube/continuous data stays FSTAR002.
 
 Initial saved-scene check (seed 934903968): continuous 1,668 stars; scales

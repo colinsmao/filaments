@@ -5,6 +5,48 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Purpose and user preferences
 
+- Lighting checkpoint accepted (2026-10-11): user said "close enough, save".
+  Preserve the Scar lighting correction and current viewer-autosaved settings
+  as the accepted lighting baseline. Do not resume visual tuning automatically.
+
+- Scar lighting correction (2026-10-11, supersedes trial below): user explicitly
+  wants the screenshots matched, not another fidelity audit. Native offscreen
+  renders of three brighter trials selected sky .35, brightness1, ambient .03,
+  sky RGB (.8,.82,1). `_block_lighting.light_colors` now uses Java1.21.8's normal
+  warm block RGB ramp, two neutral mixes and quartic lift, plus adjustable extra
+  ambient. All canopy cells assumed exposed sky15. No emitter full-bright bypass.
+  With extra ambient0, all16 values agree with actual GPU shader within1.04e-7.
+  Palette: brighter cream candles, retained gray/lavender contrast, near-white rods,
+  pale cream luminous blocks. Worker migrates only untouched old lighting triples
+  (.03 or .08,.2,.5) to (.03,.35,1); custom combinations remain. Normal autosave only.
+  Same4668 stars and byte-identical curves/positions/shapes/sizes on saved fixture.
+  `build/scar-lighting-before-after.png` includes native before/after, another
+  camera below canopy and Scar reference. Visually inspected; no exact scene or
+  screenshot-settings equivalence claimed. Validation:137 Python tests plus native
+  perspective/material and panel startup checks pass. Python-only, no viewer launch/rebuild.
+
+- Block lighting trial (2026-10-11): shared `_block_lighting.py` runs in the
+  worker after all proxy survival fades, before legacy display conversion.
+  Rods emit14, full blocks15, candles0 (unlit). Max(E-Manhattan distance,0),
+  exact nearest-source queries per emission class; no occlusion, colored light,
+  relay, sky propagation or bloom. `_block_kinds` now survives sampling as private
+  metadata, filtered with shapes by surviving cells; never inferred from RGB.
+  pop_lighting defaults on; pop_light_ambient fraction0–1/default.03 adds neutral
+  ambient. pop_light_sky0–1/default.2 adds uniform cool (.65,.7,1) sky illumination
+  so unlit exposed candles remain visible beyond local source range. Sum ambient,
+  sky and L/(60-3L), clamp, then blend with1-(1-C)^4 using pop_light_brightness
+  0–1/default.5. Approximation inspired by Java1.21 lightmap, not screenshot-derived
+  settings. Sources keep base RGB; renderer face shading retained. Off/ambient1
+  restore base RGB exactly. Existing settings (including interim ambient.08) stay.
+  No geometry/count/shape/RNG changes, continuous/unit-cube modes bypass.
+  FSTAR003 unchanged; Python reload only. No live config edits or viewer launch.
+  Fading sources can now darken nearby survivors; base palette stays unchanged.
+  Validation:136 Python tests pass, native panel startup passed. Saved scene
+  snapshot4668 objects (4287 candles/366 rods/15 blocks):2644 candles have no
+  local block light and receive sky/ambient. Lighting ~3.65ms in one run;
+  on/off curve bytes, positions, counts, sizes and shapes identical. Appearance
+  still needs user judgment; settings snapshot/paired buffers under build/lighting-*.
+
 - Direction-change checkpoint (2026-10-11): user requested saving this state
   before changing direction. Both independent field growth and the separate
   branching script are preserved, along with viewer presets and scar references.
