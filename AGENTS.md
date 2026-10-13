@@ -5,6 +5,137 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Purpose and user preferences
 
+- Short turning / candle preference (2026-10-12): user requested faster turns on
+  shorts and fewer shorts consumed by rods. Incremental experiment now exposes
+  short_growth_response=2 blocks (1–128) and short_growth_wander=.8 (0–2).
+  Existing response/wander relabeled Long; density pull stays shared. Same
+  grow_field math, coherent two-octave noise and roots/budgets; short batch gets
+  its own controls. Long candidate paths byte-identical. Matching short controls
+  to long values restores previous geometry. Other experiments inherit unchanged
+  controls. CurvePool carries a read-only short_mask; no new random streams.
+  select_short_rod_penalty=.5 (0–2) adds a dimensionless cost to normalized rod
+  scores for shorts only. Zero restores equal role rules. Soft preference leaves
+  shorts available for density filling; does not force candles or forbid all rods.
+  Selection remains candle-proximity/rod-redundancy, not unlit-gap detection.
+  Score edits reuse pool/sketch/proximity caches. No population/lighting changes.
+  Preserved user's current rate40.271, short fraction.5, variation1, rod intensity
+  .101 and all other saved settings; frozen397 candidates,208 short. Response2 /
+  wander.8 raised median integrated turning42->163deg, chord/arc .982->.872;
+  isolated short growth ~42->59ms. Stronger wander1.5 curls more but selected
+  fewer candles, giving a sparser native render, so .8 retained. With rod penalty.5,
+  short roles46 candle/94 rod ->91/15; all roles145/159->192/84; final objects
+  8315 candles+839 rods ->8964+679. New choices can change selected long roles and
+  population through competition; only long candidate geometry is invariant.
+  Native below/oblique images inspected; no claim of user visual acceptance.
+  168 Python tests and native panel startup pass. Live viewer autosaved all three
+  new defaults on Python reload; no config writes, launch, rebuild or restart.
+  Evidence: build/short-turn-evaluation/{settings.json,turn-sweep.json,role-sweep.json,
+  render-results.json,comparison.png,turn-comparison.png}; local sweep/render scripts
+  alongside evidence operate only on the frozen copy.
+
+- Isolation penalty trial (2026-10-12): user found too many floating short strands
+  and authorized trying a nearest-population isolation penalty. Incremental selector
+  adds select_isolation=.9 (dimensionless,0–2) and select_isolation_distance=8 blocks
+  (1–32) in Curve selection. After the first candle, add w*(1-exp(-(d/r)^2)) to
+  the mass-normalized candle score; d is closest positive-weight sketch-sample
+  distance to selected CANDLE curves. First candle uses old score; rods never
+  anchor candles, and rod scoring is unchanged. One approach suffices, multiple
+  contacts do not accumulate; geometry/population/lighting formulas unchanged.
+  Zero and selection-off bypass proximity computation; zero verified byte-identical
+  to prior frozen curve/star outputs. No final-occupancy connectivity guarantee.
+  Cached sparse affinities use AABB pruning and batched cKDTree nearest queries,
+  not all point pairs. Beyond4r affinity0 (omitted <=exp(-16)); no self edges or
+  zero-mass samples.2m directed-edge guard. Strength edits reuse the cache;
+  distance edits rebuild. First construction ~.56–1.09s at8 blocks on fixture,
+  warm selection~28ms/full Python~2.04s; timings depend on viewer/test contention.
+  User had reduced seed rate to50.167; retained that and all other saved settings.
+  Frozen624-candidate scene: off471 candle/108 rod curves,12879 objects; on212/153,
+  9268 objects. Short candles with no other candle sketch within8 blocks87/375->1/119.
+  Actual candle components of <=30 cells at4-block adjacency925->495 (includes
+  sampling gaps, not source-curve counts). Average near-parallel multiplicity
+  at8-block/30-degree diagnostic1.278->1.284; arc with>3 neighbors .292%->.349%.
+  Moderate strength.65 retains10921 objects; high strength/small reach can collapse
+  to one cluster. Native below/oblique comparisons inspected, visual acceptance
+  pending.166 Python tests/native panel startup pass. Viewer loaded new controls
+  through Python reload; live saved settings reproduce tested strong buffers.
+  No config writes, visible launch, main viewer rebuild or restart needed.
+  Evidence build/isolation-evaluation/{settings.json,sweep.json,render-results.json,
+  comparison.png,validation.json}; repeat sweep via scripts/evaluate_isolation_selection.py.
+
+- Screenshot tuning / short candidates (2026-10-12): user requested narrower
+  coherent strings, visible rods, dimmer faint candles and short strands in dense
+  areas, specifically targeting `Screenshot 2026-10-10 232941` and
+  `vlcsnap-2026-10-10-23h47m08s611` in scar/. This authorizes the following lighting
+  tuning for the incremental experiment; other accepted lighting remains intact.
+  `density_population_selection` adds short_curve_fraction=.75 and
+  short_curve_length=24 blocks beside long mean120. Stable root hash chooses
+  class; same .6 length variation, density-guided growth and whole-curve selector.
+  Independent short/long batches avoid long histories for short roots; zero
+  fraction preserves the old single-length pool exactly. Existing scripts do not
+  expose/use the mixture. No changed overlap objective, cutting or joining.
+  Tuned defaults: rate96, seed power1, response8.276/pull.35/wander.15, root XZ.803
+  and Y roughly10.9..86.7 in frozen field; pop density.9, source influence.35,
+  curve variation.25, narrow spread XZ.2/Y.1 blocks, rod intensity.2, budget5,
+  rod attraction.75/repulsion5, samples128. Shared field unchanged. Lighting
+  sky.10/ambient.02/lift1 changes only this script's defaults/preset; formula and
+  base palette unchanged. Lavender is still a material choice, not a light-state
+  flag. On identical geometry unlit candle mean RGB luminance .636->.347,
+  level8+ candles .740->.645, rods .957->.956. Curves/positions/shapes/counts
+  byte-identical across lighting comparison.
+  Compared single/mixed lengths, short24/36, rate64/96/128, lights.05/.10/.16,
+  population density and source-density choices. Chosen frozen scene1169
+  candidates ->670 candle/243 rod curves ->15731 candle objects/1824 rods;
+  558 candle/197 rod curves short. Normal sampler limit1.63m probes reached;
+  diagnostic4.46m probes gives17575 total vs17555 (+.11%), not per-cell convergence.
+  Warm selection59–64ms, Python total~2.7s, fresh pool/sketch total~3.4s in one run;
+  live-viewer contention gave slower runs. No universal speed guarantee.
+  Native close-below, oblique and broad views inspected; more continuous long
+  strings than references remain. No claim of a match or user visual acceptance.
+  Artifacts: build/narrow-tuning/{selected-preset.json,chosen-request.json,
+  chosen.stars.bin,reference-comparison.png,lighting-comparison.png,validation.json}.
+  161 Python tests and native panel startup pass. Python reload only; no viewer
+  rebuild or auto-launch. After user closed the viewer, applied only the incremental
+  local preset; shared density, camera and other presets unchanged. Preserved the
+  user's inactive jitter/clump-scale values. Backup:
+  build/narrow-tuning/plot-before-screenshot-tuning.json. Re-generating the saved
+  config gives byte-identical curve and star buffers to the inspected chosen render.
+
+- Incremental population selection trial (2026-10-12): user authorized a simple
+  candle/rod selector after rejecting independent shapes and curve-only overlap.
+  New separate `density_population_selection.py` reuses density-guided growth with
+  joining off, then selects whole curves using expected population sketches.
+  Shared density DAG remains upstream; original/branching/coverage/corpus scripts
+  are preserved. Local defaults copied from current curve preset, except seed
+  rate32, mean length180 (was320.183), proxies on, rod intensity.2 (was.036).
+  Candle score is marginal weighted density error per expected star; target is
+  pop_density*grid_spacing*budget*(rho/peak)^contrast, inverse target weight with
+  2% peak floor. Rod score rewards candle proximity and penalizes rod redundancy,
+  including self cost. Two roles interleave, each candidate used once, stop at
+  nonnegative score. No lighting evaluation, curve cutting, joins or swaps.
+  Defaults budget4, contrast.5, candle grid8 blocks, rod grid12, attraction.5,
+  repulsion5,128 Sobol samples/curve. All controls exposed with descriptions;
+  new Curve selection UI section and result counts require native rebuild.
+  Toggle off populates entire same pool as candles; rods shown gold in preview.
+  Star profiles/scatter/taper/warp and approximate edge survival drive footprints;
+  final occupancy and fade suppression remain approximate in selection. Profiles
+  normalized across candidate pool, retained through sampling, with seed-cell
+  identities preserving per-path randomness under subset changes. Optional private
+  population context affects only this experiment; old paths retain index IDs.
+  Full-block role omitted; existing accepted lighting settings unchanged.
+  Growth/sketch caches separate; score/rod-intensity/lighting changes reuse sketch.
+  Local sparse interactions, worst-case quadratic;2048 seed guard before growth,
+  524288 sketch samples,2m entries per interaction matrix. No silent pool truncation.
+  Frozen scene274 candidates->116 candle/39 rod curves->3946 candle objects/213 rods,
+  versus12021 candles with selection off. At8-block/30-degree diagnostic reach,
+  99.7% of selected candle arc has1–3 near-parallel candle paths (69.1% all candidates).
+  This is measured, not a hard cap or connectivity guarantee. Some thin connections
+  disappear; user visual acceptance pending. Compared rates16/32/48/64 and lengths
+  120/180/240/320, plus rod weights and128/256 samples. Warm selection7–15ms, full
+  Python generation.7–1.2s on fixture, startup excluded. build/incremental-evaluation
+  holds frozen preset, sweeps, metrics and inspected native/curve comparisons.
+  160 Python tests and native panel startup pass. Viewer rebuilt after user closed
+  the locked executable. No live config edits or viewer launch.
+
 - Lighting checkpoint accepted (2026-10-11): user said "close enough, save".
   Preserve the Scar lighting correction and current viewer-autosaved settings
   as the accepted lighting baseline. Do not resume visual tuning automatically.

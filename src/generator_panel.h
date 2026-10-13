@@ -65,6 +65,7 @@ public:
                     densitySettings.field = result->metadata["density_field"];
             }
             if (!result->error.empty()) { error = result->error; return {}; }
+            selectionStats = result->metadata.value("selection_stats", nlohmann::json::object());
             error.clear();
             mathMs = result->metadata.at("generation_ms").get<double>();
             totalMs = result->elapsedMs;
@@ -195,6 +196,13 @@ public:
                     }
                 }
                 ImGui::EndDisabled();
+                if (entry.contains("description") && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                    ImGui::BeginTooltip();
+                    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 32.f);
+                    ImGui::TextUnformatted(entry.at("description").get<std::string>().c_str());
+                    ImGui::PopTextWrapPos();
+                    ImGui::EndTooltip();
+                }
             };
             if (blockUnits && DensitySettings::participates(selected) && ImGui::CollapsingHeader("Noise / density field", ImGuiTreeNodeFlags_DefaultOpen)) {
                 for (const auto& entry : item.at("parameters"))
@@ -203,6 +211,16 @@ public:
             if (!selectedPopulation || ImGui::CollapsingHeader("Curve generation", ImGuiTreeNodeFlags_DefaultOpen)) {
                 for (const auto& entry : item.at("parameters"))
                     if (entry.value("group", std::string{}).empty()) drawParameter(entry);
+            }
+            bool hasSelection = false;
+            for (const auto& entry : item.at("parameters"))
+                hasSelection |= entry.value("section", std::string{}) == "selection";
+            if (hasSelection && ImGui::CollapsingHeader("Curve selection", ImGuiTreeNodeFlags_DefaultOpen)) {
+                for (const auto& entry : item.at("parameters"))
+                    if (entry.value("section", std::string{}) == "selection") drawParameter(entry);
+                if (!selectionStats.empty())
+                    ImGui::Text("%d candidates -> %d candle / %d rod curves", selectionStats.value("candidates", 0),
+                                selectionStats.value("candles", 0), selectionStats.value("rods", 0));
             }
             if (selectedPopulation && ImGui::CollapsingHeader("Star population", ImGuiTreeNodeFlags_DefaultOpen)) {
                 for (const auto& entry : item.at("parameters"))
@@ -213,7 +231,7 @@ public:
                 ImGui::Indent();
                 std::vector<std::string> groups;
                 for (const auto& entry : item.at("parameters")) {
-                    if (entry.value("section", std::string{}) == "population" || entry.value("section", std::string{}) == "field") continue;
+                    if (entry.value("section", std::string{}) == "population" || entry.value("section", std::string{}) == "field" || entry.value("section", std::string{}) == "selection") continue;
                     const auto group = entry.value("group", std::string{});
                     if (!group.empty() && std::find(groups.begin(), groups.end(), group) == groups.end())
                         groups.push_back(group);
@@ -269,6 +287,7 @@ private:
     GeneratorRuntime runtime;
     GenerationService service;
     nlohmann::json catalog = nlohmann::json::array();
+    nlohmann::json selectionStats = nlohmann::json::object();
     std::map<std::string, nlohmann::json> parameters;
     DensitySettings densitySettings;
     std::string selected, fingerprint, error, warnings;

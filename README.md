@@ -5,13 +5,240 @@ Windows runs directly against the installed graphics driver; WSL is not required
 
 For development context and workflow preferences, read [AGENTS.md](AGENTS.md).
 
+## Incremental candle / rod selection (experiment)
+
+Select **Incremental candle / rod curve selection** (`density_population_selection.py`)
+in the generator list. Its **Curve selection** section has the selection controls,
+hover explanations, and candidate/candle/rod curve counts. Toggle **Apply incremental
+selection** off to populate the same entire candidate pool as candles. Curves and
+stars retain their independent visibility controls; selected rod curves are gold
+in the line preview. The selection section, tooltips and shared-field UI registration
+require the rebuilt viewer. Later Python changes reload normally.
+
+This keeps the existing organic density-guided growth, with joining disabled,
+then chooses whole curves. It shares `generator.density_field` with the other
+density scripts. The October 12 tuning targets `scar/Screenshot 2026-10-10 232941.png`
+and `scar/vlcsnap-2026-10-10-23h47m08s611.png`: coherent narrow strings, short strands
+within patches, visible rods and dimmer unlit candles. It retains the shared field
+and adds a **short/long candidate mixture** using the same density-guided growth.
+Each root gets one length class from a stable hash; both classes use the same
+length variation. Separate growth batches avoid storing long histories for short
+curves. The existing population selector chooses whole curves from the combined
+pool; there is no new overlap score, cutting or joining rule.
+The subsequent isolation trial adds a soft candle proximity penalty to selection,
+without changing the candidate geometry or population sampler.
+
+Current defaults use seed rate **96**, **75% short candidates** averaging **24
+blocks**, and **120-block** long candidates. Length variation is .6; growth
+response 8.276 blocks and wandering .15 for longs; short response **2 blocks** and
+wandering **.8**. Density attraction .35 remains shared. Seed density power
+is 1. Narrow transverse spread (.2 XZ/.1 Y blocks) is paired with **.9 expected
+stars per block of arc** to avoid making thin strings empty. Per-curve intensity
+variation is .25, original-density influence .35, and rod intensity .2.
+This experiment's lighting defaults are ambient **.02**, sky **.10**, brightness
+lift **1**. The shared lighting formula and material palette are unchanged;
+lavender candle colors still exist, but low-light candles are darker. Other
+experiments retain their settings and accepted lighting baseline. Existing saved
+presets are not overwritten by Python defaults. Material lottery weights/full-block
+curves are omitted here because the selector assigns candle and rod roles directly.
+
+Each candidate gets a small deterministic sample of its expected star population,
+including source-density variation, along-curve noise, per-curve intensity variation,
+transverse scatter, taper, warp and an approximate edge survival envelope. These
+weighted samples are deposited smoothly on a coarse grid. A long shared stretch
+accumulates more overlap than a brief crossing; larger star mass contributes more.
+This is neither a binary intersection test nor a count of nearby centerlines.
+
+The incremental loop starts empty. A candle candidate is scored by how much its
+expected population improves the density fit, divided by its expected star mass.
+After the first candle curve, add an isolation penalty based on the nearest
+positive-mass population sample on any already selected candle curve. Choose the
+best negative score, update its neighbors, and repeat. Rod candidates
+instead receive a reward near selected candles and a penalty near other rods.
+The two roles compete in the same loop; each curve can receive at most one role.
+Stop when neither role has a beneficial candidate. No lighting propagation is
+computed during selection; the existing shared lighting pass runs after sampling.
+
+| Control | Default | Meaning and effect |
+| --- | ---: | --- |
+| Candidate seeds per million blocks | 96 | Mean roots per million blocks in the seed region. More gives more candidate choices and more work. Increasing only this value preserves existing root locations, but selection and final counts can change. |
+| Mean long curve length | 120 blocks | Mean growth budget for the long class, before length variation and domain clipping. Longer paths connect farther but tie useful and redundant stretches together. Changes geometry and counts. |
+| Short candidate fraction | .75 | Dimensionless fraction of roots assigned the short length by a stable hash. Increasing it converts a nested subset to short candidates; roots stay fixed, but geometry, selection and star counts change. 0 restores a single length class. |
+| Mean short curve length | 24 blocks | Mean total arc budget for the short class, with the same variation and clipping as long curves. Changes geometry/counts, without changing root positions or the class lottery. |
+| Short response length | 2 blocks | Short candidates' density smoothing, heading response and integration scale. Smaller turns sooner and costs more steps; noise wavelength is four times this value. Changes short geometry and selection/counts, without resampling roots or changing length budgets. |
+| Short wandering strength | .8 | Dimensionless amplitude of the existing coherent two-octave noise for shorts. Higher bends more; 0 keeps only density steering. Same seeded noise, no star scatter changes. Changes geometry and selection/counts. Long response/wandering controls now explicitly apply only to longs. |
+| Apply incremental selection | On | Off retains all candidates as candles, for comparison. Changes counts. |
+| Density budget multiplier | 5 | Dimensionless amplitude of the desired population. Raise it to usually keep more candle curves/stars; lower it to thin them. It is not a curve-count quota. |
+| Density contrast | 0.5 | Exponent on normalized upstream density in the selection target. Higher concentrates retained population into denser areas; 0 makes the target uniform and permits more sparse excursions. Changes selection and counts. |
+| Candle overlap scale | 8 blocks | Spacing of the population comparison grid. Shared grid support extends up to twice this spacing per axis, with smoothly varying weight. Larger values compare a broader neighborhood and lose fine detail. Also changes the target's spatial scale, so counts need not vary monotonically. |
+| Candle isolation penalty | .9 | Dimensionless maximum extra candle score. Higher discourages floating segments; 0 restores the previous selector exactly. The first candle curve is exempt. Strong settings can leave only one cluster. Changes selection/counts without adding random draws. |
+| Isolation distance | 8 blocks | Scale of the shortest distance between candidate population samples and selected candle samples. Larger allows wider gaps. At this distance the penalty is 63% of its maximum; one close approach is enough. Changes selection/counts, not candidate geometry. |
+| Select rod curves | On | Enables the second role. Requires block population and material proxies. Off selects candles only. |
+| Rod proximity scale | 12 blocks | Grid spacing for both rod/candle attraction and rod/rod repulsion. Larger values let more distant populations interact; changes rod choices and possibly candle choices. It is not an exact light radius. |
+| Rod attraction to candles | 0.75 | Dimensionless proximity reward. Higher generally selects more rods, and may reserve candidates that would otherwise become candles. Zero selects no rods. |
+| Rod repulsion from rods | 5 | Dimensionless redundancy penalty, including the candidate's own population footprint. Higher generally retains fewer rod curves. |
+| Short-curve rod penalty | .5 | Dimensionless extra rod score, after mass normalization, for the short class only. Higher reserves more shorts for candle density filling; 0 restores equal rod rules for both classes. Still permits useful short rods, and does not force unwanted candles. Changes roles/counts, not geometry or random draws. |
+| Rod density multiplier (Star population) | 0.2 | Rod intensity relative to candle intensity along the same path. Higher puts more rods on each chosen rod curve, but can cause the selector to choose fewer rod curves. It does not alter scatter. |
+| Population samples per curve | 128 | Integration quality, rounded up to a power of two, from 32 to 512. More resolves the population footprint better at greater cost; selection and counts may shift. Samples are not rendered objects. |
+| Along-curve population density | .9 stars/block | Base expected intensity before source density, curve variation, material ratio and cell occupancy. Higher fills each curve more closely; selection and final counts can change. Does not widen scatter. |
+| Transverse spread XZ / Y | .2 / .1 blocks | Gaussian standard-deviation scales perpendicular to the curve. Smaller values keep each string coherent. Random draws stay the same; occupied cells and final counts can change. |
+| Night sky illumination | .10 | Dimensionless uniform sky contribution. Lower darkens candles with little local rod light. No random draws or count changes. |
+| Ambient brightness | .02 | Dimensionless neutral ambient contribution. Raise to brighten all materials, especially shadows. No random draws or count changes. |
+
+The score controls add no random draws. Root hashes and per-curve population
+identities are stable. **Original density influence** in Star population remains
+separate from **Density contrast**: the former changes where stars lie on each
+candidate, while the latter changes what distribution the selector wants to keep.
+Population profiles are normalized over the candidate pool and reused after
+selection; rejecting a curve therefore does not renormalize every survivor.
+Crossing-cell occupancy, a changed material role, final fades and lighting can
+still change surviving objects and their appearance.
+
+For the math, let `q_i[x]` be candidate i's expected candle mass at comparison node
+x, `M[x]` the selected candle mass, `rho[x]` the normalized upstream density,
+`lambda` the base stars per block, and `h` the candle grid spacing. The target is
+`T[x] = lambda * h * budget * rho[x]^contrast`, with weight
+`W[x] = 1 / (T[x] + .02 * lambda * h * budget)`. Candle score is the change in
+`0.5 * sum(W * (M-T)^2)`, divided by candidate mass. Initially it is
+`(0.5 * sum(W*q_i*q_i) - sum(W*q_i*T)) / mass_i`; accepting candle j adds
+`sum(W*q_i*q_j) / mass_i` to neighboring candle scores. Thus a star contributes
+less crowding penalty where the target is high.
+
+Isolation adds `w * (1 - exp(-(d/r)^2))` to that **already mass-normalized**
+candle score, where w is the isolation strength, r its distance scale, and d the
+minimum Euclidean distance between the candidate's positive-weight population
+samples and those of any selected candle curve. The initial candle selection
+uses the original score. Rods do not provide candle attachment, and their scoring
+is unchanged. Nearby contacts do not accumulate: keep only the closest one. The
+existing density and overlap scores can still justify a new isolated cluster or
+reject a redundant nearby route. This is a selection heuristic, not a new global
+energy optimum or a guarantee of connected final stars. In particular, a sparse
+sampled tail can suggest proximity even when final occupancy leaves a visible gap.
+
+Closest-sample affinities are cached separately from population sketches.
+Bounding boxes reject distant pairs; batched nearest-neighbor queries calculate
+the rest without constructing all sample pairs. Affinity beyond `4*r` is treated
+as zero (omitted affinity at most `exp(-16)`, about 1.13e-7). Zero-weight samples
+and self contacts are excluded. Each accepted candle updates only its nearby
+candidates using a maximum, and changing strength reuses the cached distances.
+Both strength zero and selection off bypass distance construction entirely.
+
+The isolation trial used the latest saved seed rate **50.167**, preserving the
+user's other settings. On its 624 candidates, strength .9 / distance8 retained
+212 candle and 153 rod curves, producing **9,268 objects**, versus 12,879 with the
+penalty off. Short candle curves having no other selected candle sample within
+8 blocks fell from **87 of 375 to 1 of 119**. In the actual candle population, grouping
+by pair distances <=4 blocks reduced components with at most 30 objects from
+925 to 495; these include sampling gaps within individual curves and are not a
+count of isolated source curves. Strength .65 is a gentler alternative, retaining
+10,921 objects. Very strong penalties with small distance scales collapsed to a
+single cluster, so those were not selected as defaults. Native below/oblique
+comparisons are in `build/isolation-evaluation/comparison.png`; the frozen settings,
+numeric sweep, rendered buffers and validation metrics are alongside it. Re-run
+the sweep with `python scripts/evaluate_isolation_selection.py --settings
+build/isolation-evaluation/settings.json`. It never writes live settings.
+Zero penalty reproduced the previous frozen curve/star buffers byte for byte.
+Average near-parallel curve multiplicity at an 8-block, 30-degree diagnostic
+changed only from 1.278 to 1.284; arc with more than three nearby parallel curves
+changed from .292% to .349%. These are geometric checks, not hard overlap limits.
+Building the proximity cache took roughly .56–1.09 seconds on this fixture;
+warm selection took about 28 ms, with full Python generation about 2.04 seconds.
+These timings vary with machine load. All 166 Python tests and the native panel
+startup check passed. Python reload exposes the controls without a viewer rebuild.
+
+For rods, compute an unweighted shared-footprint product `K_ij` at the rod scale,
+normalized by `lambda * rod_scale`. With rod intensity ratio r, attraction a and
+repulsion b, a candidate's score is
+`(0.5*b*r*K_ii + b*r*sum_selected_rods(K_ij) - a*sum_selected_candles(K_ij)) / mass_i`.
+Candle ranking does not itself get an extra lighting/rod reward. Short candidates
+add `select_short_rod_penalty` to this mass-normalized rod score. Long candidates
+have no extra cost. This is a greedy
+heuristic; it does not perform swaps, cut curves into segments or guarantee a
+globally optimal result.
+
+The later short-turning trial keeps the user's current seed rate **40.271**, short
+fraction **.5**, mean short length **24**, and all population/lighting settings.
+On its **397 candidates (208 short)**, separate short response 2 / wandering .8
+increased median accumulated short-curve turning from **42 to 163 degrees**.
+Median endpoint distance divided by arc length fell from **.982 to .872**, so this
+is actual bending rather than just finer tessellation. Short growth in the isolated
+sweep took about **42 to 59 ms**; total generation timings vary with concurrent
+viewer load. Long candidate paths and root identities are unchanged. Both classes'
+selection and final population can still change as their competitors change.
+
+With a **.5 short-rod penalty**, selected shorts changed from **46 candle / 94 rod**
+curves to **91 candle / 15 rod** curves. The full population changed from **8,315
+candles + 839 rods** to **8,964 candles + 679 rods**. Short wandering 1.5 gave more
+turning but fewer retained candles and a visibly sparser result; .8 is the default.
+The penalty does not test whether candles are lit: existing rods still score candle
+proximity and rod redundancy. It leaves shorts available for the existing density
+objective instead of adding another candle reward. Revert this trial's behavior by
+matching short response/wandering to their long values and setting the short-rod
+penalty to 0. Existing saved settings are retained; new controls get their defaults
+on schema reload. Native before/after views and frozen requests/results are in
+`build/short-turn-evaluation/comparison.png` and adjacent files. Visual acceptance
+remains the user's judgment.
+
+Before the isolation trial, screenshot tuning compared single-length pools, higher population intensities,
+short means 24/36 blocks, seed rates 64/96/128, length mixtures and sky .05/.10/.16.
+The chosen frozen scene produced **1,169 candidates -> 670 candle + 243 rod curves
+-> 15,731 candle objects + 1,824 rods**. Of the selected curves, **558 candle and
+197 rod curves** came from the short class. 256 instead of 128 footprint samples
+gave 17,418 total objects versus 17,555: similar aggregate density, different choices.
+The higher seed rate offered more short choices but cost more for modest visual gain.
+Native renders show narrower strings, local short strands and clearer rod lighting,
+but still more continuous long strings than the references. Candle geometry remains
+simple cuboid proxies; the reference's planets and scenery are not represented.
+
+On identical geometry the new lighting reduced mean unlit-candle RGB luminance
+from .636 to .347, versus .740 to .645 for candles at block-light level 8 or above.
+Rods stayed .957 to .956. Counts, positions, shapes, sizes and curve bytes were
+identical. The normal final sampler reached its integration budget; a diagnostic
+4.46-million-probe run without that cap produced 17,575 objects, just **0.11% more**.
+This checks aggregate stability, not exact cell-by-cell convergence.
+
+There is no hard 1–3 curve limit or definition of a filament. Whole-curve selection cannot
+guarantee connected components or preserve every thin bridge. The proxy fits
+expected mass before final unit-cell occupancy, approximates edge fading, and
+does not model density-based fade suppression. The reported density error is over
+candidate-covered grid nodes, so it is not a full-domain quality metric and should
+not be compared directly between different pools. Appearance still needs user
+judgment; some thinner connections can be lost.
+
+Candidate growth and population sketches are cached separately. Selection-only
+changes reuse both; rod intensity and lighting changes also reuse the sketch.
+On the tuned fixture, warm selection took 59–64 ms and full Python generation took
+about 2.7 seconds; a fresh pool/sketch took about 3.4 seconds total. These exclude worker startup and
+are not universal bounds. Local sparse grid products avoid exhaustive segment-pair
+testing, but crowded pools can still approach quadratic storage/work in candidate
+count, and the simple greedy minimum scan is quadratic in the worst case. Guards
+reject over 2,048 candidate seeds before growth, over 524,288 sketch samples, or
+over two million entries in either interaction matrix, rather than silently
+truncating the pool.
+
+Current tuning outputs are in `build/narrow-tuning/`: frozen requests/results,
+`chosen.stars.bin`, `chosen-near-below.png`, `chosen-oblique.png`,
+`validation.json`, and the reference comparison. No visible viewer was launched
+for these native offscreen renders. The tested preset was applied after the viewer
+closed, with backup `plot-before-screenshot-tuning.json`; the saved configuration
+reproduces both chosen buffers byte for byte. Camera and shared field were preserved.
+Earlier single-length evaluation outputs are
+in `build/incremental-evaluation/`: `settings.json`,
+`pool-sweep.json`, `rod-sweep.json`, `render-results.json`, `final-metrics.json`,
+and `selection-comparison.png` (native populated close-up plus curve overview).
+Re-run the numeric sweep with `python scripts/evaluate_population_selection.py
+--settings build/incremental-evaluation/settings.json`; it writes only diagnostic
+outputs, never the viewer's live configuration. The earlier independent corpus
+(`density_curve_corpus.py`) and geometric coverage selector
+(`density_filament_selection.py`) remain separate comparison experiments.
+
 ## Shared noise stage and block coordinates
 
 **density_filament_curves**, **density_filament_branching**, and
-**noise_filaments_branches** consume one upstream
+**noise_filaments_branches**, and the separate curve-selection experiments consume one upstream
 noise/density configuration, stored only in `generator.density_field`. There is
 no preset-to-preset syncing. The **Noise / density field** section edits that
-same object from each generator. All three use block coordinates throughout their
+same object from each generator. These consumers use block coordinates throughout their
 active pipelines; wavelength and XZ/Y half-extents are in blocks.
 
 `_density_field.py` owns the common schema and evaluates A/B/C noise plus density.

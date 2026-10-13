@@ -114,6 +114,32 @@ int main() {
         checkStartup(saved, true, true, true);
         saved["parameters"].erase("density_filament_curves");
         checkStartup(saved, true, true, true);
+        saved["script"] = "density_curve_corpus";
+        saved["density_field"] = {{"extent", 128}, {"y_extent", 32}, {"noise_scale", 64}, {"field_resolution", 24}};
+        saved["parameters"]["density_curve_corpus"] = {{"corpus_span", 64}, {"corpus_copies", 4}, {"select_count", 24}};
+        const auto corpus = checkStartup(saved, true, true, true);
+        if (corpus["parameters"]["density_curve_corpus"]["corpus_span"] != 64 ||
+            corpus["density_field"]["extent"] != 128 || !DensitySettings::participates("density_curve_corpus"))
+            throw std::runtime_error("Independent corpus units or shared density panel failed");
+        saved["script"] = "density_filament_selection";
+        saved["parameters"]["density_filament_selection"] = {{"seed_rate", 12}, {"strand_length", 100}};
+        const auto selection = checkStartup(saved, true, true, true);
+        if (selection["parameters"]["density_filament_selection"]["strand_length"] != 100 ||
+            selection["density_field"]["extent"] != 128 || !DensitySettings::participates("density_filament_selection"))
+            throw std::runtime_error("Curve selection units or shared density panel failed");
+        saved["script"] = "density_population_selection";
+        saved["parameters"]["density_population_selection"] = {{"seed_rate", 20}, {"strand_length", 80},
+            {"seed_y_neg", .9}, {"seed_y_pos", .9}, {"select_density", 0}};
+        const auto populationSelection = checkStartup(saved, true, true, true);
+        const auto selectedPreset = populationSelection["parameters"]["density_population_selection"];
+        if (selectedPreset["strand_length"] != 80 || selectedPreset["select_budget"] != 5 ||
+            selectedPreset["short_curve_fraction"] != .75 || selectedPreset["short_curve_length"] != 24 ||
+            selectedPreset["short_growth_response"] != 2 || selectedPreset.value("short_growth_wander", 0.f) != .8f ||
+            selectedPreset["select_short_rod_penalty"] != .5 ||
+            selectedPreset.value("select_isolation", 0.f) != .9f || selectedPreset["select_isolation_distance"] != 8 ||
+            selectedPreset.contains("pop_candle_weight") || populationSelection["density_field"]["extent"] != 128 ||
+            !DensitySettings::participates("density_population_selection"))
+            throw std::runtime_error("Population selection controls or shared density panel failed");
         {
             saved["script"] = "noise_filaments_branches";
             saved["parameters"] = {

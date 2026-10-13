@@ -4,6 +4,13 @@ from scipy.ndimage import map_coordinates
 
 
 def field_profiles(paths, arcs, seed, params, source):
+    if '_population_profiles' in params:
+        profiles = params['_population_profiles']
+        if profiles is not None and len(profiles) != len(paths):
+            raise ValueError('Population profiles must match selected paths')
+        return profiles
+    from _population_context import curve_ids
+    identities = curve_ids(params, len(paths))
     strength = params.get('pop_source_density', 0.)
     if strength <= 0 or source is None:
         return None
@@ -36,7 +43,7 @@ def field_profiles(paths, arcs, seed, params, source):
         total_length += length
         total_weight += np.trapz(weight, distance)
         if variation > 0:
-            noise = density_noise(distance, seed, i, noise_scale, octaves, roughness)
+            noise = density_noise(distance, seed, int(identities[i]), noise_scale, octaves, roughness)
             noise = np.exp(variation*(noise-noise.max()))
             noise *= length/max(np.trapz(noise, distance), 1e-30)
             weight *= noise

@@ -12,6 +12,11 @@ spec = importlib.util.spec_from_file_location("worker", ROOT / "python" / "worke
 worker = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(worker)
 
+# Included in the existing Python/CTest suite as well as its standalone runner.
+from test_curve_corpus import CurveCorpus
+from test_curve_selection import CurveSelection
+from test_population_selection import PopulationSelection
+
 
 class Generators(unittest.TestCase):
     def test_block_light_matches_brute_force_manhattan_maximum(self):
@@ -812,7 +817,8 @@ class Generators(unittest.TestCase):
         catalog, _, errors = worker.load_catalog(ROOT/'generators')
         self.assertFalse(errors)
         for entry in catalog:
-            self.assertEqual(any(p['key'] == 'pop_block_scale' for p in entry['parameters']), entry['population'])
+            self.assertEqual(any(p['key'] == 'pop_block_scale' for p in entry['parameters']),
+                             entry['population'] and not entry.get('native_blocks', False))
         params = dict(curve_resolution=24, extent=6., y_extent=2., strand_length=5., pop_block_proxies=0,
                       pop_density=10., pop_taper=0., pop_spread=.2, fade_xz=0, fade_y=0)
         with tempfile.TemporaryDirectory() as temp:

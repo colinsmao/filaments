@@ -9,14 +9,14 @@ class DensitySettings {
 public:
     nlohmann::json field = nlohmann::json::object();
     static bool participates(const std::string& script) {
-        return script == "density_filament_curves" || script == "noise_filaments_branches";
+        return script == "density_filament_curves" || script == "noise_filaments_branches" || script == "density_curve_corpus" || script == "density_filament_selection" || script == "density_population_selection";
     }
 
     void importLegacy(const std::string& script, const nlohmann::json& params,
                  bool blockUnits, double legacyScale) {
         if (!participates(script) || !params.is_object()) return;
         const bool curves = script == "density_filament_curves";
-        const double scale = unitsScale(curves, params, blockUnits, legacyScale);
+        const double scale = (script == "density_curve_corpus" || script == "density_filament_selection" || script == "density_population_selection") ? 1 : unitsScale(curves, params, blockUnits, legacyScale);
         for (const char* key : {"extent", "y_extent"})
             if (number(params, key)) field[key] = params[key].get<double>() * scale;
         if (!number(params, "y_extent") && number(params, "extent") && number(params, "y_scale"))

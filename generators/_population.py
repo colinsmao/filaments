@@ -160,8 +160,10 @@ def populate_curves(paths, path_colors, seed, params, limit=1000000, density_sou
         distances.append(distance)
         lengths.append(distance[-1])
     lengths = np.asarray(lengths)
+    from _population_context import curve_ids
+    identities = curve_ids(params, len(curves))
     variation = params.get("pop_curve_density_variation", .5)
-    density_factors = np.array([np.random.default_rng(np.random.SeedSequence([seed, 64281, i])).uniform(1-variation, 1+variation)
+    density_factors = np.array([np.random.default_rng(np.random.SeedSequence([seed, 64281, int(identities[i])])).uniform(1-variation, 1+variation)
                                 for i in range(len(curves))])
     expected = lengths * params.get("pop_density", 4.) * density_factors
     profiles = field_profiles(curves, distances, seed, params, density_source)
@@ -179,12 +181,13 @@ def populate_curves(paths, path_colors, seed, params, limit=1000000, density_sou
     for i, (path, distance, number) in enumerate(zip(curves, distances, counts)):
         if number == 0 or distance[-1] <= 0:
             continue
-        spacing_rng = np.random.default_rng(np.random.SeedSequence([seed, 14281, i]))
-        scatter_rng = np.random.default_rng(np.random.SeedSequence([seed, 24281, i]))
-        survival_rng = np.random.default_rng(np.random.SeedSequence([seed, 34281, i]))
-        size_rng = np.random.default_rng(np.random.SeedSequence([seed, 44281, i]))
+        identity = int(identities[i])
+        spacing_rng = np.random.default_rng(np.random.SeedSequence([seed, 14281, identity]))
+        scatter_rng = np.random.default_rng(np.random.SeedSequence([seed, 24281, identity]))
+        survival_rng = np.random.default_rng(np.random.SeedSequence([seed, 34281, identity]))
+        size_rng = np.random.default_rng(np.random.SeedSequence([seed, 44281, identity]))
         quantiles = (np.arange(number) + .5 + params.get("pop_jitter", .8) * (spacing_rng.random(number) - .5)) / number
-        s = (density_distances(quantiles, distance[-1], seed, i, params) if profiles is None
+        s = (density_distances(quantiles, distance[-1], seed, identity, params) if profiles is None
              else sample_profile(quantiles, profiles[i]))
         segment = np.minimum(np.searchsorted(distance, s, side="right") - 1, len(path) - 2)
         delta = path[segment + 1] - path[segment]

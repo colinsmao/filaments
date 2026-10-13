@@ -9,6 +9,7 @@ contribute to the same mass before selection, with no post-sampling deduplicatio
 import numpy as np
 from scipy.special import ndtri
 from scipy.stats import qmc
+from _population_context import curve_ids
 
 MAX_PROBES = 2_097_152
 
@@ -28,12 +29,18 @@ def curve_materials(count, seed, params):
     rod_probability = weights[1] / weights.sum()
     block_probability = weights[2] / (weights[0]+weights[2]) if weights[0]+weights[2] else 0.
     kinds = np.zeros(count, dtype=np.int8)  # candle, rod, full block
+    identities = curve_ids(params, count)
     colors = np.empty((count, 3))
     for i in range(count):
-        rng = np.random.default_rng(np.random.SeedSequence([seed, 93281, i]))
+        rng = np.random.default_rng(np.random.SeedSequence([seed, 93281, int(identities[i])]))
         rod, block, tint = rng.random(3)
         kinds[i] = 1 if rod < rod_probability else (2 if block < block_probability else 0)
         colors[i] = CANDLE_COLORS[min(int(tint * len(CANDLE_COLORS)), len(CANDLE_COLORS)-1)]
+    if '_curve_kinds' in params:
+        forced = np.asarray(params['_curve_kinds'])
+        if forced.shape != (count,) or forced.dtype.kind not in 'iu' or ((forced < 0) | (forced > 2)).any():
+            raise ValueError('Selected materials must be one candle/rod/block kind per curve')
+        kinds = forced.astype(np.int8)
     colors[kinds == 1] = [.98, .97, .90]
     colors[kinds == 2] = [1., .97, .82]
     return kinds, colors
@@ -65,7 +72,7 @@ def warp_positions(positions, paths, seed, params, spread=None):
                           params.get('pp_swirl_radius', 6.))
     # A fixed source spread makes the wave transform independent of probe count
     # and lets the preview use exactly the same field as population integration.
-    spread = np.std(np.concatenate(paths), axis=0) if spread is None else spread
+    spread = params.get('_warp_spread', np.std(np.concatenate(paths), axis=0)) if spread is None else spread
     return coherent_warp(positions, seed, params.get('pp_warp_amount', .2),
                          params.get('pp_warp_scale', 3.), spread=spread)
 
@@ -115,6 +122,7 @@ def cell_masses(paths, path_colors, seed, params, limit=1_000_000, density_sourc
         raise ValueError('Population source needs one valid RGB color per curve')
     proxies = bool(params.get('pop_block_proxies', 1))
     kinds, material_colors = curve_materials(len(paths), seed, params) if proxies else (None, None)
+    identities = curve_ids(params, len(paths))
     curves, arcs, expected = [], [], []
     variation = params.get('pop_curve_density_variation', .5)
     for i, path in enumerate(paths):
@@ -125,7 +133,7 @@ def cell_masses(paths, path_colors, seed, params, limit=1_000_000, density_sourc
             raise ValueError('Population path exceeds coordinate limits')
         path = path[np.r_[True, np.linalg.norm(np.diff(path, axis=0), axis=1) > 1e-10]]
         arc = np.r_[0., np.cumsum(np.linalg.norm(np.diff(path, axis=0), axis=1))]
-        factor = np.random.default_rng(np.random.SeedSequence([seed, 64281, i])).uniform(1-variation, 1+variation)
+        factor = np.random.default_rng(np.random.SeedSequence([seed, 64281, int(identities[i])])).uniform(1-variation, 1+variation)
         curves.append(path)
         arcs.append(arc)
         density_factor = 1.
@@ -157,13 +165,14 @@ def cell_masses(paths, path_colors, seed, params, limit=1_000_000, density_sourc
             probes[probes == largest] //= 2
     all_cells, all_mass, all_rgb, all_owners = [], [], [], []
     taper = params.get('pop_taper', .3)
-    warp_spread = np.std(np.concatenate(paths), axis=0) if paths and params.get('pp_warp', 0) else None
+    warp_spread = params.get('_warp_spread', np.std(np.concatenate(paths), axis=0)) if paths and params.get('pp_warp', 0) else None
     for i, (path, arc, mass, number) in enumerate(zip(curves, arcs, expected, probes)):
         if number == 0:
             continue
-        quadrature_seed = int(np.random.SeedSequence([seed, 85281, i]).generate_state(1)[0])
+        identity = int(identities[i])
+        quadrature_seed = int(np.random.SeedSequence([seed, 85281, identity]).generate_state(1)[0])
         uvw = qmc.Sobol(d=3, scramble=True, seed=quadrature_seed).random_base2(int(number).bit_length()-1)
-        s = (density_distances(uvw[:, 0], arc[-1], seed, i, params) if profiles is None
+        s = (density_distances(uvw[:, 0], arc[-1], seed, identity, params) if profiles is None
              else sample_profile(uvw[:, 0], profiles[i]))
         segment = np.minimum(np.searchsorted(arc, s, side='right') - 1, len(path)-2)
         delta = path[segment+1] - path[segment]
@@ -212,7 +221,7 @@ def cell_masses(paths, path_colors, seed, params, limit=1_000_000, density_sourc
         owners = np.concatenate(all_owners)
         # Exponential races are categorical draws weighted by each path's mass.
         # Independent from the occupancy hash; no first-path priority at joins.
-        uniforms = np.concatenate([cell_uniform(c, seed, 1000+i) for c, i in
+        uniforms = np.concatenate([cell_uniform(c, seed, 1000+int(identities[i])) for c, i in
                                    zip(all_cells, [j for j, n in enumerate(probes) if n])])
         scores = -np.log(np.maximum(uniforms, 1e-15)) / np.maximum(contributions, 1e-300)
         order = np.lexsort((owners, scores, inverse))
@@ -241,6 +250,6 @@ def populate_blocks(paths, path_colors, seed, params, limit=1_000_000, density_s
     if kinds is not None:
         stats['_block_shapes'] = proxy_shapes(cells[selected], kinds[selected], seed, params)
         stats['_block_kinds'] = kinds[selected]
-        stats['_fade_groups'] = owners[selected]
+        stats['_fade_groups'] = curve_ids(params, len(paths))[owners[selected]]
     return ((cells[selected].astype(np.float32)+.5, colors[selected].astype(np.float32),
              np.ones(len(selected), dtype=np.float32)), stats)

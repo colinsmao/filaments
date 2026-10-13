@@ -62,7 +62,7 @@ def load_catalog(directory, block_units=False, density_graph=False):
                 keys.add(key)
                 parameters.append(dict(key=key, label=str(entry.get("label", key)), type=kind,
                                        min=lo, max=hi, default=default))
-                for hint in ('group', 'enabled_if', 'toggle', 'logarithmic', 'slider_max'):
+                for hint in ('group', 'section', 'description', 'enabled_if', 'toggle', 'logarithmic', 'slider_max'):
                     if hint in entry:
                         parameters[-1][hint] = entry[hint]
             axis_fade = getattr(module, 'NATIVE_AXIS_FADE', False)
@@ -103,8 +103,14 @@ def load_catalog(directory, block_units=False, density_graph=False):
                 parameters.extend(dict(entry) for entry in LIGHTING_PARAMETERS)
                 if callable(getattr(module, 'generate_population_density_source', None)):
                     parameters.append(dict(FIELD_PARAMETER))
-            field_consumer = density_graph and path.stem in NATIVE_CURVE_GENERATORS | {'noise_filaments_branches'}
-            if block_units and (path.stem in NATIVE_CURVE_GENERATORS or field_consumer):
+            native_math = getattr(module, 'NATIVE_BLOCKS', False)
+            field_consumer = density_graph and (path.stem in NATIVE_CURVE_GENERATORS | {'noise_filaments_branches'}
+                                               or getattr(module, 'SHARED_DENSITY_FIELD', False))
+            if native_math:
+                # New scripts can declare physical local controls from birth.
+                # Only the legacy shared population/appearance schema converts.
+                parameters = [p if p['key'] in keys else block_schema([p])[0] for p in parameters]
+            elif block_units and (path.stem in NATIVE_CURVE_GENERATORS or field_consumer):
                 module._legacy_parameters = parameters
                 parameters = block_schema(parameters)
             if field_consumer:
@@ -119,11 +125,20 @@ def load_catalog(directory, block_units=False, density_graph=False):
                         if entry['key'] == 'strand_length':
                             entry['label'] = 'Mean curve length (blocks)'
             from _zone_controls import annotate_zones
+            overrides = getattr(module, 'PARAMETER_DEFAULTS', {})
+            omitted = getattr(module, 'OMIT_POPULATION_PARAMETERS', ())
+            parameters = [p for p in parameters if p['key'] not in omitted]
+            for p in parameters:
+                if p['key'] in overrides:
+                    value = overrides[p['key']]
+                    if not isinstance(value, (int, float)) or not math.isfinite(value) or not p['min'] <= value <= p['max']:
+                        raise ValueError(f"Invalid default override for {p['key']}")
+                    p['default'] = int(value) if p['type'] == 'int' else float(value)
             parameters = annotate_zones(parameters)
             if len(parameters) > 96:
                 raise ValueError("Maximum 96 parameters per generator")
             catalog.append(dict(id=path.stem, name=str(getattr(module, "NAME", path.stem)),
-                                primitive=primitive, population=population, parameters=parameters))
+                                primitive=primitive, population=population, native_blocks=bool(native_math), parameters=parameters))
             modules[path.stem] = module
         except Exception:
             errors.append(f"{path.name}:\n{traceback.format_exc(limit=5)}")
@@ -153,9 +168,11 @@ def generate_request(request, directory, output):
         supplied = request.get("params", {})
         if not isinstance(supplied, dict):
             raise ValueError("params must be an object")
-        field_consumer = density_graph and selected in NATIVE_CURVE_GENERATORS | {'noise_filaments_branches'}
-        native_blocks = block_units and (selected in NATIVE_CURVE_GENERATORS or field_consumer)
-        if native_blocks and not supplied and schema['population']:
+        native_math = getattr(modules[selected], 'NATIVE_BLOCKS', False)
+        field_consumer = density_graph and (selected in NATIVE_CURVE_GENERATORS | {'noise_filaments_branches'}
+                                           or getattr(modules[selected], 'SHARED_DENSITY_FIELD', False))
+        native_blocks = native_math or (block_units and (selected in NATIVE_CURVE_GENERATORS or field_consumer))
+        if native_blocks and not native_math and not supplied and schema['population']:
             supplied = {'pop_block_scale': 16}
         migrate = getattr(modules[selected], 'migrate_parameters', None)
         if callable(migrate):
@@ -163,7 +180,7 @@ def generate_request(request, directory, output):
         if schema['population']:
             supplied = migrate_population(supplied)
             supplied = migrate_lighting(supplied)
-        if native_blocks:
+        if native_blocks and not native_math:
             supplied = migrate_to_blocks(supplied, modules[selected]._legacy_parameters,
                 direct_scale=float(request.get('legacy_display_scale', 16)) if not schema['population'] else None)
         if field_consumer:
@@ -220,7 +237,12 @@ def generate_request(request, directory, output):
         density_source = None
         population_density = None
         if schema["population"]:
-            if params.get('pop_source_density', 0) > 0:
+            if callable(getattr(module, 'generate_population_plan', None)):
+                plan = module.generate_population_plan(count=count, seed=seed, **params)
+                generated, paths, path_colors, population_density = plan['source']
+                params = dict(params, **plan['population'])
+                response['selection_stats'] = plan['stats']
+            elif params.get('pop_source_density', 0) > 0:
                 generated, paths, path_colors, population_density = module.generate_population_density_source(count=count, seed=seed, **native_params)
             else:
                 generated, paths, path_colors = module.generate_population_source(count=count, seed=seed, **native_params)
