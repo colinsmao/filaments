@@ -32,6 +32,58 @@ def fixture():
 
 
 class PopulationSelection(unittest.TestCase):
+    def test_pair_restart_starts_separate_patches_but_not_unsupported_singletons(self):
+        pairs=csr_matrix(np.eye(5))
+        initial=np.array([-.9,-.7,-.7,-.7,-.4])
+        near=csr_matrix([[0.,.9,0.,0.,0.],[.9,0.,0.,0.,0.],
+                         [0.,0.,0.,.8,0.],[0.,0.,.8,0.,0.],[0.,0.,0.,0.,0.]])
+        args=(pairs,initial,csr_matrix((5,5)),np.ones(5),0.,1.,1.,near,1.)
+        before=greedy(*args)
+        np.testing.assert_array_equal(before[0],[0,1])
+        report={}
+        ids,kinds,scores=greedy(*args,restart_patches=True,report=report)
+        np.testing.assert_array_equal(ids,[0,1,2,3])
+        np.testing.assert_allclose(scores,[-.9,-.6,-.5,-.5])
+        self.assertFalse(kinds.any())
+        self.assertEqual(report['patch_restarts'],1)
+
+    def test_pair_restart_includes_mutual_overlap_once_and_normalizes_combined_mass(self):
+        # Unequal masses: calculate the joint quadratic error directly.
+        q=np.array([[1.,0.,0.],[0.,1.,0.],[0.,.4,1.6]])
+        target=np.array([1.4,.9,1.4])
+        pairs=gram(csr_matrix(q),1.)
+        initial=.5*pairs.diagonal()-q@target
+        mass=q.sum(axis=1)
+        near=csr_matrix([[0.,0.,0.],[0.,0.,.9],[0.,.9,0.]])
+        report={}
+        ids,roles,scores=greedy(pairs,initial,csr_matrix((3,3)),mass,0.,1.,1.,near,1.,
+                               restart_patches=True,report=report)
+        np.testing.assert_array_equal(ids,[0,1,2])
+        modeled=q[0]
+        combined=q[1]+q[2]
+        expected=(.5*np.sum((modeled+combined-target)**2)-.5*np.sum((modeled-target)**2)
+                  +.1*(mass[1]+mass[2]))/(mass[1]+mass[2])
+        np.testing.assert_allclose(scores[1:],[expected,expected])
+        self.assertFalse(roles.any())
+        self.assertEqual(report['patch_restarts'],1)
+        # Two individually attractive duplicates can overfill the same target.
+        pairs=csr_matrix([[1.,0.,0.],[0.,1.,1.],[0.,1.,1.]])
+        ids,_,_=greedy(pairs,np.array([-.9,-.4,-.4]),csr_matrix((3,3)),np.ones(3),0.,1.,1.,
+                       near,1.,restart_patches=True)
+        np.testing.assert_array_equal(ids,[0])
+
+    def test_pair_restart_has_no_effect_without_isolation_or_eligible_neighbors(self):
+        pairs=csr_matrix(np.eye(3));rod=csr_matrix((3,3))
+        initial=np.array([-.9,-.4,-.4]);near=csr_matrix([[0.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
+        args=(pairs,initial,rod,np.ones(3),0.,1.,1.,near,0.)
+        for a,b in zip(greedy(*args),greedy(*args,restart_patches=True)):
+            np.testing.assert_array_equal(a,b)
+        # A zero-mass neighbor cannot justify starting a patch.
+        ids,_,_=greedy(pairs,initial,rod,np.array([1.,1.,0.]),0.,1.,1.,near,1.,restart_patches=True)
+        np.testing.assert_array_equal(ids,[0])
+        ids,_,_=greedy(pairs,initial,rod,np.ones(3),0.,1.,1.,csr_matrix((3,3)),1.,restart_patches=True)
+        np.testing.assert_array_equal(ids,[0])
+
     def test_population_proximity_matches_nearest_positive_mass_samples(self):
         points=np.array([[0.,0.,0.],[2.,0.,0.],[0.,0.,0.],[4.,0.,0.],
                          [5.,2.,0.],[100.,0.,0.],[0.,0.,0.]])
@@ -319,6 +371,7 @@ class PopulationSelection(unittest.TestCase):
         self.assertEqual(controls['short_growth_response']['default'],2.)
         self.assertEqual(controls['short_growth_wander']['default'],.8)
         self.assertEqual(controls['select_short_rod_penalty']['default'],.5)
+        self.assertEqual(controls['select_restart_patches']['default'],1)
         self.assertTrue(controls['short_curve_length']['description'])
         self.assertEqual(controls['pop_spread_xz']['default'],generator.PARAMETER_DEFAULTS['pop_spread_xz'])
         self.assertEqual(controls['extent']['scope'],'density_field')
@@ -339,11 +392,13 @@ class PopulationSelection(unittest.TestCase):
             self.assertTrue(first['ok'],first.get('error'))
             with patch('_curve_selection.grow_field',side_effect=AssertionError('Scoring edit retraced curves')):
                 with patch('_population_selection.field_profiles',side_effect=AssertionError('Scoring edit rebuilt sketch')):
-                    second=worker.generate_request(dict(request,params=dict(params,select_budget=5.,select_short_rod_penalty=1.)),ROOT/'generators',file)
+                    second=worker.generate_request(dict(request,params=dict(params,select_budget=5.,select_short_rod_penalty=1.,select_restart_patches=0)),ROOT/'generators',file)
                 self.assertTrue(second['ok'],second.get('error'))
                 third=worker.generate_request(dict(request,params=dict(params,pop_spread_xz=2.)),ROOT/'generators',file)
                 self.assertTrue(third['ok'],third.get('error'))
             self.assertEqual(first['selection_stats']['candidates'],second['selection_stats']['candidates'])
+            self.assertIn('patch_restarts',first['selection_stats'])
+            self.assertEqual(second['selection_stats']['patch_restarts'],0)
             self.assertNotIn('_curve_ids',first['params'])
             self.assertEqual(file.with_suffix('.stars.bin').read_bytes()[:8],b'FSTAR003')
             # All-candle comparison really overrides the random material lottery.

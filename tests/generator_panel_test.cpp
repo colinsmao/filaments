@@ -136,6 +136,7 @@ int main() {
             selectedPreset["short_curve_fraction"] != .75 || selectedPreset["short_curve_length"] != 24 ||
             selectedPreset["short_growth_response"] != 2 || selectedPreset.value("short_growth_wander", 0.f) != .8f ||
             selectedPreset["select_short_rod_penalty"] != .5 ||
+            selectedPreset["select_restart_patches"] != 1 ||
             selectedPreset.value("select_isolation", 0.f) != .9f || selectedPreset["select_isolation_distance"] != 8 ||
             selectedPreset.contains("pop_candle_weight") || populationSelection["density_field"]["extent"] != 128 ||
             !DensitySettings::participates("density_population_selection"))

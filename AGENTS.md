@@ -5,6 +5,74 @@ the current implementation, not a commitment to continue any particular experime
 
 ## Purpose and user preferences
 
+- Screenshot parameter trial (2026-10-13): user requested one final parameter
+  attempt using estimated build width200–350/height40–70 blocks. Chosen offline
+  preset domain275x55x275, shared field wavelength24/width.045/resolution64; other
+  field controls retained. Rate450, root XZ.86/Y+/-.65, seed power.8; short fraction.8,
+  lengths12/48, variation.7; long response3/pull.4/wander.12, short2/.65. Population
+  .85/source.4/curve variation.35; retained narrow spread.2/.1 and lighting.02/.1/1.
+  Selection budget4/contrast.5/scale5, isolation.5/reach5, patch restarts on. Rod
+  intensity.2/attraction1/repulsion5/scale12, short rod penalty.75;128 sketch samples.
+  Edge fades XZ.12/Yends.2 with extra density suppression0. No algorithm/default
+  code changes or planets.13 tuned variants plus baseline compared; higher rates,
+  wider support, broader field, shorter lengths and stronger short curl tested.
+  Current seed1919363634:972 candidates->697 candle(566 short)/150 rod curves;
+  7466 candle objects+722 rods vs1550+147 before. Actual bounds267x52x252 blocks.
+  Five seeds:894–972 candidates,7394–8188 objects; none integration-limited.
+  Candidate-supported16-block XZ-bin coverage96.2–99.2%, not world volume coverage.
+  Fresh Python5.7–6.3s; warm selector35–48ms. Native below/oblique renders inspected
+  for3 seeds and whole canopy for chosen seed; still regular strings in places,
+  no planets/scenery/detailed candle meshes. User visual acceptance not assumed.
+  Evidence build/final-scale-tuning/{selected-preset.json,reference-comparison.png,
+  chosen-whole.png,verification.json}, frozen requests and local sweep scripts.
+  User disputed the density/visual match; this is an applied trial, not an accepted
+  screenshot match. Camera/block-size calibration and a measured screenshot density
+  target were missing. Starting actual bounds268x53x252 were already near chosen
+  bounds; the comparison does not demonstrate a major physical scale correction.
+  Full-white diagnostic retains the gaps/strings (render-audit.png/json); lighting
+  alone does not explain the mismatch, and physical density accuracy is unverified.
+  After user confirmed closure, verified no viewer process, backed up latest config
+  to build/final-scale-tuning/plot-before-apply.json, then applied only recipe deltas
+  to the active local preset and shared field. Latest camera (changed during this
+  pass), inactive controls and other local presets preserved. Regenerating saved
+  config produces byte-identical curve/star buffers to balanced-rods comparison;
+  applied-validation.json records checks. No viewer launch/rebuild.
+  Subsequent user viewer edits saved pop_density=.6 and
+  pop_curve_density_variation=.95, plus a new camera. Preserve those latest edits
+  in the requested checkpoint; the counts/byte comparisons above describe the
+  applied .85/.35 trial, not these later settings.
+
+- Isolation collapse correction (2026-10-13): user reported mostly empty results,
+  not errors. Reproduced with frozen seed1697566617, extent137.695/Y40, rate100,
+  short fraction.5, density.535, budget2.958, overlap4.031, isolation1/reach6.812.
+  Normalized candle benefit is <1; a near-1 isolation penalty prevented distant
+  patches from ever starting, sometimes keeping only the first short curve.
+  Compared isolation off, lower strength.5, shorts-only isolation and pair restarts
+  over11 seeds. Lower strength still lost regions/restored more floaters; shorts-only
+  helped but cannot solve all-short pools. Implemented select_restart_patches=1,
+  viewer label Allow new candle patches, off restores old stop rule exactly.
+  When no candle/rod singleton qualifies, score nearby unused candle pairs using
+  (D_i+D_j+K_ij+m_i*I_i+m_j*I_j)/(m_i+m_j), with one mutual-overlap term and
+  I_i=w*(1-max(selected affinity_i,pair affinity)). Accept best negative pair
+  atomically as candles, resume singles; stop if no improving pair. First candle
+  still exempt; no extra singleton exception, roots, forced quotas or random draws.
+  Pair graph reuses cached closest-positive-mass-sample affinities; no new distance
+  or gradient queries. Scans edges per restart, so dense graphs can cost more.
+  Existing geometry, population/lighting formulas and live settings untouched.
+  New toggle loaded/autosaved by viewer. No launch, main executable rebuild or restart.
+  11 seeds: candle curves1–51 ->49–67; coverage of16-block XZ bins with>1 expected
+  candidate candle .4–64% ->64–80% (not whole-world volume coverage). Isolated short
+  candles at6.812-block sample distance0–1/result, versus6–16 with isolation off.
+  Frozen failing scene490->1694 objects; seed763813 2->1856. All-short seeds1001 /
+  763813 recovered1->75 /1->71 candle curves. Legacy toggle-off curve/star binaries
+  match build/short-turn-evaluation/short-turns.* byte-for-byte. Warm small-scene
+  selector~5–7ms;953-candidate check23->39ms. Native before/after inspected; visual
+  acceptance still user's judgment.171 Python tests/native panel startup pass.
+  Evidence build/coverage-diagnosis/ holds frozen settings, alternative comparisons,
+  native comparison.png, variant-checks.json and verification/results.json. Repeat
+  sweep with scripts/evaluate_patch_restarts.py --settings <frozen settings path>.
+  This fixes patch bootstrap, not a guarantee of complete coverage or connectivity.
+
 - Short turning / candle preference (2026-10-12): user requested faster turns on
   shorts and fewer shorts consumed by rods. Incremental experiment now exposes
   short_growth_response=2 blocks (1–128) and short_growth_wander=.8 (0–2).

@@ -180,7 +180,8 @@ def population_proximity(sketch, reach):
 
 
 def greedy(candle_pairs, candle_initial, rod_pairs, mass, rod_ratio, attraction, repulsion,
-           isolation_pairs=None, isolation_strength=0., rod_penalty=None):
+           isolation_pairs=None, isolation_strength=0., rod_penalty=None,
+           restart_patches=False, report=None):
     """Normalized marginal scores; selected curves have exactly one role."""
     n = len(mass)
     candle = candle_initial.copy()
@@ -191,7 +192,23 @@ def greedy(candle_pairs, candle_initial, rod_pairs, mass, rod_ratio, attraction,
     proximity = np.zeros(n)
     penalize = isolation_strength > 0 and isolation_pairs is not None
     chosen, roles, scores = [], [], []
-    for _ in range(n):
+    pair_left = pair_right = pair_affinity = pair_overlap = None
+    restarts = 0
+
+    def accept(best, kind, score):
+        chosen.append(best); roles.append(kind); scores.append(float(score))
+        available[best] = False
+        if kind == 0:
+            a, b = candle_pairs.indptr[best:best+2]
+            candle[candle_pairs.indices[a:b]] += candle_pairs.data[a:b]
+            if penalize:
+                a, b = isolation_pairs.indptr[best:best+2]
+                neighbors = isolation_pairs.indices[a:b]
+                proximity[neighbors] = np.maximum(proximity[neighbors], isolation_pairs.data[a:b])
+        a, b = rod_pairs.indptr[best:best+2]
+        rod[rod_pairs.indices[a:b]] += rod_pairs.data[a:b]*(repulsion*rod_ratio if kind else -attraction)
+
+    while available.any():
         cscore = candle/denominator
         if penalize and chosen:
             # A single nearby approach anchors a candidate. Extra contacts do
@@ -209,18 +226,39 @@ def greedy(candle_pairs, candle_initial, rod_pairs, mass, rod_ratio, attraction,
         best = ri if kind else ci
         score = rscore[best] if kind else cscore[best]
         if score >= -1e-10:
-            break
-        chosen.append(best); roles.append(kind); scores.append(float(score))
-        available[best] = False
-        if kind == 0:
-            a, b = candle_pairs.indptr[best:best+2]
-            candle[candle_pairs.indices[a:b]] += candle_pairs.data[a:b]
-            if penalize:
-                a, b = isolation_pairs.indptr[best:best+2]
-                neighbors = isolation_pairs.indices[a:b]
-                proximity[neighbors] = np.maximum(proximity[neighbors], isolation_pairs.data[a:b])
-        a, b = rod_pairs.indptr[best:best+2]
-        rod[rod_pairs.indices[a:b]] += rod_pairs.data[a:b]*(repulsion*rod_ratio if kind else -attraction)
+            if not (restart_patches and penalize):
+                break
+            if pair_left is None:
+                # Reuse the sparse distance graph; no all-pairs geometry or
+                # arbitrary spatial partition. Each unordered pair occurs once.
+                edges = isolation_pairs.tocoo()
+                keep = edges.row < edges.col
+                pair_left, pair_right = edges.row[keep], edges.col[keep]
+                pair_affinity = edges.data[keep]
+                pair_overlap = (np.asarray(candle_pairs[pair_left, pair_right]).ravel()
+                                if len(pair_left) else np.empty(0))
+            eligible = available[pair_left] & available[pair_right]
+            if not eligible.any():
+                break
+            left, right, affinity = pair_left[eligible], pair_right[eligible], pair_affinity[eligible]
+            # Both curves support each other. The quadratic density objective
+            # contributes one cross term; overlap must not be counted twice.
+            penalty = isolation_strength*(
+                mass[left]*(1-np.maximum(proximity[left], affinity)) +
+                mass[right]*(1-np.maximum(proximity[right], affinity)))
+            pair_score = (candle[left]+candle[right]+pair_overlap[eligible]+penalty)/(mass[left]+mass[right])
+            pair = int(np.argmin(pair_score))
+            if pair_score[pair] >= -1e-10:
+                break
+            # Atomic two-candle admission. Each receives the joint per-mass
+            # score in diagnostics; normal single-curve selection then resumes.
+            accept(int(left[pair]), 0, pair_score[pair])
+            accept(int(right[pair]), 0, pair_score[pair])
+            restarts += 1
+        else:
+            accept(best, kind, score)
+    if report is not None:
+        report['patch_restarts'] = restarts
     order = np.argsort(chosen)
     return np.asarray(chosen, dtype=int)[order], np.asarray(roles, dtype=np.int8)[order], scores
 
@@ -243,6 +281,7 @@ def select_population(pool, sketch, params):
         rod_footprint, _ = rasterize(sketch, p['select_rod_scale'])
         rod_pairs = gram(rod_footprint, 1/max(p['pop_density']*p['select_rod_scale'], 1e-12))
     isolation_pairs = None
+    selection_report = {}
     if p['select_enabled']:
         isolation_strength = p.get('select_isolation', 0.)
         isolation_pairs = (population_proximity(sketch, p.get('select_isolation_distance', 8.))
@@ -251,7 +290,8 @@ def select_population(pool, sketch, params):
                        if pool.short_mask is not None else None)
         indices, roles, scores = greedy(pairs, initial, rod_pairs, sketch.mass, rod_ratio,
                                         p['select_rod_attraction'], p['select_rod_repulsion'],
-                                        isolation_pairs, isolation_strength, rod_penalty)
+                                        isolation_pairs, isolation_strength, rod_penalty,
+                                        p.get('select_restart_patches', True), selection_report)
     else:
         indices = np.flatnonzero(sketch.mass > 1e-12)
         roles, scores = np.zeros(len(indices), dtype=np.int8), []
@@ -267,6 +307,7 @@ def select_population(pool, sketch, params):
                  expected_rods=float(sketch.mass[indices[roles == 1]].sum()*rod_ratio),
                  density_error_reduction=1-error1/max(error0, 1e-30),
                  selection_ms=1000*(time.perf_counter()-started))
+    stats.update(selection_report)
     if p['select_enabled'] and isolation_pairs is not None:
         stats['isolation_interactions'] = isolation_pairs.nnz
     return indices, roles, stats

@@ -28,7 +28,69 @@ pool; there is no new overlap score, cutting or joining rule.
 The subsequent isolation trial adds a soft candle proximity penalty to selection,
 without changing the candidate geometry or population sampler.
 
-Current defaults use seed rate **96**, **75% short candidates** averaging **24
+The October 13 **saved trial preset** uses the estimated build size of 200–350
+blocks wide and 40–70 tall. Its domain is **275 × 55 × 275 blocks** (XZ half-extent
+137.5, Y half-extent 27.5). It uses a 24-block density wavelength, support width
+.045 and grid resolution 64. These are shared upstream field settings, so they
+also affect the other density consumers. Other scripts' local presets stay intact.
+
+| Saved preset control | Value | Reason |
+| --- | ---: | --- |
+| Candidate seeds per million blocks | 450 | About 900–1,000 candidates at this smaller physical volume, below the 2,048 guard. |
+| Seed XZ / lower and upper Y reaches | .86 / .65 / .65 | Spread roots through the canopy; Y roots span 35.75 blocks around its center. |
+| Seed density power | .8 | Favor filaments without restricting births to their sharpest peaks. |
+| Short fraction / mean short / mean long length | .8 / 12 / 48 blocks | Short groups dominate; long candidates provide connecting strings. |
+| Length variation | .7 | Uneven lengths without the longest tails of variation 1. |
+| Long response / pull / wandering | 3 / .4 / .12 | Follow the smaller field features. |
+| Short response / wandering | 2 / .65 | Short turns remain organic without excessive looping. |
+| Population density / source influence / curve variation | .85 / .4 / .35 | Fill narrow curves with uneven local intensity. |
+| XZ / Y star spread | .2 / .1 blocks | Preserve coherent individual strings. |
+| Selection budget / density contrast / overlap scale | 4 / .5 / 5 blocks | Permit neighboring short groups while comparing local population mass. |
+| Isolation penalty / distance / new patches | .5 / 5 blocks / on | Discourage floaters while permitting separate nearby groups to establish. |
+| Rod intensity / attraction / repulsion | .2 / 1 / 5 | Keep rods visible; their proximity scale remains 12 blocks. |
+| Short-curve rod penalty | .75 | Keep most useful shorts available for candles. |
+| XZ / each Y edge fade | .12 / .2 | Soften the domain boundary; extra density suppression is zero. |
+
+After application, the user adjusted the saved population density to **.6** and
+per-curve density variation to **.95**. The checkpoint preserves these latest values;
+the table and rendered trial measurements describe the preceding .85/.35 settings.
+
+The remaining lighting values stay at ambient .02, sky .10 and lift 1. No new
+selection, growth, lighting or planet logic was added for this tuning. Python
+fallback defaults below remain unchanged; the tuned values belong to the saved
+viewer preset.
+
+Compared 13 tuned variants plus the starting preset using the two references,
+native close-below and oblique renders, and a distant whole-canopy view. Wider
+density support and shorter wavelength reduced the long ribbon appearance.
+Raising seed rate to 600 cost more for little visual gain; broad density strength
+2 concentrated the result too strongly; a smaller 350-rate pool lost visible rods.
+The selected current seed retains 697 candle curves (566 short) and 150 rod curves,
+producing **7,466 candle objects and 722 rods** versus 1,550 and 147 before tuning.
+Its occupied bounds are 267 × 52 × 252 blocks, inside the 275 × 55 × 275 domain.
+
+Five seeds produced 7,394–8,188 objects from 894–972 candidates, without hitting
+the population integration cap. Selected candle sketches retained 96.2–99.2% of
+16-block XZ bins containing more than one expected candidate candle; this measures
+retention of candidate-supported regions, not the fraction of world volume filled.
+Fresh Python generation took 5.7–6.3 seconds and cached selection 35–48 ms in that
+check. The user disputed the visible density match: this trial is not an accepted
+reproduction. Camera/block-size calibration and a measured screenshot density target
+were missing. The starting scene's actual bounds were already 268 × 53 × 252, so
+the comparison does not demonstrate a major physical scale correction. The references'
+planets, scenery and detailed candle meshes remain absent; regular strings remain
+visible in places. A same-geometry full-white diagnostic (`render-audit.png`) retains
+the gaps and strings; lighting alone does not explain the distribution mismatch.
+
+Evidence is in `build/final-scale-tuning/`: `selected-preset.json`,
+`reference-comparison.png`, `chosen-whole.png`, `verification.json`, frozen requests,
+renders and the local sweep scripts. Cameras in those files are explicit diagnostic
+views; the latest saved viewer camera settings are preserved. Applied after the user
+closed the viewer, with backup `plot-before-apply.json`. Regeneration from the saved
+configuration reproduces the comparison's curve and star buffers byte-for-byte;
+`applied-validation.json` records verification. No viewer launch or rebuild was needed.
+
+Python defaults use seed rate **96**, **75% short candidates** averaging **24
 blocks**, and **120-block** long candidates. Length variation is .6; growth
 response 8.276 blocks and wandering .15 for longs; short response **2 blocks** and
 wandering **.8**. Density attraction .35 remains shared. Seed density power
@@ -56,7 +118,11 @@ positive-mass population sample on any already selected candle curve. Choose the
 best negative score, update its neighbors, and repeat. Rod candidates
 instead receive a reward near selected candles and a penalty near other rods.
 The two roles compete in the same loop; each curve can receive at most one role.
-Stop when neither role has a beneficial candidate. No lighting propagation is
+When neither role has a beneficial individual candidate, **Allow new candle
+patches** tests nearby pairs of remaining candle candidates together. A pair
+must improve the joint score, including mutual overlap and isolation, to start
+another patch; ordinary selection then resumes. Stop when neither an individual
+nor an eligible pair is beneficial. No lighting propagation is
 computed during selection; the existing shared lighting pass runs after sampling.
 
 | Control | Default | Meaning and effect |
@@ -71,8 +137,9 @@ computed during selection; the existing shared lighting pass runs after sampling
 | Density budget multiplier | 5 | Dimensionless amplitude of the desired population. Raise it to usually keep more candle curves/stars; lower it to thin them. It is not a curve-count quota. |
 | Density contrast | 0.5 | Exponent on normalized upstream density in the selection target. Higher concentrates retained population into denser areas; 0 makes the target uniform and permits more sparse excursions. Changes selection and counts. |
 | Candle overlap scale | 8 blocks | Spacing of the population comparison grid. Shared grid support extends up to twice this spacing per axis, with smoothly varying weight. Larger values compare a broader neighborhood and lose fine detail. Also changes the target's spatial scale, so counts need not vary monotonically. |
-| Candle isolation penalty | .9 | Dimensionless maximum extra candle score. Higher discourages floating segments; 0 restores the previous selector exactly. The first candle curve is exempt. Strong settings can leave only one cluster. Changes selection/counts without adding random draws. |
+| Candle isolation penalty | .9 | Dimensionless maximum extra candle score. Higher discourages floating segments; 0 disables isolation. The first candle curve is exempt. With patch restarts off, strong settings can leave only one cluster. Changes selection/counts without adding random draws. |
 | Isolation distance | 8 blocks | Scale of the shortest distance between candidate population samples and selected candle samples. Larger allows wider gaps. At this distance the penalty is 63% of its maximum; one close approach is enough. Changes selection/counts, not candidate geometry. |
+| Allow new candle patches | On | When selection would stop, test two nearby unused candle candidates together. They can support each other, but pay their combined density and overlap cost. Off restores the old stopping rule. Changes selection/counts, not roots, geometry, scatter or random draws. No effect with isolation zero. |
 | Select rod curves | On | Enables the second role. Requires block population and material proxies. Off selects candles only. |
 | Rod proximity scale | 12 blocks | Grid spacing for both rod/candle attraction and rod/rod repulsion. Larger values let more distant populations interact; changes rod choices and possibly candle choices. It is not an exact light radius. |
 | Rod attraction to candles | 0.75 | Dimensionless proximity reward. Higher generally selects more rods, and may reserve candidates that would otherwise become candles. Zero selects no rods. |
@@ -122,6 +189,47 @@ as zero (omitted affinity at most `exp(-16)`, about 1.13e-7). Zero-weight sample
 and self contacts are excluded. Each accepted candle updates only its nearby
 candidates using a maximum, and changing strength reuses the cached distances.
 Both strength zero and selection off bypass distance construction entirely.
+
+The October 13 correction addresses a failure of the original isolation rule:
+the normalized density benefit of an individual candidate is less than 1, so
+an isolation penalty near 1 can prevent every distant patch from starting. Only
+the first selected cluster grows; sometimes the entire result was one short curve.
+Lowering the penalty reduced this failure but also restored more floating shorts.
+Applying isolation only to shorts restored broad coverage, but retained the failure
+for all-short pools. Pair restarts preserve the same isolation rule for both classes.
+
+If single-candidate selection stalls, consider unused pairs already in the cached
+proximity graph. Let `D_i` be the current unnormalized candle density-error change,
+`K_ij = sum(W*q_i*q_j)`, `m_i` the candidate mass, and `a_ij` their closest-sample
+affinity. For each member use `I_i = w*(1-max(existing_affinity_i, a_ij))`. Score
+the pair as `(D_i + D_j + K_ij + m_i*I_i + m_j*I_j)/(m_i+m_j)`.
+The best negative pair is admitted atomically as two candle curves. There is
+one mutual-overlap cross term, no isolated-singleton exception and no forced
+regional quota. The first curve keeps the existing bootstrap exception. This is
+still a greedy heuristic: it cannot recover missing candidates or guarantee a
+fully populated domain, connected stars, or a global optimum.
+
+On the frozen current preset (rate100, isolation1, reach6.812, overlap scale4.031),
+11 seeds previously retained 1–51 candle curves; restarts retained 49–67. Coverage
+of 16-block XZ bins containing more than one expected candidate candle rose from
+**0.4–64% to 64–80%**. This measures represented candidate regions, not the fraction
+of all world volume that should be filled. At the same 6.812-block diagnostic,
+isolated short candle curves were 0–1 per result, versus 6–16 with isolation off.
+The reported failing scene changed from **490 to 1,694 objects**; another seed
+changed from **2 to 1,856**. Two all-short pools recovered from one candle curve
+each to 75 and 71. Disabling restarts reproduced the prior frozen short-turn
+curve/star buffers byte for byte. Existing growth and population formulas stay
+unchanged; additional selected populations can still affect occupancy and lighting.
+
+Pair restarts scan cached nearby edges only when the normal loop stalls; they add
+no gradient or distance queries. Each restart can scan the full sparse edge list,
+so dense candidate graphs still cost more. Warm selection on the small fixture
+was about 5–7 ms; a 953-candidate check changed from 23 to 39 ms. Timings depend on
+machine load. Reproduce with `python scripts/evaluate_patch_restarts.py --settings
+build/coverage-diagnosis/settings.json`. Frozen alternative sweeps, before/after
+native renders and backward-compatibility checks are in `build/coverage-diagnosis/`.
+The new default-on control reloads in the viewer; no preset rewrite is needed.
+All 171 Python tests and the native panel startup check pass.
 
 The isolation trial used the latest saved seed rate **50.167**, preserving the
 user's other settings. On its 624 candidates, strength .9 / distance8 retained
