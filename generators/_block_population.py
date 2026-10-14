@@ -248,6 +248,19 @@ def populate_blocks(paths, path_colors, seed, params, limit=1_000_000, density_s
     kinds = stats.pop('_block_kinds', None)
     owners = stats.pop('_block_owners', None)
     if kinds is not None:
+        # Opt-in scaffold experiment: occupancy is computed using candle paths,
+        # then a cell-keyed material draw leaves that occupancy unchanged. Other
+        # experiments retain their existing whole-path materials byte for byte.
+        if '_cell_material_fractions' in params:
+            fractions = np.asarray(params['_cell_material_fractions'], dtype=float)
+            if (fractions.shape != (3,) or not np.isfinite(fractions).all()
+                    or (fractions < 0).any() or not np.isclose(fractions.sum(), 1.)):
+                raise ValueError('Cell material fractions must be three nonnegative values summing to one')
+            kinds = np.minimum(2, np.searchsorted(np.cumsum(fractions),
+                               cell_uniform(cells, seed, 36017))).astype(np.int8)
+            if not params.get('pop_colors', 0):
+                colors[kinds == 1] = [.98, .97, .90]
+                colors[kinds == 2] = [1., .97, .82]
         stats['_block_shapes'] = proxy_shapes(cells[selected], kinds[selected], seed, params)
         stats['_block_kinds'] = kinds[selected]
         stats['_fade_groups'] = curve_ids(params, len(paths))[owners[selected]]

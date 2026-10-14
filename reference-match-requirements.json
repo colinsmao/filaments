@@ -1,0 +1,307 @@
+{
+  "version": 5,
+  "updated": "2026-10-14",
+  "purpose": "Cumulative requirements and evaluation protocol for reproducing the Scar star canopy. Read before every visual iteration. Conversation memory is not the requirements store.",
+  "authority": "Direct user instructions take priority. Historical algorithms and assistant-chosen defaults are experiments, not requirements or accepted matches.",
+  "latest_user_corrections": [
+    "that... doesnt match at all. the first one is a giant blob instead of resolved curves. the second has dozens of blocks while the screenshot has like 5, and the stars are too right angled",
+    "i told you to review your matches and find new things that need to be aligned. you must keep all old requirements too, context is not sufficient",
+    "what does gentler curves mean. explain what you did. make this a core instruciton, you must always explain what you did",
+    "havent you been trying and failing? why is there a next evidence? if you can do it then do it. otherwise, stop and say you cant"
+  ],
+  "scope_history": [
+    {
+      "instruction": "Start over from density-first generation; build curves and branches in block space.",
+      "status": "active"
+    },
+    {
+      "instruction": "Start without guidance and establish scaffold quality before stars.",
+      "status": "Unguided baseline remains active; the temporary stop-before-stars restriction was superseded by explicit star-stage authorization."
+    },
+    {
+      "instruction": "Place stars, emulate small and large scales, inspect comparisons, identify additional differences and explain scaffold limitations and next trials.",
+      "status": "active"
+    },
+    {
+      "instruction": "Planets are a future milestone.",
+      "status": "deferred, from AGENTS.md Minecraft direction 2026-10-11; do not silently count planets as star blocks"
+    }
+  ],
+  "references": {
+    "finished_collection": "scar/*2026-10-10*.png (21 finished night views; all remain the visual target)",
+    "close_primary": "scar/Screenshot 2026-10-10 232941.png",
+    "wide_primary": "scar/Screenshot 2026-10-10 233211.png",
+    "wide_block_count_comparison": "scar/vlcsnap-2026-10-10-23h46m47s809.png",
+    "oblique_primary": "scar/vlcsnap-2026-10-10-23h47m08s611.png",
+    "construction": "scar/*2026-10-11*.png: inspect supports for shape evidence, but exclude access walkways/towers from inferred target star curves",
+    "camera_status": "Reference cameras are unknown. Do not claim physical density calibration or exact camera matching from approximate image framing."
+  },
+  "design_requirements": [
+    {
+      "id": "D01",
+      "requirement": "Generate explicit curves and branches first; do not return to an upstream density-first construction.",
+      "source": "user restart instruction"
+    },
+    {
+      "id": "D02",
+      "requirement": "Generate scaffold geometry in block space. Keep growth positions discrete; stars also occupy actual unit cells.",
+      "source": "user restart instruction"
+    },
+    {
+      "id": "D03",
+      "requirement": "Keep the initial experiment unguided. A global/local guidance proposal is a separate hypothesis requiring explanation, not a hidden input.",
+      "source": "user start-with-no-guidance instruction"
+    },
+    {
+      "id": "D04",
+      "requirement": "Scaffold and stars are distinct stages and independently inspectable layers. Diagnostic scaffold cubes are not stars.",
+      "source": "user scaffold != stars; existing project architecture"
+    },
+    {
+      "id": "D05",
+      "requirement": "Do not restore preselected blob pairs, spanning trees or fixed destination endpoints as the solution.",
+      "source": "AGENTS.md emergent-filaments user rejection"
+    },
+    {
+      "id": "D06",
+      "requirement": "Always explain what was actually done in the response itself: baseline, concrete before/after changes and units, mechanism, purpose, executed work, observed result and remaining failures or untested requirements. Define vague labels such as gentler curves; identify the candidate shown in each image and distinguish scaffold, population, material, lighting, rendering and camera changes. If changes were bundled, do not assign causality to one without an isolating comparison. Distinguish proposed/tried/default/applied changes. Explain assumptions such as horizontal weighting without presenting them as reference-derived.",
+      "source": "user baseline and horizontal-movement questions; explicit core instruction to always explain work on 2026-10-14"
+    },
+    {
+      "id": "D07",
+      "requirement": "Keep experiments separate and existing generators/presets available unless replacement is explicitly requested.",
+      "source": "AGENTS.md separate-scripts correction and standing project preferences"
+    }
+  ],
+  "visual_requirements": [
+    {
+      "id": "V01",
+      "scale": "small",
+      "requirement": "Individual narrow star curves remain resolved and traceable in close-ups, including dense regions; no undifferentiated blob.",
+      "source": "user small-scale coherence request and blob correction",
+      "check": "Inspect native close crops beside finished references, both individual strands and busy intersections."
+    },
+    {
+      "id": "V02",
+      "scale": "small",
+      "requirement": "Curves bend coherently at the visible scale; conspicuous right-angle corners must not dominate. Replacing bends with nearly straight strings also fails.",
+      "source": "user right-angle correction; gentler-42 review found a straight-string regression",
+      "check": "Inspect visible turns, sustained arcs and branch departures; record multi-block chord angles only as a supporting diagnostic. Single-cell lattice turns alone are not a visual verdict."
+    },
+    {
+      "id": "V03",
+      "scale": "small",
+      "requirement": "Include branches, short offshoots and different strand lengths, rather than only long independent strings.",
+      "source": "user curves + branches; AGENTS.md short-strand requests",
+      "check": "Inspect forks, short strands within patches and long continuations in close and oblique views."
+    },
+    {
+      "id": "V04",
+      "scale": "small",
+      "requirement": "Spacing and thickness vary irregularly while preserving coherent strands; avoid both uniform bead rows and scattered clouds.",
+      "source": "initial finished-reference feature review retained by user cumulative instruction",
+      "check": "Inspect gaps, local thickness and repetitions at comparable apparent block size."
+    },
+    {
+      "id": "V05",
+      "scale": "large",
+      "requirement": "Retain visibly dense areas composed of resolved overlapping curves. Reducing everything to a uniformly sparse web does not satisfy the target.",
+      "source": "user large-scale dense-areas request plus latest blob correction",
+      "check": "Inspect dense cores and their interiors alongside sparse corridors in wide and close views."
+    },
+    {
+      "id": "V06",
+      "scale": "large",
+      "requirement": "Thin coherent filaments visibly connect dense areas.",
+      "source": "user connecting-filaments request",
+      "check": "Trace specific apparent connections in wide view, then inspect underlying routes. Do not substitute whole-graph component counts for visual matching or require global connectivity without evidence."
+    },
+    {
+      "id": "V07",
+      "scale": "large",
+      "requirement": "Preserve substantial dark voids and patch-to-corridor contrast; avoid filling the whole canopy evenly.",
+      "source": "original Minecraft target and initial feature review",
+      "check": "Inspect the complete canopy at a fixed camera, without hiding empty or overfilled regions in crops."
+    },
+    {
+      "id": "V08",
+      "scale": "large",
+      "requirement": "Match variation in patch sizes, shapes, transitions and apparent depth; avoid repeated bushes of one characteristic size.",
+      "source": "initial feature review and original multi-scale matching request",
+      "check": "Compare more than one finished wide view and more than one seed, including oblique views."
+    },
+    {
+      "id": "V09",
+      "scale": "large",
+      "requirement": "Keep a broad shallow canopy with meaningful local vertical variation.",
+      "source": "original Minecraft target and prior scaffold-reference discussion",
+      "check": "Inspect whole, below and oblique views; a shallow box or horizontal bias alone does not establish a match."
+    },
+    {
+      "id": "V10",
+      "scale": "appearance",
+      "requirement": "Many fine candle-like objects, with occasional groups, must retain a much smaller silhouette than full blocks. Grouped candles have separate narrow, uneven-height silhouettes, not a single solid rectangle.",
+      "source": "original Minecraft target; close screenshot review including 232941 and 23h46m05s314",
+      "check": "Inspect individual object sizes and silhouettes; record proxy-mesh limitations separately rather than using them to excuse unresolved geometry."
+    },
+    {
+      "id": "V11",
+      "scale": "appearance",
+      "requirement": "Bright rods remain visible but fewer than candles; sparse rod assignment must not erase candle continuity or consume all short strands.",
+      "source": "AGENTS.md visible-rods and candle-preference user requests",
+      "check": "Count materials and inspect their distribution, especially on short branches and connectors."
+    },
+    {
+      "id": "V12",
+      "scale": "appearance",
+      "requirement": "Full luminous blocks are occasional accents: roughly a handful in the cited wide reference, not dozens.",
+      "source": "latest user correction: screenshot has like 5",
+      "check": "Count full-block centers in the same native camera frame and inspect actual rendered blocks; distinguish luminous blocks from rods, planets and ornaments. About five is a view-dependent estimate, not an invented exact global quota."
+    },
+    {
+      "id": "V13",
+      "scale": "appearance",
+      "requirement": "Maintain the faint cream/white/lavender/gray candle and bright-source hierarchy, with faint candles still legible.",
+      "source": "original target, accepted lighting checkpoint and dim-faint-candle request",
+      "check": "Compare bright/faint neighborhoods and palette. Preserve the accepted shared lighting formula; isolate any new experiment-specific tuning."
+    },
+    {
+      "id": "V14",
+      "scale": "small/large",
+      "requirement": "Avoid an excess of isolated floating short strands while retaining the reference's real gaps.",
+      "source": "AGENTS.md isolation/candle-patch user feedback",
+      "check": "Inspect short fragments in empty regions and their relation to visible patches; occupancy need not be physically face-connected."
+    },
+    {
+      "id": "V15",
+      "scale": "physical",
+      "requirement": "Keep the prior estimated build scale in view: width approximately 200-350 and height 40-70 blocks; do not replace scale checking with camera zoom.",
+      "source": "AGENTS.md 2026-10-13 user estimate",
+      "check": "Report actual bounds and camera settings. Treat the estimate as approximate, not recovered ground truth."
+    },
+    {
+      "id": "V16",
+      "scale": "boundary",
+      "requirement": "Inspect visible path endings, boundary clipping and taper for new discrepancies; do not let finite budgets silently create obvious cutoffs.",
+      "source": "standing appearance/taper/edge concern in AGENTS.md; user request to discover additional differences",
+      "check": "Inspect complete and oblique views, plus stop reasons. Any new mismatch becomes a persistent ledger entry."
+    }
+  ],
+  "evaluation_protocol": [
+    "Read this file before proposing each trial. State which requirements the change targets and which previously working features it could harm.",
+    "Freeze parameters, seed, source hashes, native buffers and cameras. Keep the rejected baseline available.",
+    "Use close, wide, whole-canopy and oblique native renders. Compare finished reference pixels; construction supports alone are insufficient for a star-stage match.",
+    "Hold camera, crop, display size and exposure fixed between candidates. Record any later camera-calibration change separately and apply it to all compared candidates.",
+    "Write a per-candidate verdict for every D and V requirement: pass, partial, fail or not_evaluated, with evidence and a reason. No missing requirements and no automatic pass from an unrelated metric.",
+    "Inspect for new discrepancies after every comparison. Add a new requirement or refine an existing one without deleting old requirements; record its source and whether it is a user instruction or assistant observation.",
+    "Do not promote a candidate merely because it improves the newest complaint. Regressions in dense regions, connections, curve readability or another earlier requirement keep it a diagnostic trial.",
+    "Tests verify mechanics, not screenshot resemblance. Unknown reference camera/geometry is a limitation to address, not a reason to label a visibly poor match acceptable.",
+    "Explain what placement can fix, what requires scaffold changes and what requires rendering changes. Continue authorized work; do not wait for unrequested confirmation or stop without explaining remaining failures."
+  ],
+  "standing_workflow": [
+    "Core instruction: always explain what you did, in plain language in every substantive work report. Read and follow the core reporting section at the top of AGENTS.md; links and experiment names do not replace the explanation.",
+    "Read AGENTS.md and README.md before project changes.",
+    "Do not overwrite live config/plot.json or config/controls.ini, stop the viewer, or launch it automatically.",
+    "Keep native Windows/OpenGL workflow and avoid unnecessary dependency changes.",
+    "Keep math separate from rendering, reuse shared population/postprocessing, explain control units/randomness/count effects.",
+    "Preserve the accepted shared lighting formula and previous experiments."
+  ],
+  "review_findings": [
+    {
+      "id": "F01",
+      "requirements": [
+        "V01",
+        "V02",
+        "V05"
+      ],
+      "finding": "placement-42 reduces star fill but leaves the same angular, crowded routes. Material/count improvement is not a geometry improvement.",
+      "next_test": "Change coherent local bending while retaining branching; compare against placement-only with identical cameras."
+    },
+    {
+      "id": "F02",
+      "requirements": [
+        "V02",
+        "V03",
+        "V05",
+        "V06"
+      ],
+      "finding": "gentler-42 is mostly straight sparse strings and loses dense patches. Smaller independent random turns and less branching overcorrect the blob.",
+      "next_test": "Keep turn direction coherent over successive block runs; test it independently from sparse branching."
+    },
+    {
+      "id": "F03",
+      "requirements": [
+        "V04",
+        "V08",
+        "V16"
+      ],
+      "finding": "Current branching recursively scales child lifetime from parent lifetime. Lengthening trunks therefore enlarges local bushes too; uniform branch opportunity rules give weak patch-to-corridor transitions.",
+      "evidence_kind": "source inspection plus prior longer/longer-room and current wide renders",
+      "next_test": "Separate continuing path reach from local branch lifetime/activity; do not preselect blob centers or destinations."
+    },
+    {
+      "id": "F04",
+      "requirements": [
+        "V10"
+      ],
+      "finding": "Solid cuboids merge multiple candles into rectangular marks. Fine separate silhouettes visible in finished close references are absent.",
+      "next_test": "A separate material-mesh pass is needed; preserve occupied cells while comparing mesh silhouettes."
+    },
+    {
+      "id": "F05",
+      "requirements": [
+        "V12",
+        "V13"
+      ],
+      "finding": "Lower luminous-block frequency fixes the obvious excess on unchanged geometry, but gentler-42 happens to contain zero full blocks. Material balance must be checked across seeds and views, not tuned to one count.",
+      "next_test": "Retain the rare-block correction as a trial, evaluate several seeds, inspect candle visibility after source removal."
+    },
+    {
+      "id": "F06",
+      "requirements": [
+        "V15"
+      ],
+      "finding": "The prior close camera showed too much world space for the measured foreground cube sizes: two reference single cubes are about20-28px in the comparison, while a generated cube at target depth was17x19px. Camera names did not establish calibration.",
+      "evidence": "build/scaffold-stars/correction/apparent-size-check.json and reference-size-probes.png",
+      "action": "All nine existing buffers rerendered at distance55 (previous75), yielding about23x26px at target depth. Original views preserved. This is a two-object apparent-size check, not a recovered camera or density calibration."
+    },
+    {
+      "id": "F07",
+      "requirements": [
+        "V01",
+        "V03",
+        "V05",
+        "V08"
+      ],
+      "finding": "Local active/quiet branching trials still form crowded clumps. Every new child starts active, allowing several generations to proliferate in the same small region; the candidate does not distribute resolved curves well even when its wide frame has five full blocks.",
+      "evidence_kind": "source inspection plus continuous-42, periods-42 and periods-short-42 native close/wide/oblique comparisons",
+      "next_test": "Test local branch-birth clearance or shared local branch activity that accounts for existing paths; compare directly with current branching rather than increasing global mass."
+    },
+    {
+      "id": "F08",
+      "requirements": [
+        "V01",
+        "V04",
+        "V05",
+        "V06",
+        "V08",
+        "V10"
+      ],
+      "finding": "In the final seed42 comparison, four-block fork clearance reduces forks493 to408 and occupied cells5068 to4821. Repetitive rows and crowded branch groups remain. Separating candle-group boxes improves silhouettes on identical occupied cells but does not fix the structural mismatch.",
+      "evidence": "build/final-scaffold-attempt/reference-close.png; reference-wide.png; comparison-close_scale55.png; comparison-wide_match.png; comparison-whole.png; comparison-oblique.png",
+      "disposition": "Failed; stopped at user direction. No next experiment."
+    }
+  ],
+  "current_status": {
+    "accepted_match": null,
+    "last_presented": "build/scaffold-stars/selected-42-*",
+    "last_presented_verdict": "rejected by user; giant blob, dozens of full blocks and excessive right-angle paths",
+    "current_trials": "build/final-scaffold-attempt/",
+    "latest_trial_verdict": "Four-block fork-birth clearance and separate candle silhouettes both fail the cumulative visual target. Nothing promoted. Temporary generator edits restored.",
+    "durable_review": "reference-match-review.json",
+    "next_work": [],
+    "state": "stopped after failed final attempt; assistant cannot deliver the requested screenshot match",
+    "final_review": "build/final-scaffold-attempt/review.json",
+    "historical_suggestions": "Earlier next_test fields are retained as history, not pending work. No further trial without a new user request."
+  }
+}

@@ -1,0 +1,3232 @@
+{
+  "date": "2026-10-14",
+  "verdict": "No screenshot match. Final bounded attempt failed; assistant cannot deliver and has stopped.",
+  "references_sha256": {
+    "scar/Screenshot 2026-10-10 232941.png": "50ca5bf37e6be02897242bb737f4c645fe22dbf0ac1b1b9c6a8f7ae53e7907f8",
+    "scar/Screenshot 2026-10-10 233211.png": "2c9bb282a7d173cfe1c6ee5c8cb8c828358bda37a6a9c0abe6cd33e6f3ee9310",
+    "scar/vlcsnap-2026-10-10-23h43m39s880.png": "3bbd4ae3d71203d4f8231622e5204d06ed1d016bf49e88e06f431f2c640c3632",
+    "scar/vlcsnap-2026-10-10-23h43m56s778.png": "65e09f2b8fd8083e9b8dec7e7d7d19ac09d426ce607b96124385aa8c6aa8340d",
+    "scar/vlcsnap-2026-10-10-23h45m14s098.png": "42dd072d9ba4b24a78ad57a275a05add9be845c27838cfbf506b3f19aa159f2b",
+    "scar/vlcsnap-2026-10-10-23h45m25s109.png": "8ef9531e11395674f93c3f9269054dee2f1a44a17fc6d430377d8b498793425f",
+    "scar/vlcsnap-2026-10-10-23h45m27s242.png": "3a63ad2806fe4c4fa58fa5d561442e79415abe2f49c897cb9e5f00e8dda5e0f2",
+    "scar/vlcsnap-2026-10-10-23h45m41s432.png": "0160917efe57028773caa3ea87f94b6ca0c57b628fdf5b7460b81797fb4853b1",
+    "scar/vlcsnap-2026-10-10-23h45m45s497.png": "cfc5c89ea557005f6367d5289e9ad5a121595cf2bdc1cb30e645684a67714d19",
+    "scar/vlcsnap-2026-10-10-23h45m55s498.png": "92839efa4603ead15ae82c2448d2af6023435eec1622c53bd59679441bc2a6b1",
+    "scar/vlcsnap-2026-10-10-23h46m05s314.png": "c9cec96a243917b95030742d37b0b8c4ec21fd0b7aaf66dbec1e566a658a9419",
+    "scar/vlcsnap-2026-10-10-23h46m09s136.png": "5913a6778ab57af6b0d5278bb2821028028c6ef52b0673692cc297a90bd65cd1",
+    "scar/vlcsnap-2026-10-10-23h46m17s975.png": "dd9dbb8730ae278e956199a454a70b6ea23d4c06a60cfa7a1d42e3f0fbcfbb09",
+    "scar/vlcsnap-2026-10-10-23h46m31s637.png": "c448efe0ede7f24f1acd90eae1075c172c67d6601b97fbebd460bcce84f6719a",
+    "scar/vlcsnap-2026-10-10-23h46m44s029.png": "d1048c362881cd2678bbe5beedeabb44912330b466e3e01c357a83ec2306ba11",
+    "scar/vlcsnap-2026-10-10-23h46m47s809.png": "7fc04d82589108143bd7f81e9b57268b7be36979bf4bafebaebdb6eb62c1b65c",
+    "scar/vlcsnap-2026-10-10-23h46m50s883.png": "a010eaa3cb03dfaddfa728b56cb3a2dcf083ad34af2e55ba8773878e5a001d44",
+    "scar/vlcsnap-2026-10-10-23h47m08s611.png": "007d0b8232af599a6906fac55cd91aa2d4af2c8d74fa5c9b6ee98f0ab07bedb4",
+    "scar/vlcsnap-2026-10-10-23h47m12s084.png": "c49c795736bc205dee5bf4a37fbd6b0716058f409263d340d5fafcbc81a8005c",
+    "scar/vlcsnap-2026-10-10-23h47m24s676.png": "5c5c32341046d4196c7bb7d5a82f19c3f5d52d1034d1a09d4063572d10956284",
+    "scar/vlcsnap-2026-10-10-23h47m51s893.png": "043de09b6aad6371d32aba6d3bb743e3f702296b74400639ce3154150551444c"
+  },
+  "reference_review": "All21 inventoried in three contact sheets; primary close/wide plus23h46m31 inspected at larger resolution. Contact sheets are overview evidence, not detailed inspection of every object.",
+  "explicit_remaining_review_gaps": [
+    "Endpoint/boundary crops",
+    "Multi-seed validation of new growth and rare-block settings",
+    "Broader apparent-size and depth calibration"
+  ],
+  "candidates": [
+    {
+      "candidate": "rejected-42",
+      "verdict": "rejected; not a screenshot match",
+      "summary": "User rejection confirmed: unresolved dense regions, excessive full blocks and hard corners.",
+      "assessment_type": "explicit visual review plus code/geometry evidence; not an automated similarity metric",
+      "requirements_version": 5,
+      "requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+      "checks": {
+        "D01": {
+          "status": "pass",
+          "reason": "Explicit graph grown before population; no density input.",
+          "evidence": [
+            "rejected-42-request.json",
+            "rejected-42-metrics.json",
+            "rejected-42-diagnostics.json",
+            "rejected-42-graph.npz"
+          ]
+        },
+        "D02": {
+          "status": "pass",
+          "reason": "Frozen graph contains integer cells; population occupies unit cells.",
+          "evidence": [
+            "rejected-42-request.json",
+            "rejected-42-metrics.json",
+            "rejected-42-diagnostics.json",
+            "rejected-42-graph.npz"
+          ]
+        },
+        "D03": {
+          "status": "pass",
+          "reason": "Uniform roots and local stochastic growth; no guidance field.",
+          "evidence": [
+            "rejected-42-request.json",
+            "rejected-42-metrics.json",
+            "rejected-42-diagnostics.json",
+            "rejected-42-graph.npz"
+          ]
+        },
+        "D04": {
+          "status": "pass",
+          "reason": "Graph NPZ, line buffer and star buffer remain independently inspectable.",
+          "evidence": [
+            "rejected-42-request.json",
+            "rejected-42-metrics.json",
+            "rejected-42-diagnostics.json",
+            "rejected-42-graph.npz"
+          ]
+        },
+        "D05": {
+          "status": "pass",
+          "reason": "No predetermined blob pairs, spanning tree or fixed destinations.",
+          "evidence": [
+            "rejected-42-request.json",
+            "rejected-42-metrics.json",
+            "rejected-42-diagnostics.json",
+            "rejected-42-graph.npz"
+          ]
+        },
+        "D06": {
+          "status": "fail",
+          "reason": "The historical report used labels such as gentler without explaining the bundled before/after changes in the response, and did not clearly distinguish that trial from the displayed bending-42 candidate. The core reporting rule and README now document this correction; that does not retroactively make the earlier report adequate.",
+          "evidence": [
+            "rejected-42-request.json",
+            "rejected-42-metrics.json",
+            "rejected-42-diagnostics.json",
+            "rejected-42-graph.npz"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Separate experiment; prior generators and user presets preserved.",
+          "evidence": [
+            "rejected-42-request.json",
+            "rejected-42-metrics.json",
+            "rejected-42-diagnostics.json",
+            "rejected-42-graph.npz"
+          ]
+        },
+        "V01": {
+          "status": "fail",
+          "reason": "Dense close-view interior merges into a blob; individual routes are not adequately resolved.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V02": {
+          "status": "fail",
+          "reason": "Frequent large corners and orthogonal runs dominate visible paths.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V03": {
+          "status": "partial",
+          "reason": "Forks and short offshoots exist, but crowding hides their hierarchy.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V04": {
+          "status": "fail",
+          "reason": "Regular bead chains coexist with diffuse crowded areas; the reference has more legible irregular fine strands.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V05": {
+          "status": "fail",
+          "reason": "Dense patches exist, but their interiors fail the required resolved-curve condition.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V06": {
+          "status": "fail",
+          "reason": "Some routes connect nearby branches; no convincing hierarchy of thin links between resolved dense patches.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V07": {
+          "status": "partial",
+          "reason": "Large voids exist; patch interiors are too uniformly thick.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V08": {
+          "status": "fail",
+          "reason": "Bush-like accumulations have abrupt transitions and insufficient variation in internal structure.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V09": {
+          "status": "partial",
+          "reason": "Oblique view confirms shallow extent with vertical excursions; reference depth distribution is not matched.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V10": {
+          "status": "fail",
+          "reason": "Multi-candle groups are solid cuboids, missing separate narrow silhouettes and height variation.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V11": {
+          "status": "partial",
+          "reason": "574 rods versus 7336 candles; rods are visible, but close branch readability is poor.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V12": {
+          "status": "fail",
+          "reason": "56 full-block centers in the wide frame versus the user estimate of roughly five.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V13": {
+          "status": "partial",
+          "reason": "Bright and faint objects and lavender/cream colors exist; excess sources alter local illumination and generated marks appear warmer than the close reference.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V14": {
+          "status": "partial",
+          "reason": "Short strands attach to scaffold branches, but star gaps create detached-looking bits; not resolved by graph connectivity.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V15": {
+          "status": "partial",
+          "reason": "Scaffold occupied-cell footprint spans [217, 55, 249] blocks (coordinate spans plus one). All candidates also use the revised distance55 close camera, based on two reference cube sizes. Broader apparent-size/depth distribution and reference camera remain uncalibrated; no physical density match established.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Whole views inspected, but no dedicated endpoint/boundary crop review yet.",
+          "evidence": [
+            "rejected-42-close_match.png",
+            "rejected-42-wide_match.png",
+            "rejected-42-whole.png",
+            "rejected-42-oblique.png",
+            "rejected-42-close_scale55.png"
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "rejected-42-close_match.png": "5321233adbb239f13879132de8929c8628602097a014cb6eccc9a831f3cde1b7",
+        "rejected-42-wide_match.png": "37c19446871d8a8c4bdc765771fd5d32a152c934d452c7939be54468d467f6a1",
+        "rejected-42-whole.png": "984226307369e716277c9ba26249419c17be4f7031578561a0ebfcb842013517",
+        "rejected-42-oblique.png": "717058ed6cd44a842756cda566b41c300a0c48d30f9535e4573b9a7ba5e76edd",
+        "rejected-42-close_scale55.png": "b292bb49ef58be614dddb73a23ab63a0a3c6b515a9b167c57d7c410e654e1752",
+        "rejected-42-request.json": "174b844bac598da15ae8db22d66b0be0618118328681b4c1e2dbfdcdc0003fd0",
+        "rejected-42-metrics.json": "403154e98e480e89a04c0e702c5e03e5623f6c57e39190e043e11bca3c2eb4ae",
+        "rejected-42-diagnostics.json": "19048ff168a1d97c61c6a794cb79fd5be80cd9a8bd5f41a7be8477948b6d260b",
+        "rejected-42-graph.npz": "68e79c26203de0f27444da1ce53f720b166c1410e5b4efc10411d8afd7883f98"
+      },
+      "new_findings": [
+        {
+          "id": "F01",
+          "requirements": [
+            "V01",
+            "V02",
+            "V05"
+          ],
+          "finding": "placement-42 reduces star fill but leaves the same angular, crowded routes. Material/count improvement is not a geometry improvement.",
+          "next_test": "Change coherent local bending while retaining branching; compare against placement-only with identical cameras."
+        },
+        {
+          "id": "F02",
+          "requirements": [
+            "V02",
+            "V03",
+            "V05",
+            "V06"
+          ],
+          "finding": "gentler-42 is mostly straight sparse strings and loses dense patches. Smaller independent random turns and less branching overcorrect the blob.",
+          "next_test": "Keep turn direction coherent over successive block runs; test it independently from sparse branching."
+        },
+        {
+          "id": "F03",
+          "requirements": [
+            "V04",
+            "V08",
+            "V16"
+          ],
+          "finding": "Current branching recursively scales child lifetime from parent lifetime. Lengthening trunks therefore enlarges local bushes too; uniform branch opportunity rules give weak patch-to-corridor transitions.",
+          "evidence_kind": "source inspection plus prior longer/longer-room and current wide renders",
+          "next_test": "Separate continuing path reach from local branch lifetime/activity; do not preselect blob centers or destinations."
+        },
+        {
+          "id": "F04",
+          "requirements": [
+            "V10"
+          ],
+          "finding": "Solid cuboids merge multiple candles into rectangular marks. Fine separate silhouettes visible in finished close references are absent.",
+          "next_test": "A separate material-mesh pass is needed; preserve occupied cells while comparing mesh silhouettes."
+        },
+        {
+          "id": "F05",
+          "requirements": [
+            "V12",
+            "V13"
+          ],
+          "finding": "Lower luminous-block frequency fixes the obvious excess on unchanged geometry, but gentler-42 happens to contain zero full blocks. Material balance must be checked across seeds and views, not tuned to one count.",
+          "next_test": "Retain the rare-block correction as a trial, evaluate several seeds, inspect candle visibility after source removal."
+        },
+        {
+          "id": "F06",
+          "requirements": [
+            "V15"
+          ],
+          "finding": "The prior close camera showed too much world space for the measured foreground cube sizes: two reference single cubes are about20-28px in the comparison, while a generated cube at target depth was17x19px. Camera names did not establish calibration.",
+          "evidence": "build/scaffold-stars/correction/apparent-size-check.json and reference-size-probes.png",
+          "action": "All nine existing buffers rerendered at distance55 (previous75), yielding about23x26px at target depth. Original views preserved. This is a two-object apparent-size check, not a recovered camera or density calibration."
+        },
+        {
+          "id": "F07",
+          "requirements": [
+            "V01",
+            "V03",
+            "V05",
+            "V08"
+          ],
+          "finding": "Local active/quiet branching trials still form crowded clumps. Every new child starts active, allowing several generations to proliferate in the same small region; the candidate does not distribute resolved curves well even when its wide frame has five full blocks.",
+          "evidence_kind": "source inspection plus continuous-42, periods-42 and periods-short-42 native close/wide/oblique comparisons",
+          "next_test": "Test local branch-birth clearance or shared local branch activity that accounts for existing paths; compare directly with current branching rather than increasing global mass."
+        },
+        {
+          "id": "F08",
+          "requirements": [
+            "V01",
+            "V04",
+            "V05",
+            "V06",
+            "V08",
+            "V10"
+          ],
+          "finding": "In the final seed42 comparison, four-block fork clearance reduces forks493 to408 and occupied cells5068 to4821. Repetitive rows and crowded branch groups remain. Separating candle-group boxes improves silhouettes on identical occupied cells but does not fix the structural mismatch.",
+          "evidence": "build/final-scaffold-attempt/reference-close.png; reference-wide.png; comparison-close_scale55.png; comparison-wide_match.png; comparison-whole.png; comparison-oblique.png",
+          "disposition": "Failed; stopped at user direction. No next experiment."
+        }
+      ],
+      "evidence_base": "build/scaffold-stars/correction"
+    },
+    {
+      "candidate": "placement-42",
+      "verdict": "rejected; not a screenshot match",
+      "summary": "Material/count correction only; geometric failures remain.",
+      "assessment_type": "explicit visual review plus code/geometry evidence; not an automated similarity metric",
+      "requirements_version": 5,
+      "requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+      "checks": {
+        "D01": {
+          "status": "pass",
+          "reason": "Explicit graph grown before population; no density input.",
+          "evidence": [
+            "placement-42-request.json",
+            "placement-42-metrics.json",
+            "placement-42-diagnostics.json",
+            "placement-42-graph.npz"
+          ]
+        },
+        "D02": {
+          "status": "pass",
+          "reason": "Frozen graph contains integer cells; population occupies unit cells.",
+          "evidence": [
+            "placement-42-request.json",
+            "placement-42-metrics.json",
+            "placement-42-diagnostics.json",
+            "placement-42-graph.npz"
+          ]
+        },
+        "D03": {
+          "status": "pass",
+          "reason": "Uniform roots and local stochastic growth; no guidance field.",
+          "evidence": [
+            "placement-42-request.json",
+            "placement-42-metrics.json",
+            "placement-42-diagnostics.json",
+            "placement-42-graph.npz"
+          ]
+        },
+        "D04": {
+          "status": "pass",
+          "reason": "Graph NPZ, line buffer and star buffer remain independently inspectable.",
+          "evidence": [
+            "placement-42-request.json",
+            "placement-42-metrics.json",
+            "placement-42-diagnostics.json",
+            "placement-42-graph.npz"
+          ]
+        },
+        "D05": {
+          "status": "pass",
+          "reason": "No predetermined blob pairs, spanning tree or fixed destinations.",
+          "evidence": [
+            "placement-42-request.json",
+            "placement-42-metrics.json",
+            "placement-42-diagnostics.json",
+            "placement-42-graph.npz"
+          ]
+        },
+        "D06": {
+          "status": "fail",
+          "reason": "The historical report used labels such as gentler without explaining the bundled before/after changes in the response, and did not clearly distinguish that trial from the displayed bending-42 candidate. The core reporting rule and README now document this correction; that does not retroactively make the earlier report adequate.",
+          "evidence": [
+            "placement-42-request.json",
+            "placement-42-metrics.json",
+            "placement-42-diagnostics.json",
+            "placement-42-graph.npz"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Separate experiment; prior generators and user presets preserved.",
+          "evidence": [
+            "placement-42-request.json",
+            "placement-42-metrics.json",
+            "placement-42-diagnostics.json",
+            "placement-42-graph.npz"
+          ]
+        },
+        "V01": {
+          "status": "fail",
+          "reason": "Narrower placement reveals more marks but preserves crowded unresolved branch groups.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V02": {
+          "status": "fail",
+          "reason": "Identical graph retains the rejected corners and axis runs.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V03": {
+          "status": "partial",
+          "reason": "Same forks and length distribution; lower fill makes some short branches hard to trace.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V04": {
+          "status": "fail",
+          "reason": "Narrower chains remain too regularly aligned; random thinning is not varied coherent curvature.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V05": {
+          "status": "fail",
+          "reason": "Patches remain but still fail to resolve their fine curves convincingly.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V06": {
+          "status": "fail",
+          "reason": "No scaffold routes changed; thinning cannot supply missing thin connections.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V07": {
+          "status": "partial",
+          "reason": "Voids preserved and less filled, but patch-to-corridor contrast is not reference-like.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V08": {
+          "status": "fail",
+          "reason": "Same bush structure and abrupt transition pattern as rejected graph.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V09": {
+          "status": "partial",
+          "reason": "Shallow shape and local vertical variation retained in oblique view; no depth match established.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V10": {
+          "status": "fail",
+          "reason": "Same solid group proxies lack individual candle silhouettes.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V11": {
+          "status": "partial",
+          "reason": "379 rods versus 4753 candles; visible rods retained, but short-star continuity still inconsistent.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V12": {
+          "status": "partial",
+          "reason": "Six full-block centers in the wide frame fixes the obvious excess on this seed; not yet robust across seeds/views.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V13": {
+          "status": "partial",
+          "reason": "Fainter neighborhoods after removing sources; palette hierarchy survives, but no calibrated appearance match.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V14": {
+          "status": "partial",
+          "reason": "No new isolated scaffold components; lower occupancy can make short pieces appear detached.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V15": {
+          "status": "partial",
+          "reason": "Scaffold occupied-cell footprint spans [217, 55, 249] blocks (coordinate spans plus one). All candidates also use the revised distance55 close camera, based on two reference cube sizes. Broader apparent-size/depth distribution and reference camera remain uncalibrated; no physical density match established.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "No dedicated endpoint/boundary crop review yet.",
+          "evidence": [
+            "placement-42-close_match.png",
+            "placement-42-wide_match.png",
+            "placement-42-whole.png",
+            "placement-42-oblique.png",
+            "placement-42-close_scale55.png"
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "placement-42-close_match.png": "83c3bf59497051718aaf79b455c226bb4ac2a8ceac119bef863533b151c3dce6",
+        "placement-42-wide_match.png": "c3593de9935dfaf48026ac756760a8febd89b11bf7f0ba28a87e97778cb0983e",
+        "placement-42-whole.png": "542e42b230c37ca95ee62a051e445c94eba88bf9318e496b0d1560d1a2497af2",
+        "placement-42-oblique.png": "2cf2909236325ccc835d8a10eef412a8ca9f0e8799fde8f10ba56de0ad5818d0",
+        "placement-42-close_scale55.png": "e79180891a357e92c51b0918c596fd240bb1aa18a5fdb4d7ca05a8d91ef37974",
+        "placement-42-request.json": "a23ba2bd88e54251d9d384d52aff6de9d436861afdeac12b36044c320e4cb949",
+        "placement-42-metrics.json": "34544b11fe779beecae26fabd1ef8eb5b8fb511daccfcda96e9007ebeed3cd8c",
+        "placement-42-diagnostics.json": "7bd6c431e8006ee3e8ef304084cda8b8528615bc636371bfc97ad1a471e4dce3",
+        "placement-42-graph.npz": "68e79c26203de0f27444da1ce53f720b166c1410e5b4efc10411d8afd7883f98"
+      },
+      "new_findings": [
+        {
+          "id": "F01",
+          "requirements": [
+            "V01",
+            "V02",
+            "V05"
+          ],
+          "finding": "placement-42 reduces star fill but leaves the same angular, crowded routes. Material/count improvement is not a geometry improvement.",
+          "next_test": "Change coherent local bending while retaining branching; compare against placement-only with identical cameras."
+        },
+        {
+          "id": "F02",
+          "requirements": [
+            "V02",
+            "V03",
+            "V05",
+            "V06"
+          ],
+          "finding": "gentler-42 is mostly straight sparse strings and loses dense patches. Smaller independent random turns and less branching overcorrect the blob.",
+          "next_test": "Keep turn direction coherent over successive block runs; test it independently from sparse branching."
+        },
+        {
+          "id": "F03",
+          "requirements": [
+            "V04",
+            "V08",
+            "V16"
+          ],
+          "finding": "Current branching recursively scales child lifetime from parent lifetime. Lengthening trunks therefore enlarges local bushes too; uniform branch opportunity rules give weak patch-to-corridor transitions.",
+          "evidence_kind": "source inspection plus prior longer/longer-room and current wide renders",
+          "next_test": "Separate continuing path reach from local branch lifetime/activity; do not preselect blob centers or destinations."
+        },
+        {
+          "id": "F04",
+          "requirements": [
+            "V10"
+          ],
+          "finding": "Solid cuboids merge multiple candles into rectangular marks. Fine separate silhouettes visible in finished close references are absent.",
+          "next_test": "A separate material-mesh pass is needed; preserve occupied cells while comparing mesh silhouettes."
+        },
+        {
+          "id": "F05",
+          "requirements": [
+            "V12",
+            "V13"
+          ],
+          "finding": "Lower luminous-block frequency fixes the obvious excess on unchanged geometry, but gentler-42 happens to contain zero full blocks. Material balance must be checked across seeds and views, not tuned to one count.",
+          "next_test": "Retain the rare-block correction as a trial, evaluate several seeds, inspect candle visibility after source removal."
+        },
+        {
+          "id": "F06",
+          "requirements": [
+            "V15"
+          ],
+          "finding": "The prior close camera showed too much world space for the measured foreground cube sizes: two reference single cubes are about20-28px in the comparison, while a generated cube at target depth was17x19px. Camera names did not establish calibration.",
+          "evidence": "build/scaffold-stars/correction/apparent-size-check.json and reference-size-probes.png",
+          "action": "All nine existing buffers rerendered at distance55 (previous75), yielding about23x26px at target depth. Original views preserved. This is a two-object apparent-size check, not a recovered camera or density calibration."
+        },
+        {
+          "id": "F07",
+          "requirements": [
+            "V01",
+            "V03",
+            "V05",
+            "V08"
+          ],
+          "finding": "Local active/quiet branching trials still form crowded clumps. Every new child starts active, allowing several generations to proliferate in the same small region; the candidate does not distribute resolved curves well even when its wide frame has five full blocks.",
+          "evidence_kind": "source inspection plus continuous-42, periods-42 and periods-short-42 native close/wide/oblique comparisons",
+          "next_test": "Test local branch-birth clearance or shared local branch activity that accounts for existing paths; compare directly with current branching rather than increasing global mass."
+        },
+        {
+          "id": "F08",
+          "requirements": [
+            "V01",
+            "V04",
+            "V05",
+            "V06",
+            "V08",
+            "V10"
+          ],
+          "finding": "In the final seed42 comparison, four-block fork clearance reduces forks493 to408 and occupied cells5068 to4821. Repetitive rows and crowded branch groups remain. Separating candle-group boxes improves silhouettes on identical occupied cells but does not fix the structural mismatch.",
+          "evidence": "build/final-scaffold-attempt/reference-close.png; reference-wide.png; comparison-close_scale55.png; comparison-wide_match.png; comparison-whole.png; comparison-oblique.png",
+          "disposition": "Failed; stopped at user direction. No next experiment."
+        }
+      ],
+      "evidence_base": "build/scaffold-stars/correction"
+    },
+    {
+      "candidate": "gentler-42",
+      "verdict": "rejected; not a screenshot match",
+      "summary": "Rejected regression: clearer strands at the cost of dense regions, branching and curved shape.",
+      "assessment_type": "explicit visual review plus code/geometry evidence; not an automated similarity metric",
+      "requirements_version": 5,
+      "requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+      "checks": {
+        "D01": {
+          "status": "pass",
+          "reason": "Explicit graph grown before population; no density input.",
+          "evidence": [
+            "gentler-42-request.json",
+            "gentler-42-metrics.json",
+            "gentler-42-diagnostics.json",
+            "gentler-42-graph.npz"
+          ]
+        },
+        "D02": {
+          "status": "pass",
+          "reason": "Frozen graph contains integer cells; population occupies unit cells.",
+          "evidence": [
+            "gentler-42-request.json",
+            "gentler-42-metrics.json",
+            "gentler-42-diagnostics.json",
+            "gentler-42-graph.npz"
+          ]
+        },
+        "D03": {
+          "status": "pass",
+          "reason": "Uniform roots and local stochastic growth; no guidance field.",
+          "evidence": [
+            "gentler-42-request.json",
+            "gentler-42-metrics.json",
+            "gentler-42-diagnostics.json",
+            "gentler-42-graph.npz"
+          ]
+        },
+        "D04": {
+          "status": "pass",
+          "reason": "Graph NPZ, line buffer and star buffer remain independently inspectable.",
+          "evidence": [
+            "gentler-42-request.json",
+            "gentler-42-metrics.json",
+            "gentler-42-diagnostics.json",
+            "gentler-42-graph.npz"
+          ]
+        },
+        "D05": {
+          "status": "pass",
+          "reason": "No predetermined blob pairs, spanning tree or fixed destinations.",
+          "evidence": [
+            "gentler-42-request.json",
+            "gentler-42-metrics.json",
+            "gentler-42-diagnostics.json",
+            "gentler-42-graph.npz"
+          ]
+        },
+        "D06": {
+          "status": "fail",
+          "reason": "The historical report used labels such as gentler without explaining the bundled before/after changes in the response, and did not clearly distinguish that trial from the displayed bending-42 candidate. The core reporting rule and README now document this correction; that does not retroactively make the earlier report adequate.",
+          "evidence": [
+            "gentler-42-request.json",
+            "gentler-42-metrics.json",
+            "gentler-42-diagnostics.json",
+            "gentler-42-graph.npz"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Separate experiment; prior generators and user presets preserved.",
+          "evidence": [
+            "gentler-42-request.json",
+            "gentler-42-metrics.json",
+            "gentler-42-diagnostics.json",
+            "gentler-42-graph.npz"
+          ]
+        },
+        "V01": {
+          "status": "partial",
+          "reason": "Separate strands are much more readable, but dense regions were removed to obtain this.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V02": {
+          "status": "fail",
+          "reason": "Fewer hard turns, but mostly straight strings replace the sustained curved paths needed.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V03": {
+          "status": "fail",
+          "reason": "Too few short offshoots and local branch groups; long sparse strings dominate.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V04": {
+          "status": "fail",
+          "reason": "Single-file bead rows remain repetitive and overly regular.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V05": {
+          "status": "fail",
+          "reason": "Dense areas largely disappear. This regresses an older explicit requirement.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V06": {
+          "status": "fail",
+          "reason": "Long strands exist, but not as narrow links between adequately dense patches.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V07": {
+          "status": "fail",
+          "reason": "Dark space exists, but weak density variation makes a sparse web instead of patch/corridor/void hierarchy.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V08": {
+          "status": "fail",
+          "reason": "No convincing range of patch sizes or transitions because patches are too weak.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V09": {
+          "status": "partial",
+          "reason": "Shallow domain and local height variation retained; visual depth distribution is not matched.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V10": {
+          "status": "fail",
+          "reason": "Cuboid candle-group silhouettes unchanged.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V11": {
+          "status": "partial",
+          "reason": "250 rods versus 3261 candles; rods visible but cannot compensate for missing short candle strands.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V12": {
+          "status": "fail",
+          "reason": "Zero full blocks on this seed; removed the occasional accents rather than balancing them.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V13": {
+          "status": "partial",
+          "reason": "Cream/lavender hierarchy retained; missing full-block sources changes illumination and sparse scene remains unlike reference.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V14": {
+          "status": "partial",
+          "reason": "Many sparse endpoints and disconnected-looking chains; no systematic crop-level isolation review yet.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V15": {
+          "status": "partial",
+          "reason": "Scaffold occupied-cell footprint spans [256, 55, 275] blocks (coordinate spans plus one). All candidates also use the revised distance55 close camera, based on two reference cube sizes. Broader apparent-size/depth distribution and reference camera remain uncalibrated; no physical density match established.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "No dedicated endpoint/boundary crop review yet.",
+          "evidence": [
+            "gentler-42-close_match.png",
+            "gentler-42-wide_match.png",
+            "gentler-42-whole.png",
+            "gentler-42-oblique.png",
+            "gentler-42-close_scale55.png"
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "gentler-42-close_match.png": "96ebe74e3f40ba617014e3f2e42011037b40f35d141830f2e1318fd5217ea275",
+        "gentler-42-wide_match.png": "55aa213e7bb42e6d3502c90bdbdedc69ab8d634ff2ba460ceb038a6ce20c7aa8",
+        "gentler-42-whole.png": "1f993487f6de001dc96e8cc66b928cfa5ed80f0b25f5d4977e1ec6dc1d6ce6f0",
+        "gentler-42-oblique.png": "a58f34577dddc57032ff6f576244d4f5a6b6ec21c497e0b057052eacc2c629e1",
+        "gentler-42-close_scale55.png": "5645f71e894c81d4dd1b96c658fb2a22ee04c2dad39c338eed36f9182d5f343f",
+        "gentler-42-request.json": "192131ee3d80cd5763274344359a52f93503e54df5017b279573e6fb97b55fa2",
+        "gentler-42-metrics.json": "083d799619afd83c39fec1917fd583d3bcaa23f3627dcc1381b5f696dd4b4215",
+        "gentler-42-diagnostics.json": "4d84a1a8f699b931c662c4e7bece1380f03aeffe11dc28607887cc184c03ccb4",
+        "gentler-42-graph.npz": "e24fbb3bffa87ac6b87456141d040c464ef96fc2b480fc0eda9a1b8a031e7746"
+      },
+      "new_findings": [
+        {
+          "id": "F01",
+          "requirements": [
+            "V01",
+            "V02",
+            "V05"
+          ],
+          "finding": "placement-42 reduces star fill but leaves the same angular, crowded routes. Material/count improvement is not a geometry improvement.",
+          "next_test": "Change coherent local bending while retaining branching; compare against placement-only with identical cameras."
+        },
+        {
+          "id": "F02",
+          "requirements": [
+            "V02",
+            "V03",
+            "V05",
+            "V06"
+          ],
+          "finding": "gentler-42 is mostly straight sparse strings and loses dense patches. Smaller independent random turns and less branching overcorrect the blob.",
+          "next_test": "Keep turn direction coherent over successive block runs; test it independently from sparse branching."
+        },
+        {
+          "id": "F03",
+          "requirements": [
+            "V04",
+            "V08",
+            "V16"
+          ],
+          "finding": "Current branching recursively scales child lifetime from parent lifetime. Lengthening trunks therefore enlarges local bushes too; uniform branch opportunity rules give weak patch-to-corridor transitions.",
+          "evidence_kind": "source inspection plus prior longer/longer-room and current wide renders",
+          "next_test": "Separate continuing path reach from local branch lifetime/activity; do not preselect blob centers or destinations."
+        },
+        {
+          "id": "F04",
+          "requirements": [
+            "V10"
+          ],
+          "finding": "Solid cuboids merge multiple candles into rectangular marks. Fine separate silhouettes visible in finished close references are absent.",
+          "next_test": "A separate material-mesh pass is needed; preserve occupied cells while comparing mesh silhouettes."
+        },
+        {
+          "id": "F05",
+          "requirements": [
+            "V12",
+            "V13"
+          ],
+          "finding": "Lower luminous-block frequency fixes the obvious excess on unchanged geometry, but gentler-42 happens to contain zero full blocks. Material balance must be checked across seeds and views, not tuned to one count.",
+          "next_test": "Retain the rare-block correction as a trial, evaluate several seeds, inspect candle visibility after source removal."
+        },
+        {
+          "id": "F06",
+          "requirements": [
+            "V15"
+          ],
+          "finding": "The prior close camera showed too much world space for the measured foreground cube sizes: two reference single cubes are about20-28px in the comparison, while a generated cube at target depth was17x19px. Camera names did not establish calibration.",
+          "evidence": "build/scaffold-stars/correction/apparent-size-check.json and reference-size-probes.png",
+          "action": "All nine existing buffers rerendered at distance55 (previous75), yielding about23x26px at target depth. Original views preserved. This is a two-object apparent-size check, not a recovered camera or density calibration."
+        },
+        {
+          "id": "F07",
+          "requirements": [
+            "V01",
+            "V03",
+            "V05",
+            "V08"
+          ],
+          "finding": "Local active/quiet branching trials still form crowded clumps. Every new child starts active, allowing several generations to proliferate in the same small region; the candidate does not distribute resolved curves well even when its wide frame has five full blocks.",
+          "evidence_kind": "source inspection plus continuous-42, periods-42 and periods-short-42 native close/wide/oblique comparisons",
+          "next_test": "Test local branch-birth clearance or shared local branch activity that accounts for existing paths; compare directly with current branching rather than increasing global mass."
+        },
+        {
+          "id": "F08",
+          "requirements": [
+            "V01",
+            "V04",
+            "V05",
+            "V06",
+            "V08",
+            "V10"
+          ],
+          "finding": "In the final seed42 comparison, four-block fork clearance reduces forks493 to408 and occupied cells5068 to4821. Repetitive rows and crowded branch groups remain. Separating candle-group boxes improves silhouettes on identical occupied cells but does not fix the structural mismatch.",
+          "evidence": "build/final-scaffold-attempt/reference-close.png; reference-wide.png; comparison-close_scale55.png; comparison-wide_match.png; comparison-whole.png; comparison-oblique.png",
+          "disposition": "Failed; stopped at user direction. No next experiment."
+        }
+      ],
+      "evidence_base": "build/scaffold-stars/correction"
+    },
+    {
+      "candidate": "independent-42",
+      "verdict": "rejected; not a screenshot match",
+      "summary": "Lower turn angle alone retains straight strings and crowded branch groups.",
+      "assessment_type": "explicit visual review plus code/geometry evidence; not an automated similarity metric",
+      "requirements_version": 5,
+      "requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+      "checks": {
+        "D01": {
+          "status": "pass",
+          "reason": "Explicit graph grown before population; no density input.",
+          "evidence": [
+            "independent-42-request.json",
+            "independent-42-metrics.json",
+            "independent-42-diagnostics.json",
+            "independent-42-graph.npz"
+          ]
+        },
+        "D02": {
+          "status": "pass",
+          "reason": "Frozen graph contains integer cells; population occupies unit cells.",
+          "evidence": [
+            "independent-42-request.json",
+            "independent-42-metrics.json",
+            "independent-42-diagnostics.json",
+            "independent-42-graph.npz"
+          ]
+        },
+        "D03": {
+          "status": "pass",
+          "reason": "Uniform roots and local stochastic growth; no guidance field.",
+          "evidence": [
+            "independent-42-request.json",
+            "independent-42-metrics.json",
+            "independent-42-diagnostics.json",
+            "independent-42-graph.npz"
+          ]
+        },
+        "D04": {
+          "status": "pass",
+          "reason": "Graph NPZ, line buffer and star buffer remain independently inspectable.",
+          "evidence": [
+            "independent-42-request.json",
+            "independent-42-metrics.json",
+            "independent-42-diagnostics.json",
+            "independent-42-graph.npz"
+          ]
+        },
+        "D05": {
+          "status": "pass",
+          "reason": "No predetermined blob pairs, spanning tree or fixed destinations.",
+          "evidence": [
+            "independent-42-request.json",
+            "independent-42-metrics.json",
+            "independent-42-diagnostics.json",
+            "independent-42-graph.npz"
+          ]
+        },
+        "D06": {
+          "status": "fail",
+          "reason": "The historical report used labels such as gentler without explaining the bundled before/after changes in the response, and did not clearly distinguish that trial from the displayed bending-42 candidate. The core reporting rule and README now document this correction; that does not retroactively make the earlier report adequate.",
+          "evidence": [
+            "independent-42-request.json",
+            "independent-42-metrics.json",
+            "independent-42-diagnostics.json",
+            "independent-42-graph.npz"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Separate experiment; prior generators and user presets preserved.",
+          "evidence": [
+            "independent-42-request.json",
+            "independent-42-metrics.json",
+            "independent-42-diagnostics.json",
+            "independent-42-graph.npz"
+          ]
+        },
+        "V01": {
+          "status": "fail",
+          "reason": "More single strands are visible, but dense interior groups still crowd together.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V02": {
+          "status": "fail",
+          "reason": "Lower independent turn angles reduce hard corners but leave straight bead strings and occasional sharp forks.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V03": {
+          "status": "partial",
+          "reason": "Dense branching and short offshoots retained; branch groups are not adequately resolved.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V04": {
+          "status": "fail",
+          "reason": "Narrower chains remain too regularly aligned; random thinning is not varied coherent curvature.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V05": {
+          "status": "fail",
+          "reason": "Patches remain but still fail to resolve their fine curves convincingly.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V06": {
+          "status": "fail",
+          "reason": "No scaffold routes changed; thinning cannot supply missing thin connections.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V07": {
+          "status": "partial",
+          "reason": "Voids preserved and less filled, but patch-to-corridor contrast is not reference-like.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V08": {
+          "status": "fail",
+          "reason": "Same bush structure and abrupt transition pattern as rejected graph.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V09": {
+          "status": "partial",
+          "reason": "Shallow shape and local vertical variation retained in oblique view; no depth match established.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V10": {
+          "status": "fail",
+          "reason": "Same solid group proxies lack individual candle silhouettes.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V11": {
+          "status": "partial",
+          "reason": "405 rods and 4758 candles; rods remain visible, but group silhouettes and crowding still impair strands.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V12": {
+          "status": "partial",
+          "reason": "Two full blocks in wide frame; excess removed but no multi-seed balance demonstrated.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V13": {
+          "status": "partial",
+          "reason": "Fainter neighborhoods after removing sources; palette hierarchy survives, but no calibrated appearance match.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V14": {
+          "status": "partial",
+          "reason": "No new isolated scaffold components; lower occupancy can make short pieces appear detached.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V15": {
+          "status": "partial",
+          "reason": "Scaffold occupied-cell footprint spans [237, 55, 255] blocks (coordinate spans plus one). All candidates also use the revised distance55 close camera, based on two reference cube sizes. Broader apparent-size/depth distribution and reference camera remain uncalibrated; no physical density match established.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "No dedicated endpoint/boundary crop review yet.",
+          "evidence": [
+            "independent-42-close_match.png",
+            "independent-42-wide_match.png",
+            "independent-42-whole.png",
+            "independent-42-oblique.png",
+            "independent-42-close_scale55.png"
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "independent-42-close_match.png": "462a06ff44e040556513c9f0548d6b9ae6619c3822dc6fda393f45916cf69d49",
+        "independent-42-wide_match.png": "771cf616f57694b33cb663b660871f1651ab2849a21a207e7023b61db827c116",
+        "independent-42-whole.png": "8caf8e6f3eef4127462b9e85248bc9e37aee67488281e472e66ed53be0a2062d",
+        "independent-42-oblique.png": "801714932173bbd15a16dbae7dc1b88610aa0e966618cc4441828129aa5e76b2",
+        "independent-42-close_scale55.png": "b4ebe252c9e6060920339579ed586f7f961c2e0847b1957ce469b6f727e61cb9",
+        "independent-42-request.json": "8653edf80eb0268de9dababce41d7d0c1c944c4f1f88ecbdbfe220b0170405b4",
+        "independent-42-metrics.json": "5b9aaa5ffd1b9fcdcc4a5bf01d1ee29b1809395661e815d917d06d1ab4a43541",
+        "independent-42-diagnostics.json": "5223fbe009b15ee1277506f0869867bbc0b5ec0dac913bddcd50b1c2991d74e8",
+        "independent-42-graph.npz": "cf3bcfcbeb58eaef6be09f464afbb01b2bb4fef1291cbdcc09460152286265ad"
+      },
+      "new_findings": [
+        {
+          "id": "F01",
+          "requirements": [
+            "V01",
+            "V02",
+            "V05"
+          ],
+          "finding": "placement-42 reduces star fill but leaves the same angular, crowded routes. Material/count improvement is not a geometry improvement.",
+          "next_test": "Change coherent local bending while retaining branching; compare against placement-only with identical cameras."
+        },
+        {
+          "id": "F02",
+          "requirements": [
+            "V02",
+            "V03",
+            "V05",
+            "V06"
+          ],
+          "finding": "gentler-42 is mostly straight sparse strings and loses dense patches. Smaller independent random turns and less branching overcorrect the blob.",
+          "next_test": "Keep turn direction coherent over successive block runs; test it independently from sparse branching."
+        },
+        {
+          "id": "F03",
+          "requirements": [
+            "V04",
+            "V08",
+            "V16"
+          ],
+          "finding": "Current branching recursively scales child lifetime from parent lifetime. Lengthening trunks therefore enlarges local bushes too; uniform branch opportunity rules give weak patch-to-corridor transitions.",
+          "evidence_kind": "source inspection plus prior longer/longer-room and current wide renders",
+          "next_test": "Separate continuing path reach from local branch lifetime/activity; do not preselect blob centers or destinations."
+        },
+        {
+          "id": "F04",
+          "requirements": [
+            "V10"
+          ],
+          "finding": "Solid cuboids merge multiple candles into rectangular marks. Fine separate silhouettes visible in finished close references are absent.",
+          "next_test": "A separate material-mesh pass is needed; preserve occupied cells while comparing mesh silhouettes."
+        },
+        {
+          "id": "F05",
+          "requirements": [
+            "V12",
+            "V13"
+          ],
+          "finding": "Lower luminous-block frequency fixes the obvious excess on unchanged geometry, but gentler-42 happens to contain zero full blocks. Material balance must be checked across seeds and views, not tuned to one count.",
+          "next_test": "Retain the rare-block correction as a trial, evaluate several seeds, inspect candle visibility after source removal."
+        },
+        {
+          "id": "F06",
+          "requirements": [
+            "V15"
+          ],
+          "finding": "The prior close camera showed too much world space for the measured foreground cube sizes: two reference single cubes are about20-28px in the comparison, while a generated cube at target depth was17x19px. Camera names did not establish calibration.",
+          "evidence": "build/scaffold-stars/correction/apparent-size-check.json and reference-size-probes.png",
+          "action": "All nine existing buffers rerendered at distance55 (previous75), yielding about23x26px at target depth. Original views preserved. This is a two-object apparent-size check, not a recovered camera or density calibration."
+        },
+        {
+          "id": "F07",
+          "requirements": [
+            "V01",
+            "V03",
+            "V05",
+            "V08"
+          ],
+          "finding": "Local active/quiet branching trials still form crowded clumps. Every new child starts active, allowing several generations to proliferate in the same small region; the candidate does not distribute resolved curves well even when its wide frame has five full blocks.",
+          "evidence_kind": "source inspection plus continuous-42, periods-42 and periods-short-42 native close/wide/oblique comparisons",
+          "next_test": "Test local branch-birth clearance or shared local branch activity that accounts for existing paths; compare directly with current branching rather than increasing global mass."
+        },
+        {
+          "id": "F08",
+          "requirements": [
+            "V01",
+            "V04",
+            "V05",
+            "V06",
+            "V08",
+            "V10"
+          ],
+          "finding": "In the final seed42 comparison, four-block fork clearance reduces forks493 to408 and occupied cells5068 to4821. Repetitive rows and crowded branch groups remain. Separating candle-group boxes improves silhouettes on identical occupied cells but does not fix the structural mismatch.",
+          "evidence": "build/final-scaffold-attempt/reference-close.png; reference-wide.png; comparison-close_scale55.png; comparison-wide_match.png; comparison-whole.png; comparison-oblique.png",
+          "disposition": "Failed; stopped at user direction. No next experiment."
+        }
+      ],
+      "evidence_base": "build/scaffold-stars/correction"
+    },
+    {
+      "candidate": "bending-42",
+      "verdict": "rejected; not a screenshot match",
+      "summary": "Some broader bends, but regular rows and unresolved branch groups remain.",
+      "assessment_type": "explicit visual review plus code/geometry evidence; not an automated similarity metric",
+      "requirements_version": 5,
+      "requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+      "checks": {
+        "D01": {
+          "status": "pass",
+          "reason": "Explicit graph grown before population; no density input.",
+          "evidence": [
+            "bending-42-request.json",
+            "bending-42-metrics.json",
+            "bending-42-diagnostics.json",
+            "bending-42-graph.npz"
+          ]
+        },
+        "D02": {
+          "status": "pass",
+          "reason": "Frozen graph contains integer cells; population occupies unit cells.",
+          "evidence": [
+            "bending-42-request.json",
+            "bending-42-metrics.json",
+            "bending-42-diagnostics.json",
+            "bending-42-graph.npz"
+          ]
+        },
+        "D03": {
+          "status": "pass",
+          "reason": "Uniform roots and local stochastic growth; no guidance field.",
+          "evidence": [
+            "bending-42-request.json",
+            "bending-42-metrics.json",
+            "bending-42-diagnostics.json",
+            "bending-42-graph.npz"
+          ]
+        },
+        "D04": {
+          "status": "pass",
+          "reason": "Graph NPZ, line buffer and star buffer remain independently inspectable.",
+          "evidence": [
+            "bending-42-request.json",
+            "bending-42-metrics.json",
+            "bending-42-diagnostics.json",
+            "bending-42-graph.npz"
+          ]
+        },
+        "D05": {
+          "status": "pass",
+          "reason": "No predetermined blob pairs, spanning tree or fixed destinations.",
+          "evidence": [
+            "bending-42-request.json",
+            "bending-42-metrics.json",
+            "bending-42-diagnostics.json",
+            "bending-42-graph.npz"
+          ]
+        },
+        "D06": {
+          "status": "fail",
+          "reason": "The historical report used labels such as gentler without explaining the bundled before/after changes in the response, and did not clearly distinguish that trial from the displayed bending-42 candidate. The core reporting rule and README now document this correction; that does not retroactively make the earlier report adequate.",
+          "evidence": [
+            "bending-42-request.json",
+            "bending-42-metrics.json",
+            "bending-42-diagnostics.json",
+            "bending-42-graph.npz"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Separate experiment; prior generators and user presets preserved.",
+          "evidence": [
+            "bending-42-request.json",
+            "bending-42-metrics.json",
+            "bending-42-diagnostics.json",
+            "bending-42-graph.npz"
+          ]
+        },
+        "V01": {
+          "status": "fail",
+          "reason": "Some separate curved strands are easier to trace; busy groups still fail the close-reference arrangement.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V02": {
+          "status": "partial",
+          "reason": "Several broader bends replace independent wandering. Straight bead rows and hard branch departures remain.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V03": {
+          "status": "partial",
+          "reason": "Dense branching and short offshoots retained; branch groups are not adequately resolved.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V04": {
+          "status": "fail",
+          "reason": "Turn continuation does not remove regular bead spacing or monotonous solid group marks.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V05": {
+          "status": "fail",
+          "reason": "Dense patches retained, but not as sufficiently resolved fine curves.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V06": {
+          "status": "fail",
+          "reason": "Visible local links exist; dense-knot/thin-bridge hierarchy still weak.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V07": {
+          "status": "partial",
+          "reason": "Voids preserved and less filled, but patch-to-corridor contrast is not reference-like.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V08": {
+          "status": "fail",
+          "reason": "Bending changes patch outlines; does not sufficiently vary internal structure or transitions.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V09": {
+          "status": "partial",
+          "reason": "Shallow shape and local vertical variation retained in oblique view; no depth match established.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V10": {
+          "status": "fail",
+          "reason": "Same solid group proxies lack individual candle silhouettes.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V11": {
+          "status": "partial",
+          "reason": "390 rods and 4676 candles; mixed short branches retained, but no reference-like material distribution established.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V12": {
+          "status": "partial",
+          "reason": "Two full blocks in wide frame; excess removed but no multi-seed balance demonstrated.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V13": {
+          "status": "partial",
+          "reason": "Fainter neighborhoods after removing sources; palette hierarchy survives, but no calibrated appearance match.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V14": {
+          "status": "partial",
+          "reason": "No new isolated scaffold components; lower occupancy can make short pieces appear detached.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V15": {
+          "status": "partial",
+          "reason": "Scaffold occupied-cell footprint spans [240, 55, 231] blocks (coordinate spans plus one). All candidates also use the revised distance55 close camera, based on two reference cube sizes. Broader apparent-size/depth distribution and reference camera remain uncalibrated; no physical density match established.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "No dedicated endpoint/boundary crop review yet.",
+          "evidence": [
+            "bending-42-close_match.png",
+            "bending-42-wide_match.png",
+            "bending-42-whole.png",
+            "bending-42-oblique.png",
+            "bending-42-close_scale55.png"
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "bending-42-close_match.png": "22424126c8e77599c565cba9fc905ccea500d94011c1643a5e091d2aef8bb11b",
+        "bending-42-wide_match.png": "1fbe32c97cd73cfc05ceb6c6c7c67609d2f2a84527c74476d1d07fa59d2c474d",
+        "bending-42-whole.png": "8e13627c770dc6504fda2b24a0f14e5976ac3184a99f213ddcf7aaed271ce75e",
+        "bending-42-oblique.png": "ea76ba4bf02e48c2ceb5a187a810bb99c04ad80bde495eaa0bc33e607460f40d",
+        "bending-42-close_scale55.png": "3623dbb29cea5680587f934a126d1cd03c61da4d50540e65f0ebe603e550487b",
+        "bending-42-request.json": "5c0d2fe11667dcaf8deaa31715299f4460eea70577b29f88dac93050c9edc8d6",
+        "bending-42-metrics.json": "f46bb7673aa5e00287477c7b5d4f853454cdb969371744a5524666526cc8d6c2",
+        "bending-42-diagnostics.json": "0b3dd9a0cc6e584e74d9930d759eff6153127cd324a6873aeb76f5fd72e90636",
+        "bending-42-graph.npz": "23d28bff9d1053420add02a8a25051e7654aa2bc59046a0a8314a6ca7ab17183"
+      },
+      "new_findings": [
+        {
+          "id": "F01",
+          "requirements": [
+            "V01",
+            "V02",
+            "V05"
+          ],
+          "finding": "placement-42 reduces star fill but leaves the same angular, crowded routes. Material/count improvement is not a geometry improvement.",
+          "next_test": "Change coherent local bending while retaining branching; compare against placement-only with identical cameras."
+        },
+        {
+          "id": "F02",
+          "requirements": [
+            "V02",
+            "V03",
+            "V05",
+            "V06"
+          ],
+          "finding": "gentler-42 is mostly straight sparse strings and loses dense patches. Smaller independent random turns and less branching overcorrect the blob.",
+          "next_test": "Keep turn direction coherent over successive block runs; test it independently from sparse branching."
+        },
+        {
+          "id": "F03",
+          "requirements": [
+            "V04",
+            "V08",
+            "V16"
+          ],
+          "finding": "Current branching recursively scales child lifetime from parent lifetime. Lengthening trunks therefore enlarges local bushes too; uniform branch opportunity rules give weak patch-to-corridor transitions.",
+          "evidence_kind": "source inspection plus prior longer/longer-room and current wide renders",
+          "next_test": "Separate continuing path reach from local branch lifetime/activity; do not preselect blob centers or destinations."
+        },
+        {
+          "id": "F04",
+          "requirements": [
+            "V10"
+          ],
+          "finding": "Solid cuboids merge multiple candles into rectangular marks. Fine separate silhouettes visible in finished close references are absent.",
+          "next_test": "A separate material-mesh pass is needed; preserve occupied cells while comparing mesh silhouettes."
+        },
+        {
+          "id": "F05",
+          "requirements": [
+            "V12",
+            "V13"
+          ],
+          "finding": "Lower luminous-block frequency fixes the obvious excess on unchanged geometry, but gentler-42 happens to contain zero full blocks. Material balance must be checked across seeds and views, not tuned to one count.",
+          "next_test": "Retain the rare-block correction as a trial, evaluate several seeds, inspect candle visibility after source removal."
+        },
+        {
+          "id": "F06",
+          "requirements": [
+            "V15"
+          ],
+          "finding": "The prior close camera showed too much world space for the measured foreground cube sizes: two reference single cubes are about20-28px in the comparison, while a generated cube at target depth was17x19px. Camera names did not establish calibration.",
+          "evidence": "build/scaffold-stars/correction/apparent-size-check.json and reference-size-probes.png",
+          "action": "All nine existing buffers rerendered at distance55 (previous75), yielding about23x26px at target depth. Original views preserved. This is a two-object apparent-size check, not a recovered camera or density calibration."
+        },
+        {
+          "id": "F07",
+          "requirements": [
+            "V01",
+            "V03",
+            "V05",
+            "V08"
+          ],
+          "finding": "Local active/quiet branching trials still form crowded clumps. Every new child starts active, allowing several generations to proliferate in the same small region; the candidate does not distribute resolved curves well even when its wide frame has five full blocks.",
+          "evidence_kind": "source inspection plus continuous-42, periods-42 and periods-short-42 native close/wide/oblique comparisons",
+          "next_test": "Test local branch-birth clearance or shared local branch activity that accounts for existing paths; compare directly with current branching rather than increasing global mass."
+        },
+        {
+          "id": "F08",
+          "requirements": [
+            "V01",
+            "V04",
+            "V05",
+            "V06",
+            "V08",
+            "V10"
+          ],
+          "finding": "In the final seed42 comparison, four-block fork clearance reduces forks493 to408 and occupied cells5068 to4821. Repetitive rows and crowded branch groups remain. Separating candle-group boxes improves silhouettes on identical occupied cells but does not fix the structural mismatch.",
+          "evidence": "build/final-scaffold-attempt/reference-close.png; reference-wide.png; comparison-close_scale55.png; comparison-wide_match.png; comparison-whole.png; comparison-oblique.png",
+          "disposition": "Failed; stopped at user direction. No next experiment."
+        }
+      ],
+      "evidence_base": "build/scaffold-stars/correction"
+    },
+    {
+      "candidate": "bending-long-42",
+      "verdict": "rejected; not a screenshot match",
+      "summary": "Longer apparent connections, still insufficiently resolved dense regions and weak transitions.",
+      "assessment_type": "explicit visual review plus code/geometry evidence; not an automated similarity metric",
+      "requirements_version": 5,
+      "requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+      "checks": {
+        "D01": {
+          "status": "pass",
+          "reason": "Explicit graph grown before population; no density input.",
+          "evidence": [
+            "bending-long-42-request.json",
+            "bending-long-42-metrics.json",
+            "bending-long-42-diagnostics.json",
+            "bending-long-42-graph.npz"
+          ]
+        },
+        "D02": {
+          "status": "pass",
+          "reason": "Frozen graph contains integer cells; population occupies unit cells.",
+          "evidence": [
+            "bending-long-42-request.json",
+            "bending-long-42-metrics.json",
+            "bending-long-42-diagnostics.json",
+            "bending-long-42-graph.npz"
+          ]
+        },
+        "D03": {
+          "status": "pass",
+          "reason": "Uniform roots and local stochastic growth; no guidance field.",
+          "evidence": [
+            "bending-long-42-request.json",
+            "bending-long-42-metrics.json",
+            "bending-long-42-diagnostics.json",
+            "bending-long-42-graph.npz"
+          ]
+        },
+        "D04": {
+          "status": "pass",
+          "reason": "Graph NPZ, line buffer and star buffer remain independently inspectable.",
+          "evidence": [
+            "bending-long-42-request.json",
+            "bending-long-42-metrics.json",
+            "bending-long-42-diagnostics.json",
+            "bending-long-42-graph.npz"
+          ]
+        },
+        "D05": {
+          "status": "pass",
+          "reason": "No predetermined blob pairs, spanning tree or fixed destinations.",
+          "evidence": [
+            "bending-long-42-request.json",
+            "bending-long-42-metrics.json",
+            "bending-long-42-diagnostics.json",
+            "bending-long-42-graph.npz"
+          ]
+        },
+        "D06": {
+          "status": "fail",
+          "reason": "The historical report used labels such as gentler without explaining the bundled before/after changes in the response, and did not clearly distinguish that trial from the displayed bending-42 candidate. The core reporting rule and README now document this correction; that does not retroactively make the earlier report adequate.",
+          "evidence": [
+            "bending-long-42-request.json",
+            "bending-long-42-metrics.json",
+            "bending-long-42-diagnostics.json",
+            "bending-long-42-graph.npz"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Separate experiment; prior generators and user presets preserved.",
+          "evidence": [
+            "bending-long-42-request.json",
+            "bending-long-42-metrics.json",
+            "bending-long-42-diagnostics.json",
+            "bending-long-42-graph.npz"
+          ]
+        },
+        "V01": {
+          "status": "fail",
+          "reason": "Close view still contains crowded branch groups mixed with regular rows.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V02": {
+          "status": "partial",
+          "reason": "Several broader bends replace independent wandering. Straight bead rows and hard branch departures remain.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V03": {
+          "status": "partial",
+          "reason": "Longer reach and short branches present; local branch hierarchy remains unlike the reference.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V04": {
+          "status": "fail",
+          "reason": "Turn continuation does not remove regular bead spacing or monotonous solid group marks.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V05": {
+          "status": "fail",
+          "reason": "Dense patches retained, but not as sufficiently resolved fine curves.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V06": {
+          "status": "partial",
+          "reason": "More longer apparent links in wide view; they still do not join reference-like resolved dense patches.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V07": {
+          "status": "partial",
+          "reason": "Voids preserved and less filled, but patch-to-corridor contrast is not reference-like.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V08": {
+          "status": "fail",
+          "reason": "Longer reach still changes local branch scale; patch transitions are not convincingly reproduced.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V09": {
+          "status": "partial",
+          "reason": "Shallow shape and local vertical variation retained in oblique view; no depth match established.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V10": {
+          "status": "fail",
+          "reason": "Same solid group proxies lack individual candle silhouettes.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V11": {
+          "status": "partial",
+          "reason": "455 rods and 5156 candles; visible material hierarchy, unresolved strand distribution.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V12": {
+          "status": "partial",
+          "reason": "Three full-block centers in wide frame, four overall; rare accents only checked on this seed.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V13": {
+          "status": "partial",
+          "reason": "Fainter neighborhoods after removing sources; palette hierarchy survives, but no calibrated appearance match.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V14": {
+          "status": "partial",
+          "reason": "No new isolated scaffold components; lower occupancy can make short pieces appear detached.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V15": {
+          "status": "partial",
+          "reason": "Scaffold occupied-cell footprint spans [238, 55, 244] blocks (coordinate spans plus one). All candidates also use the revised distance55 close camera, based on two reference cube sizes. Broader apparent-size/depth distribution and reference camera remain uncalibrated; no physical density match established.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "No dedicated endpoint/boundary crop review yet.",
+          "evidence": [
+            "bending-long-42-close_match.png",
+            "bending-long-42-wide_match.png",
+            "bending-long-42-whole.png",
+            "bending-long-42-oblique.png",
+            "bending-long-42-close_scale55.png"
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "bending-long-42-close_match.png": "f6288ae45299dacefa68a5c1ac4bacda2de654c623a5ebfb5bab40e02b640e3f",
+        "bending-long-42-wide_match.png": "5c33a7e186b0141702138691d568d0f8110406c87f738550d81e483371072629",
+        "bending-long-42-whole.png": "144be554d56160d466eb1b114328c7f1089a18e97bb8169dc1f476a3665b40a4",
+        "bending-long-42-oblique.png": "d6102a279455a4ec7860ed6aa3632bb9e1f19c315459adeba0c5ca2400756b62",
+        "bending-long-42-close_scale55.png": "81989ae6f686422409b99dd9debd7b06f6ae1944e37e5dc7d47fd032fa880c8a",
+        "bending-long-42-request.json": "69056f0b89b5bd7e4c71846b949271c134f0e7bed6bd3fac75f87d5e3186cc85",
+        "bending-long-42-metrics.json": "47dea47e0d859f4d70f2273cfc665c571c5072633c833794884acf2193e0452b",
+        "bending-long-42-diagnostics.json": "02188139c4a5de17ad1d3585f22d6d2a08a94e00e077b680df2524296dd305b7",
+        "bending-long-42-graph.npz": "1f61f9075e3beda18203e252968c56a42c71cfc63d752720a39109ca2f9d2a56"
+      },
+      "new_findings": [
+        {
+          "id": "F01",
+          "requirements": [
+            "V01",
+            "V02",
+            "V05"
+          ],
+          "finding": "placement-42 reduces star fill but leaves the same angular, crowded routes. Material/count improvement is not a geometry improvement.",
+          "next_test": "Change coherent local bending while retaining branching; compare against placement-only with identical cameras."
+        },
+        {
+          "id": "F02",
+          "requirements": [
+            "V02",
+            "V03",
+            "V05",
+            "V06"
+          ],
+          "finding": "gentler-42 is mostly straight sparse strings and loses dense patches. Smaller independent random turns and less branching overcorrect the blob.",
+          "next_test": "Keep turn direction coherent over successive block runs; test it independently from sparse branching."
+        },
+        {
+          "id": "F03",
+          "requirements": [
+            "V04",
+            "V08",
+            "V16"
+          ],
+          "finding": "Current branching recursively scales child lifetime from parent lifetime. Lengthening trunks therefore enlarges local bushes too; uniform branch opportunity rules give weak patch-to-corridor transitions.",
+          "evidence_kind": "source inspection plus prior longer/longer-room and current wide renders",
+          "next_test": "Separate continuing path reach from local branch lifetime/activity; do not preselect blob centers or destinations."
+        },
+        {
+          "id": "F04",
+          "requirements": [
+            "V10"
+          ],
+          "finding": "Solid cuboids merge multiple candles into rectangular marks. Fine separate silhouettes visible in finished close references are absent.",
+          "next_test": "A separate material-mesh pass is needed; preserve occupied cells while comparing mesh silhouettes."
+        },
+        {
+          "id": "F05",
+          "requirements": [
+            "V12",
+            "V13"
+          ],
+          "finding": "Lower luminous-block frequency fixes the obvious excess on unchanged geometry, but gentler-42 happens to contain zero full blocks. Material balance must be checked across seeds and views, not tuned to one count.",
+          "next_test": "Retain the rare-block correction as a trial, evaluate several seeds, inspect candle visibility after source removal."
+        },
+        {
+          "id": "F06",
+          "requirements": [
+            "V15"
+          ],
+          "finding": "The prior close camera showed too much world space for the measured foreground cube sizes: two reference single cubes are about20-28px in the comparison, while a generated cube at target depth was17x19px. Camera names did not establish calibration.",
+          "evidence": "build/scaffold-stars/correction/apparent-size-check.json and reference-size-probes.png",
+          "action": "All nine existing buffers rerendered at distance55 (previous75), yielding about23x26px at target depth. Original views preserved. This is a two-object apparent-size check, not a recovered camera or density calibration."
+        },
+        {
+          "id": "F07",
+          "requirements": [
+            "V01",
+            "V03",
+            "V05",
+            "V08"
+          ],
+          "finding": "Local active/quiet branching trials still form crowded clumps. Every new child starts active, allowing several generations to proliferate in the same small region; the candidate does not distribute resolved curves well even when its wide frame has five full blocks.",
+          "evidence_kind": "source inspection plus continuous-42, periods-42 and periods-short-42 native close/wide/oblique comparisons",
+          "next_test": "Test local branch-birth clearance or shared local branch activity that accounts for existing paths; compare directly with current branching rather than increasing global mass."
+        },
+        {
+          "id": "F08",
+          "requirements": [
+            "V01",
+            "V04",
+            "V05",
+            "V06",
+            "V08",
+            "V10"
+          ],
+          "finding": "In the final seed42 comparison, four-block fork clearance reduces forks493 to408 and occupied cells5068 to4821. Repetitive rows and crowded branch groups remain. Separating candle-group boxes improves silhouettes on identical occupied cells but does not fix the structural mismatch.",
+          "evidence": "build/final-scaffold-attempt/reference-close.png; reference-wide.png; comparison-close_scale55.png; comparison-wide_match.png; comparison-whole.png; comparison-oblique.png",
+          "disposition": "Failed; stopped at user direction. No next experiment."
+        }
+      ],
+      "evidence_base": "build/scaffold-stars/correction"
+    },
+    {
+      "candidate": "continuous-42",
+      "verdict": "rejected; not a screenshot match",
+      "summary": "Long reach and child lifetime cap still produce concentrated clumps.",
+      "assessment_type": "explicit visual review plus code/geometry evidence; not an automated similarity metric",
+      "requirements_version": 5,
+      "requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+      "checks": {
+        "D01": {
+          "status": "pass",
+          "reason": "Explicit graph grown before population; no density input.",
+          "evidence": [
+            "continuous-42-request.json",
+            "continuous-42-metrics.json",
+            "continuous-42-diagnostics.json",
+            "continuous-42-graph.npz"
+          ]
+        },
+        "D02": {
+          "status": "pass",
+          "reason": "Frozen graph contains integer cells; population occupies unit cells.",
+          "evidence": [
+            "continuous-42-request.json",
+            "continuous-42-metrics.json",
+            "continuous-42-diagnostics.json",
+            "continuous-42-graph.npz"
+          ]
+        },
+        "D03": {
+          "status": "pass",
+          "reason": "Uniform roots and local stochastic growth; no guidance field.",
+          "evidence": [
+            "continuous-42-request.json",
+            "continuous-42-metrics.json",
+            "continuous-42-diagnostics.json",
+            "continuous-42-graph.npz"
+          ]
+        },
+        "D04": {
+          "status": "pass",
+          "reason": "Graph NPZ, line buffer and star buffer remain independently inspectable.",
+          "evidence": [
+            "continuous-42-request.json",
+            "continuous-42-metrics.json",
+            "continuous-42-diagnostics.json",
+            "continuous-42-graph.npz"
+          ]
+        },
+        "D05": {
+          "status": "pass",
+          "reason": "No predetermined blob pairs, spanning tree or fixed destinations.",
+          "evidence": [
+            "continuous-42-request.json",
+            "continuous-42-metrics.json",
+            "continuous-42-diagnostics.json",
+            "continuous-42-graph.npz"
+          ]
+        },
+        "D06": {
+          "status": "fail",
+          "reason": "The historical report used labels such as gentler without explaining the bundled before/after changes in the response, and did not clearly distinguish that trial from the displayed bending-42 candidate. The core reporting rule and README now document this correction; that does not retroactively make the earlier report adequate.",
+          "evidence": [
+            "continuous-42-request.json",
+            "continuous-42-metrics.json",
+            "continuous-42-diagnostics.json",
+            "continuous-42-graph.npz"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Separate experiment; prior generators and user presets preserved.",
+          "evidence": [
+            "continuous-42-request.json",
+            "continuous-42-metrics.json",
+            "continuous-42-diagnostics.json",
+            "continuous-42-graph.npz"
+          ]
+        },
+        "V01": {
+          "status": "fail",
+          "reason": "Long trunks with capped children still form dense unresolved clumps.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V02": {
+          "status": "partial",
+          "reason": "Broad bends exist, but straight runs and hard fork departures remain prominent.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V03": {
+          "status": "partial",
+          "reason": "Plenty of branches and short paths, but their overlap hides coherent organization.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V04": {
+          "status": "fail",
+          "reason": "Turn continuation does not remove regular bead spacing or monotonous solid group marks.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V05": {
+          "status": "fail",
+          "reason": "Dense regions merge many fine strands into a blob.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V06": {
+          "status": "fail",
+          "reason": "Two graph components is not success: wide view is dominated by one clump rather than a resolved patch/bridge network.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V07": {
+          "status": "fail",
+          "reason": "Large empty areas surround a disproportionately concentrated cloud; internal voids are weak.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V08": {
+          "status": "fail",
+          "reason": "Large main accumulation and separate smaller bush; weak hierarchy within patches.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V09": {
+          "status": "partial",
+          "reason": "Shallow shape and local vertical variation retained in oblique view; no depth match established.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V10": {
+          "status": "fail",
+          "reason": "Same solid group proxies lack individual candle silhouettes.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V11": {
+          "status": "partial",
+          "reason": "658 rods and 8534 candles; rods remain visible but cannot resolve geometry.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V12": {
+          "status": "partial",
+          "reason": "Two full blocks in wide frame; count excess fixed, scene still fails.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V13": {
+          "status": "partial",
+          "reason": "Fainter neighborhoods after removing sources; palette hierarchy survives, but no calibrated appearance match.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V14": {
+          "status": "partial",
+          "reason": "No new isolated scaffold components; lower occupancy can make short pieces appear detached.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V15": {
+          "status": "partial",
+          "reason": "Scaffold occupied-cell footprint spans [225, 55, 252] blocks (coordinate spans plus one). All candidates also use the revised distance55 close camera, based on two reference cube sizes. Broader apparent-size/depth distribution and reference camera remain uncalibrated; no physical density match established.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "No dedicated endpoint/boundary crop review yet.",
+          "evidence": [
+            "continuous-42-close_match.png",
+            "continuous-42-wide_match.png",
+            "continuous-42-whole.png",
+            "continuous-42-oblique.png",
+            "continuous-42-close_scale55.png"
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "continuous-42-close_match.png": "86eeaed6e12e19464c96cb16549487312396a2aec19cacc135c6d027facc6d16",
+        "continuous-42-wide_match.png": "86473fb421c001d5671edb12281ee1992504150eee9e81f4fba36670779deed5",
+        "continuous-42-whole.png": "5a3c580bbdd3c090f3bd87dbea26410aa6a0fc1810fdc1468ab8808d70e61ace",
+        "continuous-42-oblique.png": "8600e355ec2bd45509c8c36bf8c8f648becd97092e06535b757f33d24af0cbd0",
+        "continuous-42-close_scale55.png": "705c5c56b1806c3f10479be8cfca40814630c6f0038d98fc0d6fa82b0c3b2027",
+        "continuous-42-request.json": "5b7cb0f2ad05f0ba2f1d2d5c342ca424423eca88fd413369fd2231d1ede920ec",
+        "continuous-42-metrics.json": "6a6a3b583602f9e5a8d9e9ed2c82ecefff2abfc15738e5f371c5fe61091b68e2",
+        "continuous-42-diagnostics.json": "000c4c425f55e7e7547e5ad2a6518420f38a8a0a5fcec620d18e1b85d128d682",
+        "continuous-42-graph.npz": "ade13ae4fa4575225aa1ab84f27d240ce54e1a37e3092863f44c3422b2958c08"
+      },
+      "new_findings": [
+        {
+          "id": "F01",
+          "requirements": [
+            "V01",
+            "V02",
+            "V05"
+          ],
+          "finding": "placement-42 reduces star fill but leaves the same angular, crowded routes. Material/count improvement is not a geometry improvement.",
+          "next_test": "Change coherent local bending while retaining branching; compare against placement-only with identical cameras."
+        },
+        {
+          "id": "F02",
+          "requirements": [
+            "V02",
+            "V03",
+            "V05",
+            "V06"
+          ],
+          "finding": "gentler-42 is mostly straight sparse strings and loses dense patches. Smaller independent random turns and less branching overcorrect the blob.",
+          "next_test": "Keep turn direction coherent over successive block runs; test it independently from sparse branching."
+        },
+        {
+          "id": "F03",
+          "requirements": [
+            "V04",
+            "V08",
+            "V16"
+          ],
+          "finding": "Current branching recursively scales child lifetime from parent lifetime. Lengthening trunks therefore enlarges local bushes too; uniform branch opportunity rules give weak patch-to-corridor transitions.",
+          "evidence_kind": "source inspection plus prior longer/longer-room and current wide renders",
+          "next_test": "Separate continuing path reach from local branch lifetime/activity; do not preselect blob centers or destinations."
+        },
+        {
+          "id": "F04",
+          "requirements": [
+            "V10"
+          ],
+          "finding": "Solid cuboids merge multiple candles into rectangular marks. Fine separate silhouettes visible in finished close references are absent.",
+          "next_test": "A separate material-mesh pass is needed; preserve occupied cells while comparing mesh silhouettes."
+        },
+        {
+          "id": "F05",
+          "requirements": [
+            "V12",
+            "V13"
+          ],
+          "finding": "Lower luminous-block frequency fixes the obvious excess on unchanged geometry, but gentler-42 happens to contain zero full blocks. Material balance must be checked across seeds and views, not tuned to one count.",
+          "next_test": "Retain the rare-block correction as a trial, evaluate several seeds, inspect candle visibility after source removal."
+        },
+        {
+          "id": "F06",
+          "requirements": [
+            "V15"
+          ],
+          "finding": "The prior close camera showed too much world space for the measured foreground cube sizes: two reference single cubes are about20-28px in the comparison, while a generated cube at target depth was17x19px. Camera names did not establish calibration.",
+          "evidence": "build/scaffold-stars/correction/apparent-size-check.json and reference-size-probes.png",
+          "action": "All nine existing buffers rerendered at distance55 (previous75), yielding about23x26px at target depth. Original views preserved. This is a two-object apparent-size check, not a recovered camera or density calibration."
+        },
+        {
+          "id": "F07",
+          "requirements": [
+            "V01",
+            "V03",
+            "V05",
+            "V08"
+          ],
+          "finding": "Local active/quiet branching trials still form crowded clumps. Every new child starts active, allowing several generations to proliferate in the same small region; the candidate does not distribute resolved curves well even when its wide frame has five full blocks.",
+          "evidence_kind": "source inspection plus continuous-42, periods-42 and periods-short-42 native close/wide/oblique comparisons",
+          "next_test": "Test local branch-birth clearance or shared local branch activity that accounts for existing paths; compare directly with current branching rather than increasing global mass."
+        },
+        {
+          "id": "F08",
+          "requirements": [
+            "V01",
+            "V04",
+            "V05",
+            "V06",
+            "V08",
+            "V10"
+          ],
+          "finding": "In the final seed42 comparison, four-block fork clearance reduces forks493 to408 and occupied cells5068 to4821. Repetitive rows and crowded branch groups remain. Separating candle-group boxes improves silhouettes on identical occupied cells but does not fix the structural mismatch.",
+          "evidence": "build/final-scaffold-attempt/reference-close.png; reference-wide.png; comparison-close_scale55.png; comparison-wide_match.png; comparison-whole.png; comparison-oblique.png",
+          "disposition": "Failed; stopped at user direction. No next experiment."
+        }
+      ],
+      "evidence_base": "build/scaffold-stars/correction"
+    },
+    {
+      "candidate": "periods-42",
+      "verdict": "rejected; not a screenshot match",
+      "summary": "Five full blocks does not rescue crowded clumps; children restart active and proliferate locally.",
+      "assessment_type": "explicit visual review plus code/geometry evidence; not an automated similarity metric",
+      "requirements_version": 5,
+      "requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+      "checks": {
+        "D01": {
+          "status": "pass",
+          "reason": "Explicit graph grown before population; no density input.",
+          "evidence": [
+            "periods-42-request.json",
+            "periods-42-metrics.json",
+            "periods-42-diagnostics.json",
+            "periods-42-graph.npz"
+          ]
+        },
+        "D02": {
+          "status": "pass",
+          "reason": "Frozen graph contains integer cells; population occupies unit cells.",
+          "evidence": [
+            "periods-42-request.json",
+            "periods-42-metrics.json",
+            "periods-42-diagnostics.json",
+            "periods-42-graph.npz"
+          ]
+        },
+        "D03": {
+          "status": "pass",
+          "reason": "Uniform roots and local stochastic growth; no guidance field.",
+          "evidence": [
+            "periods-42-request.json",
+            "periods-42-metrics.json",
+            "periods-42-diagnostics.json",
+            "periods-42-graph.npz"
+          ]
+        },
+        "D04": {
+          "status": "pass",
+          "reason": "Graph NPZ, line buffer and star buffer remain independently inspectable.",
+          "evidence": [
+            "periods-42-request.json",
+            "periods-42-metrics.json",
+            "periods-42-diagnostics.json",
+            "periods-42-graph.npz"
+          ]
+        },
+        "D05": {
+          "status": "pass",
+          "reason": "No predetermined blob pairs, spanning tree or fixed destinations.",
+          "evidence": [
+            "periods-42-request.json",
+            "periods-42-metrics.json",
+            "periods-42-diagnostics.json",
+            "periods-42-graph.npz"
+          ]
+        },
+        "D06": {
+          "status": "fail",
+          "reason": "The historical report used labels such as gentler without explaining the bundled before/after changes in the response, and did not clearly distinguish that trial from the displayed bending-42 candidate. The core reporting rule and README now document this correction; that does not retroactively make the earlier report adequate.",
+          "evidence": [
+            "periods-42-request.json",
+            "periods-42-metrics.json",
+            "periods-42-diagnostics.json",
+            "periods-42-graph.npz"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Separate experiment; prior generators and user presets preserved.",
+          "evidence": [
+            "periods-42-request.json",
+            "periods-42-metrics.json",
+            "periods-42-diagnostics.json",
+            "periods-42-graph.npz"
+          ]
+        },
+        "V01": {
+          "status": "fail",
+          "reason": "Active/quiet periods retain crowded clumps at original and revised close camera.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V02": {
+          "status": "partial",
+          "reason": "Broad bends exist, but straight runs and hard fork departures remain prominent.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V03": {
+          "status": "fail",
+          "reason": "Children restarting active produces locally excessive descendant branching; hierarchy remains unreadable.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V04": {
+          "status": "fail",
+          "reason": "Turn continuation does not remove regular bead spacing or monotonous solid group marks.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V05": {
+          "status": "fail",
+          "reason": "Dense areas present but remain unresolved accumulations.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V06": {
+          "status": "fail",
+          "reason": "Some thin peripheral paths appear; central clumps still prevent the desired patch/bridge arrangement.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V07": {
+          "status": "fail",
+          "reason": "Large voids and concentrated masses persist; local periods do not fix their balance.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V08": {
+          "status": "fail",
+          "reason": "Period variation does not prevent descendant cascades in the same region.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V09": {
+          "status": "partial",
+          "reason": "Shallow shape and local vertical variation retained in oblique view; no depth match established.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V10": {
+          "status": "fail",
+          "reason": "Same solid group proxies lack individual candle silhouettes.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V11": {
+          "status": "partial",
+          "reason": "643 rods and 7566 candles; material counts alone do not match their arrangement.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V12": {
+          "status": "partial",
+          "reason": "Five full blocks in wide frame, but matching this one count is not a full visual match or a robust material test.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V13": {
+          "status": "partial",
+          "reason": "Fainter neighborhoods after removing sources; palette hierarchy survives, but no calibrated appearance match.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V14": {
+          "status": "partial",
+          "reason": "No new isolated scaffold components; lower occupancy can make short pieces appear detached.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V15": {
+          "status": "partial",
+          "reason": "Scaffold occupied-cell footprint spans [270, 55, 265] blocks (coordinate spans plus one). All candidates also use the revised distance55 close camera, based on two reference cube sizes. Broader apparent-size/depth distribution and reference camera remain uncalibrated; no physical density match established.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "No dedicated endpoint/boundary crop review yet.",
+          "evidence": [
+            "periods-42-close_match.png",
+            "periods-42-wide_match.png",
+            "periods-42-whole.png",
+            "periods-42-oblique.png",
+            "periods-42-close_scale55.png"
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "periods-42-close_match.png": "878512842f4b99a008f864b12510f84676e6533538ea888b25e7fad7e099f52c",
+        "periods-42-wide_match.png": "aa05015ee57312731894db10954c71db0e017d725b4477c327bd59a7d44aa55a",
+        "periods-42-whole.png": "1220879ff161b090478280eaff80d873916efa341a4863fa42403bb42b0aa9a7",
+        "periods-42-oblique.png": "d05458ad3c06b68445a8e9ae4da9239a00ee746c4e0de9907632e9ad8831a8e5",
+        "periods-42-close_scale55.png": "8e0ee949e43b7f2ade84054c47496f2e17a5348d63daa64830bb913b6ce957cf",
+        "periods-42-request.json": "52faac1008003e777a74d6f226569699650cb5f5fc928a54376ae97edc07ae68",
+        "periods-42-metrics.json": "d94eabb0df550ede13ec53949e809d71982bd8e85b8843e93311cd5c7de7c7ec",
+        "periods-42-diagnostics.json": "58064f4606214255084161f736846579cefd7acd37573b93ad7f869fba92aa3a",
+        "periods-42-graph.npz": "63c67b4c72e7a660abddc190ff8f002ad45aa6ddcd3fd3b67729918a450dc4c0"
+      },
+      "new_findings": [
+        {
+          "id": "F01",
+          "requirements": [
+            "V01",
+            "V02",
+            "V05"
+          ],
+          "finding": "placement-42 reduces star fill but leaves the same angular, crowded routes. Material/count improvement is not a geometry improvement.",
+          "next_test": "Change coherent local bending while retaining branching; compare against placement-only with identical cameras."
+        },
+        {
+          "id": "F02",
+          "requirements": [
+            "V02",
+            "V03",
+            "V05",
+            "V06"
+          ],
+          "finding": "gentler-42 is mostly straight sparse strings and loses dense patches. Smaller independent random turns and less branching overcorrect the blob.",
+          "next_test": "Keep turn direction coherent over successive block runs; test it independently from sparse branching."
+        },
+        {
+          "id": "F03",
+          "requirements": [
+            "V04",
+            "V08",
+            "V16"
+          ],
+          "finding": "Current branching recursively scales child lifetime from parent lifetime. Lengthening trunks therefore enlarges local bushes too; uniform branch opportunity rules give weak patch-to-corridor transitions.",
+          "evidence_kind": "source inspection plus prior longer/longer-room and current wide renders",
+          "next_test": "Separate continuing path reach from local branch lifetime/activity; do not preselect blob centers or destinations."
+        },
+        {
+          "id": "F04",
+          "requirements": [
+            "V10"
+          ],
+          "finding": "Solid cuboids merge multiple candles into rectangular marks. Fine separate silhouettes visible in finished close references are absent.",
+          "next_test": "A separate material-mesh pass is needed; preserve occupied cells while comparing mesh silhouettes."
+        },
+        {
+          "id": "F05",
+          "requirements": [
+            "V12",
+            "V13"
+          ],
+          "finding": "Lower luminous-block frequency fixes the obvious excess on unchanged geometry, but gentler-42 happens to contain zero full blocks. Material balance must be checked across seeds and views, not tuned to one count.",
+          "next_test": "Retain the rare-block correction as a trial, evaluate several seeds, inspect candle visibility after source removal."
+        },
+        {
+          "id": "F06",
+          "requirements": [
+            "V15"
+          ],
+          "finding": "The prior close camera showed too much world space for the measured foreground cube sizes: two reference single cubes are about20-28px in the comparison, while a generated cube at target depth was17x19px. Camera names did not establish calibration.",
+          "evidence": "build/scaffold-stars/correction/apparent-size-check.json and reference-size-probes.png",
+          "action": "All nine existing buffers rerendered at distance55 (previous75), yielding about23x26px at target depth. Original views preserved. This is a two-object apparent-size check, not a recovered camera or density calibration."
+        },
+        {
+          "id": "F07",
+          "requirements": [
+            "V01",
+            "V03",
+            "V05",
+            "V08"
+          ],
+          "finding": "Local active/quiet branching trials still form crowded clumps. Every new child starts active, allowing several generations to proliferate in the same small region; the candidate does not distribute resolved curves well even when its wide frame has five full blocks.",
+          "evidence_kind": "source inspection plus continuous-42, periods-42 and periods-short-42 native close/wide/oblique comparisons",
+          "next_test": "Test local branch-birth clearance or shared local branch activity that accounts for existing paths; compare directly with current branching rather than increasing global mass."
+        },
+        {
+          "id": "F08",
+          "requirements": [
+            "V01",
+            "V04",
+            "V05",
+            "V06",
+            "V08",
+            "V10"
+          ],
+          "finding": "In the final seed42 comparison, four-block fork clearance reduces forks493 to408 and occupied cells5068 to4821. Repetitive rows and crowded branch groups remain. Separating candle-group boxes improves silhouettes on identical occupied cells but does not fix the structural mismatch.",
+          "evidence": "build/final-scaffold-attempt/reference-close.png; reference-wide.png; comparison-close_scale55.png; comparison-wide_match.png; comparison-whole.png; comparison-oblique.png",
+          "disposition": "Failed; stopped at user direction. No next experiment."
+        }
+      ],
+      "evidence_base": "build/scaffold-stars/correction"
+    },
+    {
+      "candidate": "periods-short-42",
+      "verdict": "rejected; not a screenshot match",
+      "summary": "Shorter quiet periods do not fix the clump failure.",
+      "assessment_type": "explicit visual review plus code/geometry evidence; not an automated similarity metric",
+      "requirements_version": 5,
+      "requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+      "checks": {
+        "D01": {
+          "status": "pass",
+          "reason": "Explicit graph grown before population; no density input.",
+          "evidence": [
+            "periods-short-42-request.json",
+            "periods-short-42-metrics.json",
+            "periods-short-42-diagnostics.json",
+            "periods-short-42-graph.npz"
+          ]
+        },
+        "D02": {
+          "status": "pass",
+          "reason": "Frozen graph contains integer cells; population occupies unit cells.",
+          "evidence": [
+            "periods-short-42-request.json",
+            "periods-short-42-metrics.json",
+            "periods-short-42-diagnostics.json",
+            "periods-short-42-graph.npz"
+          ]
+        },
+        "D03": {
+          "status": "pass",
+          "reason": "Uniform roots and local stochastic growth; no guidance field.",
+          "evidence": [
+            "periods-short-42-request.json",
+            "periods-short-42-metrics.json",
+            "periods-short-42-diagnostics.json",
+            "periods-short-42-graph.npz"
+          ]
+        },
+        "D04": {
+          "status": "pass",
+          "reason": "Graph NPZ, line buffer and star buffer remain independently inspectable.",
+          "evidence": [
+            "periods-short-42-request.json",
+            "periods-short-42-metrics.json",
+            "periods-short-42-diagnostics.json",
+            "periods-short-42-graph.npz"
+          ]
+        },
+        "D05": {
+          "status": "pass",
+          "reason": "No predetermined blob pairs, spanning tree or fixed destinations.",
+          "evidence": [
+            "periods-short-42-request.json",
+            "periods-short-42-metrics.json",
+            "periods-short-42-diagnostics.json",
+            "periods-short-42-graph.npz"
+          ]
+        },
+        "D06": {
+          "status": "fail",
+          "reason": "The historical report used labels such as gentler without explaining the bundled before/after changes in the response, and did not clearly distinguish that trial from the displayed bending-42 candidate. The core reporting rule and README now document this correction; that does not retroactively make the earlier report adequate.",
+          "evidence": [
+            "periods-short-42-request.json",
+            "periods-short-42-metrics.json",
+            "periods-short-42-diagnostics.json",
+            "periods-short-42-graph.npz"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Separate experiment; prior generators and user presets preserved.",
+          "evidence": [
+            "periods-short-42-request.json",
+            "periods-short-42-metrics.json",
+            "periods-short-42-diagnostics.json",
+            "periods-short-42-graph.npz"
+          ]
+        },
+        "V01": {
+          "status": "fail",
+          "reason": "Shortening quiet spans still leaves crowded regions in close view.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V02": {
+          "status": "partial",
+          "reason": "Broad bends exist, but straight runs and hard fork departures remain prominent.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V03": {
+          "status": "fail",
+          "reason": "Children restarting active produces locally excessive descendant branching; hierarchy remains unreadable.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V04": {
+          "status": "fail",
+          "reason": "Turn continuation does not remove regular bead spacing or monotonous solid group marks.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V05": {
+          "status": "fail",
+          "reason": "More frequent active branching does not produce resolved dense curves.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V06": {
+          "status": "fail",
+          "reason": "Some thin peripheral paths appear; central clumps still prevent the desired patch/bridge arrangement.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V07": {
+          "status": "fail",
+          "reason": "Large voids and concentrated masses persist; local periods do not fix their balance.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V08": {
+          "status": "fail",
+          "reason": "The same concentration/descendant-cascade failure persists with shorter quiet periods.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V09": {
+          "status": "partial",
+          "reason": "Shallow shape and local vertical variation retained in oblique view; no depth match established.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V10": {
+          "status": "fail",
+          "reason": "Same solid group proxies lack individual candle silhouettes.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V11": {
+          "status": "partial",
+          "reason": "682 rods and 8029 candles; visible rods, but repeated group marks and crowded paths remain.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V12": {
+          "status": "partial",
+          "reason": "Four full blocks in wide frame; no multi-seed balance demonstrated.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V13": {
+          "status": "partial",
+          "reason": "Fainter neighborhoods after removing sources; palette hierarchy survives, but no calibrated appearance match.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V14": {
+          "status": "partial",
+          "reason": "No new isolated scaffold components; lower occupancy can make short pieces appear detached.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V15": {
+          "status": "partial",
+          "reason": "Scaffold occupied-cell footprint spans [260, 55, 265] blocks (coordinate spans plus one). All candidates also use the revised distance55 close camera, based on two reference cube sizes. Broader apparent-size/depth distribution and reference camera remain uncalibrated; no physical density match established.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "No dedicated endpoint/boundary crop review yet.",
+          "evidence": [
+            "periods-short-42-close_match.png",
+            "periods-short-42-wide_match.png",
+            "periods-short-42-whole.png",
+            "periods-short-42-oblique.png",
+            "periods-short-42-close_scale55.png"
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "periods-short-42-close_match.png": "62af9ba0813d51d6054a8938079621aa2d966ab284a430b63a5656aec75430ae",
+        "periods-short-42-wide_match.png": "3ac85a7c44027ef27d8173986774384d904cb2dad5b7707c475c69ad7525475a",
+        "periods-short-42-whole.png": "89959954b2619692deaa1ef7de423ee770f0d64c7d3eac6693de51db5d13ce86",
+        "periods-short-42-oblique.png": "8650bed8ec6daa467072d9d65573a2444fe2f58dcfd1d546048c263559d9b6ec",
+        "periods-short-42-close_scale55.png": "cad7917189b86997df50beffef186f5be1c5e58f60c4dfc4efab4c80a9f4c468",
+        "periods-short-42-request.json": "c93baca173b1dc9cf986379f26c146ad4f9f3f959170520bd9e6390399101e68",
+        "periods-short-42-metrics.json": "ba0a03be69408940613fdeb3f08a72081dfafcf2dd08a30e86fd29500223f25d",
+        "periods-short-42-diagnostics.json": "8d4d5c786f5f68222dd51d3721208595dc4a8372b75304489e836923a6098290",
+        "periods-short-42-graph.npz": "de08c4345fd6f80282dc12a447688df3695c60f68ede0ceb6626168255fe5ba5"
+      },
+      "new_findings": [
+        {
+          "id": "F01",
+          "requirements": [
+            "V01",
+            "V02",
+            "V05"
+          ],
+          "finding": "placement-42 reduces star fill but leaves the same angular, crowded routes. Material/count improvement is not a geometry improvement.",
+          "next_test": "Change coherent local bending while retaining branching; compare against placement-only with identical cameras."
+        },
+        {
+          "id": "F02",
+          "requirements": [
+            "V02",
+            "V03",
+            "V05",
+            "V06"
+          ],
+          "finding": "gentler-42 is mostly straight sparse strings and loses dense patches. Smaller independent random turns and less branching overcorrect the blob.",
+          "next_test": "Keep turn direction coherent over successive block runs; test it independently from sparse branching."
+        },
+        {
+          "id": "F03",
+          "requirements": [
+            "V04",
+            "V08",
+            "V16"
+          ],
+          "finding": "Current branching recursively scales child lifetime from parent lifetime. Lengthening trunks therefore enlarges local bushes too; uniform branch opportunity rules give weak patch-to-corridor transitions.",
+          "evidence_kind": "source inspection plus prior longer/longer-room and current wide renders",
+          "next_test": "Separate continuing path reach from local branch lifetime/activity; do not preselect blob centers or destinations."
+        },
+        {
+          "id": "F04",
+          "requirements": [
+            "V10"
+          ],
+          "finding": "Solid cuboids merge multiple candles into rectangular marks. Fine separate silhouettes visible in finished close references are absent.",
+          "next_test": "A separate material-mesh pass is needed; preserve occupied cells while comparing mesh silhouettes."
+        },
+        {
+          "id": "F05",
+          "requirements": [
+            "V12",
+            "V13"
+          ],
+          "finding": "Lower luminous-block frequency fixes the obvious excess on unchanged geometry, but gentler-42 happens to contain zero full blocks. Material balance must be checked across seeds and views, not tuned to one count.",
+          "next_test": "Retain the rare-block correction as a trial, evaluate several seeds, inspect candle visibility after source removal."
+        },
+        {
+          "id": "F06",
+          "requirements": [
+            "V15"
+          ],
+          "finding": "The prior close camera showed too much world space for the measured foreground cube sizes: two reference single cubes are about20-28px in the comparison, while a generated cube at target depth was17x19px. Camera names did not establish calibration.",
+          "evidence": "build/scaffold-stars/correction/apparent-size-check.json and reference-size-probes.png",
+          "action": "All nine existing buffers rerendered at distance55 (previous75), yielding about23x26px at target depth. Original views preserved. This is a two-object apparent-size check, not a recovered camera or density calibration."
+        },
+        {
+          "id": "F07",
+          "requirements": [
+            "V01",
+            "V03",
+            "V05",
+            "V08"
+          ],
+          "finding": "Local active/quiet branching trials still form crowded clumps. Every new child starts active, allowing several generations to proliferate in the same small region; the candidate does not distribute resolved curves well even when its wide frame has five full blocks.",
+          "evidence_kind": "source inspection plus continuous-42, periods-42 and periods-short-42 native close/wide/oblique comparisons",
+          "next_test": "Test local branch-birth clearance or shared local branch activity that accounts for existing paths; compare directly with current branching rather than increasing global mass."
+        },
+        {
+          "id": "F08",
+          "requirements": [
+            "V01",
+            "V04",
+            "V05",
+            "V06",
+            "V08",
+            "V10"
+          ],
+          "finding": "In the final seed42 comparison, four-block fork clearance reduces forks493 to408 and occupied cells5068 to4821. Repetitive rows and crowded branch groups remain. Separating candle-group boxes improves silhouettes on identical occupied cells but does not fix the structural mismatch.",
+          "evidence": "build/final-scaffold-attempt/reference-close.png; reference-wide.png; comparison-close_scale55.png; comparison-wide_match.png; comparison-whole.png; comparison-oblique.png",
+          "disposition": "Failed; stopped at user direction. No next experiment."
+        }
+      ],
+      "evidence_base": "build/scaffold-stars/correction"
+    }
+  ],
+  "state": "stopped",
+  "final_attempt": {
+    "review": "build/final-scaffold-attempt/review.json",
+    "sha256": "f66c911ab4312dd3cb87b29d69cbab98f175da29a34a0e201a340895c1ffdb6a",
+    "candidates": [
+      "baseline",
+      "baseline-fine",
+      "clearance4",
+      "clearance4-fine"
+    ]
+  }
+}

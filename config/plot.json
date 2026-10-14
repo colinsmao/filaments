@@ -10,13 +10,13 @@
     "distance": 288.0,
     "far_clip": 160000.0,
     "near_clip": 0.1599999964237213,
-    "pitch": 56.104026794433594,
+    "pitch": 40.43994140625,
     "target": [
-      -106.26567840576172,
-      -140.61325073242188,
-      66.7469253540039
+      176.73036193847656,
+      -165.54893493652344,
+      -52.575828552246094
     ],
-    "yaw": -36247.30859375
+    "yaw": -36077.4453125
   },
   "generator": {
     "auto_apply": true,
@@ -38,6 +38,24 @@
       "y_extent": 27.5
     },
     "parameters": {
+      "block_scaffold": {
+        "_block_units": 1,
+        "allow_joins": 1,
+        "axis_run": 2,
+        "branch_spacing": 12,
+        "cells_per_root": 600,
+        "child_fraction": 0.65,
+        "color_branches": 1,
+        "height": 55,
+        "mark_junctions": 1,
+        "preview_blocks": 0,
+        "root_count": 24,
+        "run_length": 8,
+        "trunk_length": 120,
+        "turn_angle": 50.0,
+        "vertical_motion": 0.35,
+        "width": 275
+      },
       "density_curve_corpus": {
         "_block_units": 1,
         "corpus_axis_bias": 0.0,
@@ -955,7 +973,7 @@
         "y_scale": 0.23399999737739563
       }
     },
-    "script": "density_population_selection",
+    "script": "block_scaffold",
     "seed": 1919363634,
     "watch_files": true
   },

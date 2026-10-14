@@ -3,7 +3,189 @@
 Read this file and `README.md` before changing the project. This is a handoff of
 the current implementation, not a commitment to continue any particular experiment.
 
+## Core instruction: always explain what you did
+
+The user explicitly requires this in every substantive work report, not only when
+asked. Explain the work in plain language in the response itself; files, screenshots,
+trial names and parameter lists are supporting evidence, not substitutes.
+
+- Establish the relevant baseline before describing a change.
+- Explain the actual mechanism and before/after changes, including meaningful
+  values and units. Define labels such as "gentler curves" instead of assuming
+  their meaning is obvious. Distinguish scaffold, star placement, materials,
+  lighting, rendering and camera changes.
+- State why the change was tried, what was actually executed, what inspection or
+  testing found, and which old requirements still fail or remain untested.
+- When a trial changes several things at once, list those changes and do not
+  attribute the result to one of them without an isolating comparison.
+- Identify which candidate each displayed image shows. Distinguish a proposal,
+  an executed diagnostic trial, a default change and an applied user setting.
+- Scale the explanation to the task, but never omit it or replace it with vague
+  claims such as "improved", "tuned", "gentler" or "changed".
+
+This instruction is cumulative with all existing requirements and applies to
+future turns even after conversation context is lost.
+
+For all screenshot/scaffold/star work, also read `reference-match-requirements.json`.
+It is the cumulative requirement list and evaluation protocol. Keep every old
+requirement when adding new findings. Each candidate needs a verdict and evidence
+for every listed requirement; conversation memory and passing tests are insufficient.
+
 ## Purpose and user preferences
+
+- Stopped after failed final attempt (2026-10-14): user required delivery of the
+  screenshot match or an explicit admission of inability and stopping. Final
+  seed42 comparison starts from bending-42, rejects new forks within4 blocks of
+  other paths, and separately renders candle groups as narrow uneven-height boxes
+  on unchanged occupied cells. Forks493->408, occupied cells5068->4821; repetitive
+  strings, crowded branch groups and poor patch/connection structure remain in
+  close, wide, whole and oblique views. Finer silhouettes do not fix the scaffold.
+  This attempt failed. The assistant cannot deliver the requested match and has
+  stopped. Temporary generator edits restored byte-for-byte to this turn's
+  backups; earlier experiments and user settings retained. Evidence and complete
+  criterion review: build/final-scaffold-attempt/. No accepted match or promotion.
+  Do not resume the historical next-test suggestions below without a new user
+  request. No live config edits, viewer launch/rebuild, lighting edits or commit.
+
+- Cumulative visual audit (2026-10-14): read the root requirement ledger AND
+  `reference-match-review.json`. Nine candidates each have explicit verdicts for
+  all23 current criteria, with frozen evidence hashes. All fail overall; none
+  promoted. `scripts/review_scaffold_stars.py --check` catches omitted criteria,
+  changed evidence, stale requirements and unreviewed candidate inventory.
+  `evaluate_scaffold_stars.case` now creates a pending all-criteria review before
+  every generation, invalidating any previous review under a reused name.
+  All21 finished references inventoried in contact sheets; main close/wide and
+  23h46m31 viewed larger. Separate endpoint/boundary crops and new multi-seed
+  validation remain explicitly incomplete. Camera correction: two identifiable
+  single cubes measure20-28px in the reference comparison versus17x19 at old
+  native target depth. All9 buffers rerendered at distance55 instead of75,
+  about23x26px at target depth. Original cameras retained; no exposure changes.
+  This is an apparent-size check, not recovered reference geometry or density.
+  New findings: gentler growth loses dense regions and becomes straight; narrow
+  placement alone keeps angular/crowded routes; candle group cuboids miss separate
+  uneven silhouettes; child lifetimes couple trunk reach to bush size; all-active
+  child births defeat local quiet periods by concentrating descendants nearby.
+  Optional populated-scaffold controls (all default0) now test turn continuation
+  0..1, a maximum child lifetime in blocks, and local active/quiet branching
+  periods in blocks with0.5-1.5 variation. Either zero period restores continuous
+  branching. Turn bias affects only integer-slope choice; all positions remain
+  face-connected blocks, no field. Tests15 pass. Default-off graph compatibility
+  checked against all8 frozen arrays for5 original seeds. These controls are
+  diagnostic tools, not accepted settings. Further work needs local crowding
+  control without deleting dense areas, separate candle-mesh comparison on fixed
+  occupancy, more scale samples and unresolved endpoint/seed checks. No live
+  config writes, visible launch/rebuild, accepted-lighting edits or commit.
+
+- Visual rejection and cumulative requirements (2026-10-14): user rejected the
+  presented star comparison outright: close-up is a giant blob rather than
+  resolved curves, wide view has dozens of blocks versus roughly5, paths too
+  right-angled. This supersedes the assistant's "partial emulation" assessment
+  below; no screenshot match is accepted. User explicitly requires autonomous
+  discovery of additional mismatches while retaining ALL earlier requirements
+  in durable project state, not conversation context. See the required JSON
+  ledger above. Correction trials are diagnostic only. Placement-only narrows
+  spread/reduces fill and full blocks56->6 in the frozen wide camera but keeps
+  geometric faults; gentler/sparser branching improves readability but loses
+  dense patches and becomes too straight. Do not promote a latest-fix regression.
+
+- Scaffold population assessment (2026-10-14): user explicitly authorized stars
+  and requested small/large-scale finished-reference comparison. This supersedes
+  the earlier scope restriction below, but keeps `block_scaffold.py` geometry-only.
+  New separate `block_scaffold_stars.py` populates the unchanged integer graph,
+  including extra contact edges and excluding zero-length failed paths. Baseline
+  whole-path material lottery/.9 density/.2-.1 spread produced block chains and
+  sparse rod-only branches. New mixed_materials default1 forces candle mass before
+  occupancy, then optional private `_cell_material_fractions` in shared sampler
+  assigns cell-hashed types after occupancy. Existing generators remain unchanged;
+  off reproduces all3 frozen first-pass star buffers byte-for-byte. Rod/block
+  fractions change occupied-cell materials/shapes/light, never placement or graph.
+  Per-path candle tints retained; legacy material weights/density multipliers are
+  used only with mixed mode off. Selected defaults density1.1, spreadXZ.35/Y.2,
+  path variation.35, along-path variation1.5/scale12, taper0, rod fraction.075,
+  full-block fraction.006; existing light formula sky.1/ambient.02/lift1. No density
+  input, field guidance or selector. All8 frozen graph arrays match the prior
+  geometric-axis2 scaffold for all5 seeds. Stars7967–9120; components9–16 unchanged.
+  99% of stars are <=1 block from graph centers; max across seeds2 blocks.
+  Native close/below/oblique/whole renders and finished references inspected.
+  Historical assistant assessment, since rejected by user: dotted bends/forks and
+  patches/voids, but overly regular strings, weak dense-knot/thin-bridge hierarchy,
+  missing routes across some gaps, and bulky candle proxies. Full-density or
+  wider-spread trials cannot independently fix the structural routes. Longer
+  trunk180 (was120), seed42, components15->8; cap1200 too (was600), ->3 but broad
+  dense growth and19044 objects. Those are diagnostic variants, not defaults.
+  Next structural test: separate continuing-trunk allowance from local branching
+  bursts; retain unguided block growth. Individual candle models/textures/glow,
+  dark decorative blocks and planets need separate rendering/content work.
+  Reference cameras are unknown; apparent-size comparison approximate, no physical
+  density accuracy claim. Fixed cameras across seeds, no exposure manipulation.
+  `scripts/evaluate_scaffold_stars.py` stages and `build/scaffold-stars/` contain
+  frozen requests, buffers, graph NPZs, crops/cameras, comparisons, assessment and
+  verification. Normal Sobol budget reached; unconstrained requested probes for2
+  seeds change totalcounts<.1%, occupied-cell symmetric-difference/union.4–2.4%.
+  Per-cell convergence not established.184 Python tests/native panel startup pass.
+  No global lighting formula edits, visible launch/rebuild, live config writes,
+  preset application or commit. config/plot.json had user edits before this pass.
+
+- Scaffold continuation (2026-10-14): user repeatedly objected to stopping at an
+  unfinished prototype/comparison and did not require confirmation to continue.
+  Completed further unguided scaffold assessment; stars remain outside scope.
+  Revisited construction close-ups and broad views: stairs and gaps are present
+  in the reference too, so the earlier blanket criticism below was unsupported.
+  A concrete discrepancy was sustained vertical runs: baseline five canopies had
+  only0–2 runs >=4 blocks each. Tested local axis holds, uniform and geometric
+  distributions, mean1/2/3/4, three patch seeds and a full canopy. Longer uniform
+  holds looked too rectangular. Selected geometric requested mean2: half of holds
+  are1 block, with occasional longer holds. Existing integer heading deficits
+  accumulate throughout; heading changes reset holds, blocked steps may fall back
+  to other signed axes and end a hold, launch steps retain their prior rule.
+  Separate hold RNG; axis_run=1 exactly reproduces all8 frozen graph arrays for
+  all5 original canopy seeds. New Mean axis run (blocks), int1–8/default2;
+  helper and viewer defaults agree. Changes only scaffold geometry/count, no
+  field, density, stars, lighting changes, live config writes or viewer launch.
+  Selected5 seeds:10787–12431 cells,9–16 components,63–83 cycles,78–109 vertical
+  runs >=4. Local native before/after cameras/crops identical; apparent block
+  size ~24px in a reference region and at render target depth, not recovered
+  reference camera or whole-world density calibration. Five overview seeds share
+  a fixed camera and retain gaps. Tested top/side/near native views as well.
+  Assessment: keep the unguided scaffold baseline; local shape family resembles
+  the reference. Exact layout and projected reference connectivity are not
+  reconstructed, and some tips still hit the declared root cell caps. No claim
+  of user visual acceptance.180 Python tests/native panel startup pass.
+  `scripts/assess_block_scaffold.py` reproduces sweep/verify/compare stages;
+  evidence `build/block-scaffold/assessment/selected/` includes reference-before-
+  after.png, reference-five-seeds.png, metrics, frozen graphs and cameras.
+  Initial uniform sweep and geometric sweep are retained separately. No commit.
+
+- Unguided scaffold restart (2026-10-13): user rejected density-first generation,
+  requested fresh curves/branches in block space, then explicitly limited work to
+  scaffold geometry before stars. Do not add population or guidance in this trial.
+  New separate `block_scaffold.py` is NATIVE_BLOCKS and PRIMITIVE lines, with no
+  population callback. `_block_scaffold.py` owns sparse integer cells, six-face
+  adjacency, parent/child paths and local contacts. Integer slope proportions and
+  a deficit scheduler choose face steps; random run turns/forks, no spatial field.
+  Constant vertical heading weighting is explicit, not a field or postscale.
+  Uniform roots, two opposed tips, finite path lifetimes and a shared per-root
+  cell cap. Failed preferred steps try other signed axes of the same heading;
+  actual contacts are recorded or refused. Girth<10 contacts are refused, including
+  simultaneous contact pairs (caught by topology tests during development).
+  Defaults domain275x55x275, roots24, cap600/root, trunk120 total steps, run8,
+  turn50deg, fork gap12, child fraction.65, vertical weight.35, contacts on.
+  All cell caps total<=40000; caps can truncate tips. Boundary steps may slide
+  along faces. No full coverage/global connectivity guarantee. Failed zero-length
+  paths are retained in diagnostics but not counted as actual branches.
+  Viewer offers graph links/wire cells, path/root colors and junction markers.
+  `scripts/evaluate_block_scaffold.py` makes scaffold-only solid/link native
+  renders via existing hidden build/check_lighting.exe. No visible viewer launch,
+  rebuild, config writes or star stage. Five final seeds:10686–12985 cells,
+  11–17 components,56–72 cycles. Evidence `build/block-scaffold/final/` includes
+  NPZ graphs, full parameters, source hashes, cameras, six local variants and
+  five-seed multi-view renders. Earlier first/revised outputs are separate.
+  Local branches are readable; larger layout still has disconnected patches,
+  uneven gaps and repeated staircase runs. Qualitative scaffold comparison only,
+  no recovered reference camera or measured 3D target. Scaffold supports inform
+  geometry where identifiable; support blocks are not stars and access paths
+  must not automatically be treated as target branches. Visual acceptance pending.
+  Validation:179 Python tests (8 new scaffold tests) and native panel startup pass.
 
 - Screenshot parameter trial (2026-10-13): user requested one final parameter
   attempt using estimated build width200–350/height40–70 blocks. Chosen offline
