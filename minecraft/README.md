@@ -1,10 +1,9 @@
-# Minecraft mod: design handoff
+# Minecraft: research notes
 
-Status: **design only, no mod code yet.** This records a research session from
-2026-10-14/15 that compared filaments with mobwalk
+Research from 2026-10-14/15 comparing filaments with mobwalk
 ([colinsmao/mobwalk](https://github.com/colinsmao/mobwalk), v1.1.1 at `7381562`),
-Litematica and Axiom. Everything below is a recommendation unless it says
-**decided**. Rules for agents working here live in [`AGENTS.md`](AGENTS.md).
+Litematica and Axiom. Nothing here is a decision or planned work. Rules for agents
+working here live in [`AGENTS.md`](AGENTS.md).
 
 ## Goal
 
@@ -16,63 +15,64 @@ in-game:
   mod relies purely on Litematica;
 - hand the result off for building or pasting.
 
-The mod ships **without** the C++ viewer. Whether it ships the Python scripts is
-**open** (see [Generator backend](#generator-backend-python-worker-or-java-port-open)).
+The mod ships **without** the C++ viewer.
 
-What the mod places is what the block sampler already outputs, in native block
-coordinates: candles (groups of 1–4, one of the five tints in
-`_block_population.CANDLE_COLORS`), end rods along X/Y/Z, and occasional full
-blocks. The visual target is `scar/` (Hermitcraft 11, a survival server). The game
-lights real blocks itself, so `_block_lighting.py` only matters for approximate
-previews.
+The block sampler outputs, in native block coordinates: candles (groups of 1–4, one
+of the five tints in `_block_population.CANDLE_COLORS`), end rods along X/Y/Z, and
+occasional full blocks. The visual target is `scar/` (Hermitcraft 11, a survival
+server). The game lights real blocks itself, so `_block_lighting.py` only matters
+for approximate previews.
 
-## Recommended architecture
+## Schematic export
 
-```
-filaments-mod (Fabric client, 26.3)
-├─ generator/   Generator interface; PythonWorkerGenerator now, JavaGenerator later;
-│               per-stage caches; coalescing runner on a background thread
-├─ preview/     retained block mesh, curve lines, bounds box, progress ring, HUD stats
-├─ config/      MaLiLib options built from the parameter table, side-panel screen,
-│               pinned parameter adjusted with sneak + scroll
-├─ input/       wand sets the anchor, hotkeys
-└─ litematica/  optional: send to placement, paste/undo in a creative test world
+`scripts/export_schematic.py` writes the block population of a saved preset as a
+Sponge v2 `.schem` (gzipped NBT, `DataVersion` 5023 = Java 26.3). Litematica's 26.3
+source accepts this layout; WorldEdit and Axiom also import `.schem` (untested). No
+mod code is involved. **Not yet checked in-game.**
+
+```powershell
+& C:/Users/colin/miniconda3/envs/py310/python.exe -B scripts/export_schematic.py --script density_population_selection
 ```
 
-`Generator` returns `{curves, blocks, stats}`. Build the mod against the Python
-backend first; port to Java once the experiment stops changing daily, using the
-Python worker as the per-stage test oracle.
+- Reads `config/plot.json` (or `--settings`) without writing it, and sends the same
+  worker request as the viewer (`world_units=blocks`, `density_graph`,
+  `density_field`, saved per-script parameters, count, seed). `--script` and
+  `--seed` override the saved values; scripts without block population, such as
+  `block_scaffold`, are refused.
+- Forces `pop_lighting=0` and `pop_colors=0`. Both change only RGB: positions,
+  counts and shapes stay byte-identical (checked on both presets below), and
+  candle RGB then equals a `CANDLE_COLORS` tint exactly.
+- Decodes each `FSTAR003` record from its proxy shape: `(1,1,1)` full block; one
+  axis 1 and two `2/16` end rod along that axis; `(w, 6/16, w)` candles with
+  `w = 2,4,5,6 /16` giving 1–4 candles.
+- Writes `build/minecraft/<script>-<seed>.schem` (or `--out`) plus a `.json` with
+  the request, normalized parameters, counts per block state, origin and size.
+  The minimum occupied cell is the schematic origin.
 
-### Preview: own renderer for tuning, Litematica for committing
+Block mapping (first choice, to be judged in-game; the table is at the top of the
+script). The references' lavender look is night lighting, which the game now does
+itself.
 
-Three ways to see a result in-world:
+| Generator output | Block state |
+| --- | --- |
+| Candle tint 0 cream | `candle` |
+| Candle tints 1 pale lavender, 3 near-white | `white_candle` |
+| Candle tints 2 grey-blue, 4 deep lavender | `light_gray_candle` |
+| Candle group of n | `candles=n`, `lit=false` |
+| End rod along X / Y / Z | `end_rod[facing=east / up / south]` |
+| Full block | `ochre_froglight[axis=y]` (light 15, as in the lighting model) |
 
-| Option | Real block models | Real lighting | Latency per change | Code |
-| --- | --- | --- | --- | --- |
-| Own preview (mobwalk's renderer) | No (boxes) | Python approximation, optional | One frame after generation | Moderate |
-| Litematica ghost from a schematic | Yes | No (uniform fake light) | Generation + Litematica re-mesh | Small |
-| Real blocks pasted in a creative world | Yes | Yes | Seconds (see [Fake vs real blocks](#fake-vs-real-blocks)) | Small via Litematica |
+First exports, seed 1919363634 from the committed `config/plot.json` (one run each
+in a fresh process with cold caches; Generate includes the worker's catalog load):
 
-Use the **own preview** for the tuning loop, **Litematica** as a "send to
-Litematica" button (material list, layer mode, paste, survival building), and a
-**"place for real"** key in a creative test world to judge the actual night
-lighting. Do not fork Litematica's renderer (see [Litematica](#litematica)).
+| Preset | Blocks | Candles / rods / full | Size (X×Y×Z) | Generate | Encode | File |
+| --- | --- | --- | --- | --- | --- | --- |
+| `density_population_selection`, saved | 5,853 | 5,304 / 549 / 0 | 268×52×252 | 6.5 s | 0.35 s | 18 KB |
+| `block_scaffold_stars`, defaults | 8,526 | 7,814 / 673 / 39 | 239×55×214 | 1.9 s | 0.19 s | 20 KB |
 
-Own preview contents:
+`density_population_selection` has no full-block role, so it exports none.
 
-- blocks as the boxes the viewer already draws (candle groups, rod axes), optionally
-  colored by a Java port of `_block_lighting.py` (~100 lines) for a night look that
-  Litematica ghosts cannot show;
-- curves colored like the viewer's `lines` output: candidates grey, selected candle
-  curves one hue each, rods gold;
-- seed-region and fade bounds, anchor marker, HUD counts and timings (already in
-  the generator's `stats`).
-
-Renderer changes relative to mobwalk's `WorldOverlayManager`: upload the mesh once
-per result and redraw it every frame (mobwalk rebuilds and quad-sorts every frame),
-and add a line layer for curves (or thin quads through the existing pipeline).
-
-### Making changes feel immediate
+## Generation timings
 
 Measured in-process with `worker.generate_request` on the saved preset of
 2026-10-14 (`config/plot.json`, `density_population_selection`, seed 1213151058,
@@ -84,79 +84,49 @@ about 9,600 objects):
 | Selection setting (rod attraction, isolation) | 0.90–0.97 s | cached | ~35 ms | 861–928 ms |
 | Growth setting (short wandering) | 1.71 s | 209 + 215 ms | ~35 ms | 920 ms |
 
-Selection time is the total minus the measured stages; lighting took 3 ms.
-Block population is over 90% of a selection-only edit, so the preview updates in
-stages:
+Selection time is the total minus the measured stages; lighting took 3 ms. Block
+population is over 90% of a selection-only edit.
 
-1. curves redraw as soon as selection finishes;
-2. blocks follow when block population finishes, with the previous blocks drawn
-   until then (mobwalk's publish-on-completion snapshot);
-3. a progress ring shows a run in flight (mobwalk's `FloodProgressOverlay`).
-
-Stage caches already exist as `lru_cache`s keyed on each stage's own parameters:
+Stage caches exist as `lru_cache`s keyed on each stage's own parameters:
 `_curve_selection.build_pool`, `_population_selection.build_sketch`, `rasterize`
-and `population_proximity`. A slider reruns from the first stage whose inputs
-changed; tag each parameter with that stage so the UI can show the cost.
+and `population_proximity`. The viewer's service discards the worker on
+cancellation, and the next run starts cold (~2 s per the root README) with empty
+caches.
 
-Runner rules:
-
-- **Coalesce, don't cancel.** The viewer's service discards the worker on
-  cancellation, and the next run starts cold (~2 s per the root README) with empty
-  caches. Let a run finish, then run once more with the latest values if they
-  changed.
-- Generation never reads the world, so it runs on a background thread. Mobwalk's
-  latest-wins immutable snapshot handoff applies; its per-frame time budget does not.
-
-### In-game settings UI
+## MaLiLib screens
 
 MaLiLib screens keep the world live: `GuiBase.isPauseScreen()` returns false and
 `extractBackground` skips vanilla's blur. `GuiBase.drawScreenBackground` dims the
-whole screen with `0xB0000000`; override it to darken only a side panel so the
-canopy stays visible while dragging sliders.
+whole screen with `0xB0000000`.
 
-- Build options from a parameter table, not hand-written static fields.
-  `density_population_selection` defines 48 parameters; the viewer shows 86 with
-  the shared population, postprocessing and lighting controls. Python's schema
-  already carries key, label, range, default, group, description and `enabled_if`,
-  and MaLiLib's config screen lists whatever `getConfigs()` returns
-  (`ConfigOptionWrapper.createFor(collection)`), so options built at runtime work.
-- A pinned parameter adjusted with sneak + scroll and a HUD readout, generalizing
-  mobwalk's radius scroll and `RadiusIndicatorOverlay`, tunes one value while
-  flying around with no screen open.
+`density_population_selection` defines 48 parameters; the viewer shows 86 with the
+shared population, postprocessing and lighting controls. Python's schema carries
+key, label, range, default, group, description and `enabled_if`. MaLiLib's config
+screen lists whatever `getConfigs()` returns
+(`ConfigOptionWrapper.createFor(collection)`), so options built at runtime can be
+listed.
 
-### Generator backend: Python worker or Java port (open)
+## Generator dependencies
 
 **Python worker.** `python/worker.py --serve` reads JSON lines
-(`{request, response, points}`) on stdin and keeps imports and caches warm.
+(`{request, response, points}`) on stdin and keeps imports and caches warm. Running
+it needs Python 3 with numpy, scipy and pyfastnoiselite. `python/requirements.txt`
+allows any `numpy<3`, but NumPy 2.5 (what pip installs today) has no `np.trapz`, so
+`_population_field.py:44` raises `AttributeError` on a fresh install.
 
-- No porting; results match what was tuned in the viewer.
-- Every player needs Python 3 with numpy, scipy and pyfastnoiselite. Bundling a
-  Python runtime with numpy/scipy is far too large for a mod jar.
-- Dependency drift: `python/requirements.txt` allows any `numpy<3`, but NumPy 2.5
-  (what pip installs today) has no `np.trapz`, so `_population_field.py:44` raises
-  `AttributeError` on a fresh install.
+**Java.** FastNoiseLite has an official Java port. The import closure of
+`density_population_selection` plus `_population`, `_block_population`,
+`_postprocess` and `_density_field` is about 3,900 non-blank lines in 29 modules,
+part of which serves other experiments. It uses `cKDTree` (every query has a
+bounded radius), `scipy.sparse` Gram products, `ndtri`, scrambled Sobol
+(`scipy.stats.qmc`) and NumPy `SeedSequence`/PCG64.
 
-**Java port.** Self-contained, and block population parallelizes across threads.
-The import closure of `density_population_selection` plus `_population`,
-`_block_population`, `_postprocess` and `_density_field` is about 3,900 non-blank
-lines in 29 modules, part of which serves other experiments. Replacements:
+**Worker output.** `FSTAR003` stores XYZ/RGB/size plus three box multipliers, and
+the RGB is pre-lit. Block kinds (`_block_kinds`) are popped from the stats in
+`worker.py`, used for lighting and dropped; candle count is only implied by box
+width (`[2, 4, 5, 6]/16`) and rod axis by which multiplier is 1.
 
-- FastNoiseLite has an official Java port;
-- `cKDTree` → spatial hash grid (every query has a bounded radius);
-- `scipy.sparse` Gram products → hash maps;
-- `ndtri` → a standard inverse-normal approximation;
-- scrambled Sobol (`scipy.stats.qmc`) and NumPy `SeedSequence`/PCG64 need exact
-  ports only if a saved preset must reproduce the same canopy in both; otherwise the
-  two match statistically.
-
-**Worker output gap (needed by either backend).** `FSTAR003` stores
-XYZ/RGB/size plus three box multipliers, and the RGB is pre-lit. Block kinds
-(`_block_kinds`) are popped from the stats in `worker.py`, used for lighting and
-dropped; candle count is only implied by box width (`[2, 4, 5, 6]/16`) and rod axis
-by which multiplier is 1. Add an explicit block output (kind, candle count, tint
-index, rod axis) as a new, additive output so the C++ viewer keeps working.
-
-### Litematica
+## Litematica
 
 - Maintained 26.3 fork: [sakura-ryoko/litematica](https://github.com/sakura-ryoko/litematica),
   branch `26.3`, **LGPL-3.0**. Artifact `fi.dy.masa.litematica:litematica-fabric-26.3`
@@ -172,10 +142,12 @@ index, rod axis) as a new, additive output so the C++ viewer keeps working.
   `SchematicPlacement.createFor(schematic, origin, name, enabled, enableRender)` →
   `DataManager.getSchematicPlacementManager().addSchematicPlacement(placement, printMessages)`.
   Swap with `removeSchematicPlacement` and `SchematicHolder.removeSchematic`.
-- No-mod loop: write a schematic file into `.minecraft/schematics` and press
-  **Reload** in Loaded Schematics. Reload calls `readFromFile()` (Sponge `.schem`,
-  vanilla `.nbt`, `.litematic`) and rebuilds every placement of that schematic in
-  place. Litematica picks the format from the file extension.
+- Files: schematics in `.minecraft/schematics` appear under Load Schematics.
+  **Reload** in Loaded Schematics calls `readFromFile()` (Sponge `.schem`, vanilla
+  `.nbt`, `.litematic`) and rebuilds every placement of that schematic in place.
+  Litematica picks the format from the file extension. The 26.3 source validates
+  Sponge v2 (`Width`/`Height`/`Length` shorts, `Version`, `Palette`, `BlockData`)
+  and v3 (`Schematic` compound with `Blocks` and `DataVersion`).
 - Ghost lighting: `FakeLightingProvider` returns one uniform level
   (`renderFakeLightingLevel`, default 15) and ghosts draw at `ghostBlockAlpha` 0.5,
   so ghosts show position and scale, not night lighting.
@@ -187,15 +159,15 @@ index, rod axis) as a new, additive output so the C++ viewer keeps working.
 - Undo a previous paste precisely with
   `ToolUtils.deleteBlocksByPlacement(placement, PlacementDeletionMode.MATCHING_BLOCK, listener)`,
   which removes only world blocks that still match the schematic.
-- Forking is legal under LGPL (the fork stays LGPL with source published) and
-  impractical: 316 Java files, ~73k lines; the renderer alone is 51 files and ~12k
-  lines plus a 2k-line fake world and 53 mixins, and it is the most
-  version-sensitive part.
+- Forking is legal under LGPL (the fork stays LGPL with source published). Size:
+  316 Java files, ~73k lines; the renderer alone is 51 files and ~12k lines plus a
+  2k-line fake world and 53 mixins, and it is the most version-sensitive part.
 
-### Axiom
+## Axiom
 
 - Client is proprietary; its [EULA](https://axiom.moulberry.com/eula) forbids
-  reverse engineering, decompiling, modifying and derivative works. **Do not fork.**
+  reverse engineering, decompiling, modifying and derivative works, so it cannot
+  be forked.
 - Official [AxiomClientAPI](https://github.com/Moulberry/AxiomClientAPI) (MIT):
   `CustomTool` (ImGui options, use/confirm/delete callbacks), `BlockRegion`
   (ghost render with real block models), `ToolService.pushBlockRegionChange`
@@ -205,8 +177,6 @@ index, rod axis) as a new, additive output so the C++ viewer keeps working.
 - Imports `.schem` and `.schematic` (File → Import Schematic).
 - Multiplayer needs the MIT [AxiomPaperPlugin](https://github.com/Moulberry/AxiomPaperPlugin),
   op or `axiom.default`, and a whitelist (non-commercial) or commercial license.
-- Best fit: creative/singleplayer art with preview, paste and undo. Litematica fits
-  survival building, which matches `scar/`.
 
 ## Fake vs real blocks
 
@@ -221,7 +191,7 @@ vertex, 24 vertices per box):
 Minecraft's vertex builder and the GPU upload add a few milliseconds; the result
 shows on the next frame.
 
-Real (estimated; measure in-game before relying on these):
+Real (estimated; not measured in-game):
 
 1. Litematica's paste and delete each walk the whole bounding box (~257×120×257,
    ~7.9M cells for ~10k blocks) at up to ~60 ms of tick time per server tick.
@@ -230,24 +200,21 @@ Real (estimated; measure in-game before relying on these):
    the ~2,300 sections in the box.
 4. Changes reach the client at the end of a server tick (50 ms).
 
-A custom paster that touches only occupied cells removes cost 1. Real placement fits
-an occasional "place for real" key, not every slider change.
-
-## Reuse from mobwalk
+## mobwalk
 
 Paths are under `src/client/java/dev/kelianmao/mobwalk/client/` in
 [colinsmao/mobwalk](https://github.com/colinsmao/mobwalk) (MIT, same author).
 
-| Part | Size | Reuse |
-| --- | --- | --- |
-| Gradle/Loom setup, `fabric.mod.json`, `splitEnvironmentSourceSets()`, MaLiLib/ModMenu repositories, `fabric-loader-junit` test wiring | build files | As-is |
-| `overlay/` (HUD + world frameworks, `FloodProgressOverlay`, `RadiusIndicatorOverlay`), `config/WandItem`, `InitHandler`, `MobWalkClient` | ~840 lines | Rename package; add retained mesh + line layer |
-| `config/Configs` + `config/GuiConfigs` (MaLiLib stack, live apply, JSON save) | ~1,600 lines | Pattern |
-| `surface/` geometry, profile roster, their tests | ~9,000 lines | None |
+| Part | Size |
+| --- | --- |
+| Gradle/Loom setup, `fabric.mod.json`, `splitEnvironmentSourceSets()`, MaLiLib/ModMenu repositories, `fabric-loader-junit` test wiring | build files |
+| `overlay/` (HUD + world frameworks, `FloodProgressOverlay`, `RadiusIndicatorOverlay`), `config/WandItem`, `InitHandler`, `MobWalkClient` | ~840 lines |
+| `config/Configs` + `config/GuiConfigs` (MaLiLib stack, live apply, JSON save) | ~1,600 lines |
+| `surface/` geometry, profile roster, their tests | ~9,000 lines |
 
 Versions mobwalk builds with: Minecraft 26.3, Fabric Loader 0.19.5, Loom
 1.18-SNAPSHOT, Fabric API 0.161.0+26.3, MaLiLib 0.30.2, ModMenu 21.0.0, JDK 25.
-Re-check <https://fabricmc.net/develop> before building.
+Its Gradle setup builds on 26.3.
 
 ## Game rules that shape placement
 
@@ -255,19 +222,8 @@ Re-check <https://fabricmc.net/develop> before building.
   op commands, or through Litematica/Axiom.
 - Candles need a sturdy block below to be placed (`CandleBlock.canSurvive`);
   floating candles come from removing that support afterwards
-  ([MC-226686](https://mojira.dev/MC-226686)). For survival building, offer a second,
-  toggleable placement with a temporary block under every candle. End rods need no
-  support. Verify both on 26.3.
-
-## Open questions
-
-- Audience: personal tool (Python worker is fine) or public release (Java port)?
-- Must a saved preset reproduce the identical canopy in Python and Java?
-- Litematica as optional or required dependency?
-- Block palette: which candle colors the five tints map to, and which full block.
-- Anchor convention (canopy center vs corner) and vertical placement.
-- License: filaments has none yet. It decides which libraries can be bundled
-  (e.g. `litemapy` is GPL-3.0; `nbtlib` is MIT).
+  ([MC-226686](https://mojira.dev/MC-226686)). End rods need no support. Neither
+  behavior has been checked on 26.3.
 
 ## Sources
 
@@ -277,3 +233,4 @@ Re-check <https://fabricmc.net/develop> before building.
 - AxiomClientAPI: <https://github.com/Moulberry/AxiomClientAPI>
 - Candle support behavior: <https://mojira.dev/MC-226686>
 - Fabric versions: <https://fabricmc.net/develop>
+- Data versions: <https://minecraft.wiki/w/Data_version>

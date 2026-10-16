@@ -18,6 +18,7 @@ from test_curve_selection import CurveSelection
 from test_population_selection import PopulationSelection
 from test_block_scaffold import BlockScaffold
 from test_scaffold_stars import ScaffoldStars
+from test_export_schematic import ExportSchematic
 
 
 class Generators(unittest.TestCase):
