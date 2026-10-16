@@ -18,6 +18,8 @@
 #include "point_renderer.h"
 #include "generation.h"
 #include "generator_panel.h"
+#include "parts_gallery.h"
+#include "planet_gallery.h"
 
 int render(GLFWwindow* window, bool smoke) {
     if (smoke) std::fprintf(stderr, "Smoke: initializing renderers\n");
@@ -67,6 +69,9 @@ int render(GLFWwindow* window, bool smoke) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_PROGRAM_POINT_SIZE);
     int frame = 0;
+    bool openGallery = false;
+    bool openPlanets = false;
+    std::string galleryError;
     const double started = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -112,6 +117,10 @@ int render(GLFWwindow* window, bool smoke) {
         ImGui::Separator();
         const bool wasCaptured = controls.captured();
         ImGui::BeginDisabled(wasCaptured);
+        if (ImGui::Button("Planet parts")) { openPlanets = true; galleryError.clear(); }
+        ImGui::SameLine();
+        if (ImGui::Button("Block assets")) { openGallery = true; galleryError.clear(); }
+        if (!galleryError.empty()) ImGui::TextWrapped("Parts gallery: %s",galleryError.c_str());
         generator.draw(glfwGetTime());
         ImGui::Separator();
         int mode = controls.mode;
@@ -250,6 +259,18 @@ int render(GLFWwindow* window, bool smoke) {
             glfwSetWindowShouldClose(window, true);
         }
         glfwSwapBuffers(window);
+        if (openGallery) {
+            try { renderPartsGallery(window); }
+            catch (const std::exception& error) { galleryError=error.what(); }
+            glfwSwapInterval(vsync ? 1 : 0);
+            openGallery = false;
+        }
+        if (openPlanets) {
+            try { renderPlanetGallery(window); }
+            catch (const std::exception& error) { galleryError=error.what(); }
+            glfwSwapInterval(vsync ? 1 : 0);
+            openPlanets = false;
+        }
         if (pointCount > 0) ++frame;
     }
     controls.capture(window, false);
@@ -262,6 +283,10 @@ int render(GLFWwindow* window, bool smoke) {
 
 int main(int argc, char** argv) {
     const bool smoke = argc > 1 && std::string(argv[1]) == "--smoke-test";
+    const bool gallery = argc > 1 && std::string(argv[1]) == "--parts-gallery";
+    const bool galleryTest = argc > 1 && std::string(argv[1]) == "--parts-gallery-test";
+    const bool planets = argc > 1 && std::string(argv[1]) == "--planet-gallery";
+    const bool planetsTest = argc > 1 && std::string(argv[1]) == "--planet-gallery-test";
     glfwSetErrorCallback([](int code, const char* description) { std::fprintf(stderr, "GLFW %d: %s\n", code, description); });
     if (!glfwInit()) return 1;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -270,7 +295,7 @@ int main(int argc, char** argv) {
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
-    if (smoke) glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+    if (smoke || galleryTest || planetsTest) glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     GLFWwindow* window = glfwCreateWindow(1280, 800, "Filaments", nullptr, nullptr);
     if (!window) { glfwTerminate(); return 1; }
     glfwMakeContextCurrent(window);
@@ -289,7 +314,11 @@ int main(int argc, char** argv) {
         ImGui::DestroyContext(); glfwDestroyWindow(window); glfwTerminate(); return 1;
     }
     int result = 0;
-    try { result = render(window, smoke); }
+    try {
+        if (planets || planetsTest) result = renderPlanetGallery(window, planetsTest ? std::filesystem::path(argc > 2 ? argv[2] : "planet-gallery-test") : std::filesystem::path());
+        else if (gallery || galleryTest) result = renderPartsGallery(window, galleryTest ? std::filesystem::path(argc > 2 ? argv[2] : "parts-gallery-test") : std::filesystem::path());
+        else result = render(window, smoke);
+    }
     catch (const std::exception& error) { std::fprintf(stderr, "%s\n", error.what()); result = 1; }
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

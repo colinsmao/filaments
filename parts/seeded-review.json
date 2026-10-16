@@ -1,0 +1,559 @@
+{
+  "date": "2026-10-15",
+  "candidate": "seeded-small-planets-v1",
+  "scope": "Block asset library, whole-body/whole-ring dictionary, seeded small-planet assembly and native inspection. User authorized generation on 2026-10-15. Historical canopy matching remains failed and stopped.",
+  "verdict": "Implemented component selection and inspected native previews; no accepted screenshot match. Manual mouse use remains untested.",
+  "requirements_sha256": "0562ca260c64746bad0b7ad786438f487ad9c332fd628e32c83832d435e796b9",
+  "legacy_requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+  "checks": {
+    "P01": {
+      "status": "pass",
+      "reason": "Eleven complete components: four bodies and seven rings. Generated planets reference component identities; block assets remain separate.",
+      "evidence": [
+        "parts/planets.json",
+        "src/planet_generator.h"
+      ]
+    },
+    "P02": {
+      "status": "pass",
+      "reason": "Literal pane geometry retained. One-row surround is 2.125x1x2.125 blocks; two-row is 2.125x2x2.125; upright frame is 2.125x3x.125. Compared fixed-scale height and attachment views.",
+      "evidence": [
+        "build/seeded-planets/planet-36.png",
+        "build/seeded-planets/planet-39.png",
+        "build/seeded-planets/planet-59.png",
+        "tests/planet_parts_test.cpp"
+      ]
+    },
+    "P03": {
+      "status": "pass",
+      "reason": "All 160 pane states remain inspectable. Generated individual view labels actual mesh bounds; connection masks are resolved after body-material choice.",
+      "evidence": [
+        "src/parts_gallery.h",
+        "build/seeded-planets/planet-53.png",
+        "tests/test_parts_dictionary.py"
+      ]
+    },
+    "P04": {
+      "status": "pass",
+      "reason": "Full glass retained for earlier/larger examples. Native alpha/depth checks and reverse-submission pixel equality pass, including generated two-row rings.",
+      "evidence": [
+        "tests/parts_renderer_test.cpp",
+        "build/seeded-planets/planet-3.png",
+        "build/seeded-planets/verification.json"
+      ]
+    },
+    "P05": {
+      "status": "pass",
+      "reason": "Emission class, body material and pane colour have distinct random channels. Material emission is used literally; an emission-class change can change attachment arms through the chosen block. No emission inferred from colour.",
+      "evidence": [
+        "src/planet_generator.h",
+        "parts/catalog.json",
+        "build/seeded-planets/planet-42.png",
+        "build/seeded-planets/planet-46.png"
+      ]
+    },
+    "P06": {
+      "status": "pass",
+      "reason": "Small rings now have one colour, following the user correction. Earlier fixed-cell mixed/full-glass comparison remains available; it is not the small generator palette.",
+      "evidence": [
+        "parts/planets.json",
+        "build/seeded-planets/planet-3.png",
+        "build/seeded-planets/planet-40.png"
+      ]
+    },
+    "P07": {
+      "status": "pass",
+      "reason": "Local 1.19.3 textures and actual dimensions retained beside a unit reference. Three gallery seeds include lit and unlit materials; static texture limitation retained.",
+      "evidence": [
+        "build/seeded-planets/planet-40.png",
+        "build/seeded-planets/planet-44.png",
+        "build/seeded-planets/planet-45.png",
+        "tests/test_parts_dictionary.py"
+      ]
+    },
+    "P08": {
+      "status": "partial",
+      "reason": "61 hidden frames exercise every gallery mode, angle comparisons, material/night/neutral views and individual results. Human mouse interaction remains untested.",
+      "evidence": [
+        "build/seeded-planets/views.json",
+        "src/planet_gallery.h"
+      ]
+    },
+    "P09": {
+      "status": "pass",
+      "reason": "User plot, control and accepted light-formula hashes match the starting values. Existing experiments remain; gallery choices are local state.",
+      "evidence": [
+        "build/seeded-planets/verification.json"
+      ]
+    },
+    "P10": {
+      "status": "pass",
+      "reason": "README reports local asset version and limitations. This is component selection, not a screenshot or canopy match; historical canopy failure remains stopped.",
+      "evidence": [
+        "README.md",
+        "build/seeded-planets/verification.json"
+      ]
+    },
+    "P11": {
+      "status": "pass",
+      "reason": "Each result has one whole body plus zero or one whole ring. Body/ring cell arrangements persist; 9-18 blocks can still mean two parts.",
+      "evidence": [
+        "src/planet_generator.h",
+        "tests/planet_parts_test.cpp",
+        "build/seeded-planets/planet-53.png"
+      ]
+    },
+    "P12": {
+      "status": "pass",
+      "reason": "Twenty geometric body/ring pairs are valid in the complete dictionary; small-generation allowed pairs are a separate whitelist. Overlap/duplicate rejection and body-dependent pane arms pass.",
+      "evidence": [
+        "tests/planet_parts_test.cpp",
+        "src/planet_parts.h"
+      ]
+    },
+    "P13": {
+      "status": "pass",
+      "reason": "Earlier authored examples and fixed-cell colour comparison remain preserved. Generation follows that inspected stage. Current controlled height/attachment comparisons keep angle and scale equal.",
+      "evidence": [
+        "parts/planet-review.json",
+        "build/seeded-planets/planet-36.png",
+        "build/seeded-planets/planet-59.png"
+      ]
+    },
+    "P14": {
+      "status": "pass",
+      "reason": "Same-material full-glass interior culling retained. Equal-depth transparent faces now use geometry/material tie-breaking, fixing a one-channel-level order difference. Arbitrary intersecting transparency remains unsupported.",
+      "evidence": [
+        "src/parts_renderer.h",
+        "tests/parts_renderer_test.cpp",
+        "build/seeded-planets/planet-30.png"
+      ]
+    },
+    "P15": {
+      "status": "pass",
+      "reason": "All 12000 sampled assemblies use a single pane colour and exclude full glass. Earlier mixed/full-glass examples remain outside the small selection rules.",
+      "evidence": [
+        "parts/planets.json",
+        "tests/planet_parts_test.cpp",
+        "build/seeded-planets/planet-40.png"
+      ]
+    },
+    "P16": {
+      "status": "pass",
+      "reason": "Two-high ring contains 16 literal upright panes. Controlled comparison changes only the second row of eight panes around the same two-block shroomlight body.",
+      "evidence": [
+        "build/seeded-planets/planet-36.png",
+        "build/seeded-planets/planet-37.png",
+        "build/seeded-planets/planet-38.png",
+        "build/seeded-planets/planet-39.png"
+      ]
+    },
+    "P17": {
+      "status": "pass",
+      "reason": "Indexed seed choices preserve results under count/evaluation order changes. Chance 0 and 1, compatible pairs, emission class and independent choice channels pass across 12000 selections. Frame60 extends frame40 without changing its first nine choices.",
+      "evidence": [
+        "tests/planet_parts_test.cpp",
+        "build/seeded-planets/views.json",
+        "build/seeded-planets/verification.json"
+      ]
+    },
+    "P18": {
+      "status": "partial",
+      "reason": "Generated grid identifies body/ring/material/colour/emission and opens the exact indexed choice. Individual captures retain dimensions and both counts. Compact labels resolve 12-item overlap at tested 1280x800; manual clicks remain untested.",
+      "evidence": [
+        "build/seeded-planets/planet-40.png",
+        "build/seeded-planets/planet-60.png",
+        "build/seeded-planets/planet-53.png",
+        "src/planet_gallery.h"
+      ]
+    },
+    "P19": {
+      "status": "pass",
+      "reason": "Explicit attachment metadata rejects honey, jack-o-lantern and pumpkin. Local client bytecode confirms pumpkin exceptions and honey inset collision shape; controlled top view shows gaps without inward arms, preserving connected corners.",
+      "evidence": [
+        "parts/catalog.json",
+        "tests/planet_parts_test.cpp",
+        "build/seeded-planets/planet-59.png",
+        "build/seeded-planets/pane-bytecode.txt",
+        "build/seeded-planets/core-shapes-bytecode.txt"
+      ]
+    },
+    "P20": {
+      "status": "pass",
+      "reason": "Every planet exhibit has an independent light group. GPU test confirms another exhibit cannot brighten its receiver. Existing formula remains; shadows, occlusion and bloom remain absent.",
+      "evidence": [
+        "src/parts_renderer.h",
+        "tests/parts_renderer_test.cpp",
+        "build/seeded-planets/verification.json"
+      ]
+    }
+  },
+  "legacy_requirements": {
+    "D01": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "D02": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "D03": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "D04": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "D05": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "D06": {
+      "status": "pass",
+      "reason": "Current work report and README explain baseline, mechanisms, values, tests and remaining limits.",
+      "evidence": [
+        "README.md"
+      ]
+    },
+    "D07": {
+      "status": "pass",
+      "reason": "Existing experiments, user settings and accepted lighting retained.",
+      "evidence": [
+        "build/seeded-planets/verification.json"
+      ]
+    },
+    "V01": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V02": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V03": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V04": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V05": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V06": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V07": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V08": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V09": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V10": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V11": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V12": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V13": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V14": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V15": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V16": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    }
+  },
+  "samples": [
+    {
+      "seed": 42,
+      "verdict": "Cube/stack, ringless/one-high/two-high/upright and luminous/unlit variants visible. Gray rings remain dark; upright frames become narrow edge-on. Grid count12 retains first9 choices.",
+      "views": [
+        40,
+        41,
+        42,
+        43,
+        46,
+        60
+      ]
+    },
+    {
+      "seed": 7,
+      "verdict": "Different material and ring choices, including ringless luminous cube and two-high blue surround.",
+      "views": [
+        44
+      ]
+    },
+    {
+      "seed": 12345,
+      "verdict": "Several ringless bodies are a valid chance outcome, not a forced ring quota. Single-colour silhouettes remain boxy.",
+      "views": [
+        45
+      ]
+    }
+  ],
+  "new_findings": [
+    "Body material affects pane connection arms even when both bodies have full cube render bounds.",
+    "Two-row rings remain upright walls rather than a horizontal disc.",
+    "Gallery neighbour emissions must be isolated when comparing luminosity.",
+    "Six-line labels overlap in a12-item grid at1280x800; compact grid labels and detailed individual inspection fix the tested layout."
+  ],
+  "remaining_limits": [
+    "Authored cube/stack component shapes only; no procedural sphere or canopy placement.",
+    "No accepted reference match. Dark gray rings and square frame silhouettes are still literal material/shape properties.",
+    "Animated textures use frame zero; no shadows, occlusion or bloom; general intersecting transparent meshes unsupported.",
+    "Mouse interactions and other display sizes were not manually tested."
+  ],
+  "frozen_inputs": {
+    "parts/catalog.json": {
+      "frozen": "build/seeded-planets/inputs/parts/catalog.json",
+      "sha256": "d1501d8bf9e5ce6d19e686a48d0ee21fef53983ed5f0bdd7ae8312268f0db4f5"
+    },
+    "parts/planets.json": {
+      "frozen": "build/seeded-planets/inputs/parts/planets.json",
+      "sha256": "5e70278088397cfc8f840f05e1b2c522b802ddc201faa373a5ec0142db40b68c"
+    },
+    "parts/requirements.json": {
+      "frozen": "build/seeded-planets/inputs/parts/requirements.json",
+      "sha256": "0562ca260c64746bad0b7ad786438f487ad9c332fd628e32c83832d435e796b9"
+    },
+    "src/parts_dictionary.h": {
+      "frozen": "build/seeded-planets/inputs/src/parts_dictionary.h",
+      "sha256": "dd9b32dc91e3aa4ad2dd76acd4757cf6abc175a862c12f50a6f959d9e75e170b"
+    },
+    "src/parts_renderer.h": {
+      "frozen": "build/seeded-planets/inputs/src/parts_renderer.h",
+      "sha256": "536fb0e7b568cc008bc8751e39ef5cf15a7d1b808c3742fec3c2b63c1f3a28dd"
+    },
+    "src/planet_parts.h": {
+      "frozen": "build/seeded-planets/inputs/src/planet_parts.h",
+      "sha256": "641b9bd68e868704c20e7f7246d1b44184b671b243c109c008973f9da205fab7"
+    },
+    "src/planet_generator.h": {
+      "frozen": "build/seeded-planets/inputs/src/planet_generator.h",
+      "sha256": "bacb96b43d65f98c6bdbf6adb6bfd41f42a130834eca0dac780a39a4e395130a"
+    },
+    "src/planet_gallery.h": {
+      "frozen": "build/seeded-planets/inputs/src/planet_gallery.h",
+      "sha256": "85b1afa1db5a35252c35a47c639b26bade7718340952b2cefd33a32d342ae85d"
+    },
+    "src/parts_gallery.h": {
+      "frozen": "build/seeded-planets/inputs/src/parts_gallery.h",
+      "sha256": "12437ebb0e1b3cbeda07848af28245863d85257634dd5bf781d5b9782f67bd5c"
+    },
+    "src/main.cpp": {
+      "frozen": "build/seeded-planets/inputs/src/main.cpp",
+      "sha256": "580eb58055d91e4054d6499ceb640df319d458f44e0eacdd2e03ba7e711fb520"
+    },
+    "src/runtime_config.h.in": {
+      "frozen": "build/seeded-planets/inputs/src/runtime_config.h.in",
+      "sha256": "2c348b831b899a19bf1b4ab56dfd3538640628b13f835aa98af7626d3e9e96e1"
+    },
+    "scripts/build_parts_dictionary.py": {
+      "frozen": "build/seeded-planets/inputs/scripts/build_parts_dictionary.py",
+      "sha256": "324e787b8accc8fd69d7ee3aa29504b5039ae02746c2b1d4cc8395ef86ed39cc"
+    },
+    "tests/parts_renderer_test.cpp": {
+      "frozen": "build/seeded-planets/inputs/tests/parts_renderer_test.cpp",
+      "sha256": "2677f46c42b92a61ad768cac36048857ef993cc62f6b58d02112fcba30368c7e"
+    },
+    "tests/planet_parts_test.cpp": {
+      "frozen": "build/seeded-planets/inputs/tests/planet_parts_test.cpp",
+      "sha256": "f1d34b677dc317d35f0e36c97e38755b44bd8dc5e6457e7ee456e8a6c237e6e0"
+    },
+    "tests/test_parts_dictionary.py": {
+      "frozen": "build/seeded-planets/inputs/tests/test_parts_dictionary.py",
+      "sha256": "e36fe96d8f87825930ea65dfe5047513ce82a327227d042aaecba843388d3c09"
+    },
+    "README.md": {
+      "frozen": "build/seeded-planets/inputs/README.md",
+      "sha256": "37ab4860a5934fc5f9ea4d7ca88dd4d95968078fa62b3c93a534589eb5c0c064"
+    },
+    "AGENTS.md": {
+      "frozen": "build/seeded-planets/inputs/AGENTS.md",
+      "sha256": "8e0dd54591fafa3e6128724cc0644a25ea0e4619c673f340c9eb9107841353d0"
+    },
+    "CMakeLists.txt": {
+      "frozen": "build/seeded-planets/inputs/CMakeLists.txt",
+      "sha256": "85047d3dec1bfde026859263dddef0a44c2098bfe8a6cd89d630551ba8514016"
+    },
+    "build/parts-library/parts.json": {
+      "frozen": "build/seeded-planets/inputs/build/parts-library/parts.json",
+      "sha256": "cc21307b780e724875bd6a29411477caf684777e59fc947e226a2163a2a415d0"
+    },
+    "build/parts-library/textures.rgba": {
+      "frozen": "build/seeded-planets/inputs/build/parts-library/textures.rgba",
+      "sha256": "e00d2893e3b4a0dc27481b3de2bd57028217703ead5d6bea65d53cfe7a534e1e"
+    },
+    "reference-match-requirements.json": {
+      "frozen": "build/seeded-planets/inputs/reference-match-requirements.json",
+      "sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a"
+    },
+    "reference-match-review.json": {
+      "frozen": "build/seeded-planets/inputs/reference-match-review.json",
+      "sha256": "48cf7dab0b360d83ba5fff65ec04d8edb1c881e6b91e83f14e9be34e5ab39f12"
+    },
+    "scar/2026-10-15_00.38.19.png": {
+      "frozen": "build/seeded-planets/inputs/scar/2026-10-15_00.38.19.png",
+      "sha256": "492e2fea44c1177c23c4ff2dd017813ffd3d05b4f279ce0a3030d398f94dae33"
+    }
+  },
+  "evidence_sha256": {
+    "build/seeded-planets/contact.png": "688e79cd7d7ebbf8ce70f04cd2497a0f548e2414b1179c7731f54460cde0746e",
+    "build/seeded-planets/earlier-views.png": "88eade1d1bfdad7d63772bb2ed7ab2350b948e37eec77e56eac4e0dcc7ad26ad",
+    "build/seeded-planets/individuals.png": "d315fe26856e02d22a14d55e1a837c269761341cd4a425269c658ffd49b8e367",
+    "build/seeded-planets/planet-0.png": "9de9ec6a7c24217052b076366b1aac135a13ceb085c2aa8dc1773c6c65e428b6",
+    "build/seeded-planets/planet-1.png": "c07a0ba94f357d5f04d2c56e3baaf98629ed22de34936f73c011735aa1bb669a",
+    "build/seeded-planets/planet-10.png": "b0ac397cf59ccf94760dc50b3bc3b4b65e0b2ce70eb5e42fd0e9fe45dd34cb59",
+    "build/seeded-planets/planet-11.png": "7f67dc3ada12171ff884fb442093e4fe1efba4afdabb7fd06a604798c1f66b35",
+    "build/seeded-planets/planet-12.png": "3ca2d378233b818793b6bcf9160486985a111b9efed3ac9e242de58f166c6e8d",
+    "build/seeded-planets/planet-13.png": "8bcd4116b7f5c5e15d84a19ced968375eca9696b02445e8301090c991f004625",
+    "build/seeded-planets/planet-14.png": "d8c63294298604ab2982470fd190d70dcc61bc15a23c2390f1937a30389fb36e",
+    "build/seeded-planets/planet-15.png": "6a1983db3bccee195208972db5db5547f446de8b87b3e55a36cb9a5a749e8a41",
+    "build/seeded-planets/planet-16.png": "ffd07162690401185011fccb5dfd7a761c9d917ef3cf60379ec1b5cf4b1588d6",
+    "build/seeded-planets/planet-17.png": "f41cd746a84ba2544bbf62436e3b9840eb9c8b60ae70ff570440b6708cc006d8",
+    "build/seeded-planets/planet-18.png": "f03d6c841e2b3532026700f68e72b39bb601db70ce33cbd255578d42a5c41030",
+    "build/seeded-planets/planet-19.png": "b3cb7106c6816b701e70c343798d365ef5bab542e91c64d1507ae7092c9e61bf",
+    "build/seeded-planets/planet-2.png": "a9b1a4e4cccd4e409199173227f1f38901b98aef56c749c1b12e5e9e4c865b97",
+    "build/seeded-planets/planet-20.png": "144e21cb6d1982ab4203f66d0a86f813d84dd3b7addfd88dcd2c75cbdc442062",
+    "build/seeded-planets/planet-21.png": "1e4684637d85e5ba765c3d849243b168b6b3715e6324e26058ec077f48588f3f",
+    "build/seeded-planets/planet-22.png": "c22a56eb0e4bd6d55fdded58216ae80a5fa81342082a553ce29c313022f77cbc",
+    "build/seeded-planets/planet-23.png": "0c9e470c5cc892ebe27a10387bee203c7d65e40bf53943cf962e43de504e23f3",
+    "build/seeded-planets/planet-24.png": "df4134374ef418eb3de023eba337c5ba84844132bcad4c0f0b1e9ae75342f41a",
+    "build/seeded-planets/planet-25.png": "f493b392e0b15afa1a6ce3c0d1365b8816a4ef17a417fd33bdf9478fff2c2839",
+    "build/seeded-planets/planet-26.png": "628c31737ae14ec300a95245bc8c0653f6dd2df02eaa15a6fc60e6af7fa1678d",
+    "build/seeded-planets/planet-27.png": "3c854be3e5f5de927aff3716762ae343b63fc448f22d2b003fd898fc9adf3d7e",
+    "build/seeded-planets/planet-28.png": "504b164ad6827591c8359be27ed6220c68cc3e3f832b18b1074217ef48b24576",
+    "build/seeded-planets/planet-29.png": "8639c9583c41042b52194aefdb8fd43fd29a09b7fd53bc40eb1b36b369f434c7",
+    "build/seeded-planets/planet-3.png": "7910f02238e3d6ad8fc474619c8bee06b82b671bb6402b2f5ee0b1b7aff47352",
+    "build/seeded-planets/planet-30.png": "536f39d15bb3dd713016d8307a352585fc2af8edee02f147d4ddcb6e10322aa7",
+    "build/seeded-planets/planet-31.png": "fd10505464586b23a852dfd23836bb3b6d6e627573ea1500a38386aec7d5ba76",
+    "build/seeded-planets/planet-32.png": "d16f24db8e25e0efa9d20e32ee4e90ceb14a3f7027703f7ea9dda15c25d3fcdb",
+    "build/seeded-planets/planet-33.png": "d47bb3447ff1328adcbf31e149ed88e1133c73895c6c524c931d0ac6309ca848",
+    "build/seeded-planets/planet-34.png": "736047c40471440cbf3a449aa78471c6c7082041f84b6c543da0e793f40d8b84",
+    "build/seeded-planets/planet-35.png": "170144055180ba97fd07ed7eb67c0466ab8191695bf4bdac1f0650022c61effc",
+    "build/seeded-planets/planet-36.png": "080f89e53412b4bcca10a050d2e1efeb834aa508fb17c981026d9785d470ff4b",
+    "build/seeded-planets/planet-37.png": "2595e900a6e2c72123ad4bced15c8a0d341cee10d84a7f72d3fca80f31ec9214",
+    "build/seeded-planets/planet-38.png": "943a9a29d195d75b93dddf96d69d2b57ca12e485ddc44fb43ba205a7b154c3e2",
+    "build/seeded-planets/planet-39.png": "59af3258733a7984ae25f25153b5c6caaf713aaa33029d5986590c1032ec0f03",
+    "build/seeded-planets/planet-4.png": "97abc096de0911e6994770e783cc11b1cb8bba46da89b0d2d483cde7f68574b4",
+    "build/seeded-planets/planet-40.png": "f46c10d8170d1ee7e745200f16aa34a7ef95a38ae6e02dfa0937cd177777431e",
+    "build/seeded-planets/planet-41.png": "0ef07190e51e2c0a2d57f071255e6cb112541add75eb087303b47a8c771f88f6",
+    "build/seeded-planets/planet-42.png": "259c75773f1096f0d17f8ddd78c8778b0b983ce8190b9692b1e91a29a17ec241",
+    "build/seeded-planets/planet-43.png": "809364bd8d1ffd8771b255e40b9b3f974fc8f28368952aafc9dcd5fb829da000",
+    "build/seeded-planets/planet-44.png": "b2110eebd394cfed63b3fc12d82b692c8ff338f4337a19d4ccfa631821af0699",
+    "build/seeded-planets/planet-45.png": "532089e07510f932cd36676ae47ff25c08a421e425c7a86ae6a4537216d3ff28",
+    "build/seeded-planets/planet-46.png": "1b4dd917235dbcb43ea701ca98adbcbe864268ffe5b38da4d6eeb760b827a099",
+    "build/seeded-planets/planet-47.png": "2d8271320bb0b4360b5b22bffecb6037414ff909bfe72fec8586893fedfe1653",
+    "build/seeded-planets/planet-48.png": "4f3d14a0a2e23edb088325c1494767ce86976b63f309ef6865e8a0805fdefe31",
+    "build/seeded-planets/planet-49.png": "93b5a79079dfdc87ed4c07cd66f9213379a6282c624f048aa0b3ed106c395d4e",
+    "build/seeded-planets/planet-5.png": "ecf11ad190c90b4c40dc48065b9f5551ca547f3aff7226f5cd5379a952310013",
+    "build/seeded-planets/planet-50.png": "83e9743185613f0cea8abd4107da53897205b84a1f9e2e575c4c8018963dc798",
+    "build/seeded-planets/planet-51.png": "f053c63145e19074b7bce3f40078c858914bd48ee3212df6422f530453169319",
+    "build/seeded-planets/planet-52.png": "946e943f5367235e9468a0bbfbe9194a4a664d502c768a896ae0b6f492971247",
+    "build/seeded-planets/planet-53.png": "7e2f8677a70d1da7ee89b6358f6c68e67c91e2d3c0fe762414206f06779400e4",
+    "build/seeded-planets/planet-54.png": "8e06b45433b83ed48931d1e061690d01017c8c205786d79b2c701ceee822ee37",
+    "build/seeded-planets/planet-55.png": "4dd0ab5c7d92ae3db289a7f406c912e38db9b21e7d62d73ce535f78fcf9ca7b1",
+    "build/seeded-planets/planet-56.png": "6e9d389fa6ba6ceb16315e4821ac2250b1c71ea094367cf6535116539177ec01",
+    "build/seeded-planets/planet-57.png": "e8a1e1cd38f786e996d38a2bf8ee1b780cbe9ad84ca779acce83ffa7b05c07de",
+    "build/seeded-planets/planet-58.png": "e8bc3a3464e99287caa14b62e547d787afc4d642b6eeb2c9ad0ddf1e5dfc9aba",
+    "build/seeded-planets/planet-59.png": "8ac73776ea1fb876f4df0e11112c25f987500a1c319e0df9a74d952d40966a16",
+    "build/seeded-planets/planet-6.png": "b84479e3dc20c2f4eaa1a8ee4d432a02edfe73d16e79d2faa9080608c249ed02",
+    "build/seeded-planets/planet-60.png": "f894a56a1368a61f5d22a80b33ea0fe6d44c11e3e351eed3ed25ce6b0fcb0381",
+    "build/seeded-planets/planet-7.png": "4e879ad349ae92706b287c5cc97e438673e9f8e8f0ad1c2bb812256cff2a797d",
+    "build/seeded-planets/planet-8.png": "fc7a8cc775918c601a921e2eea4bab687ed7f2cc4a015afb30cc07a588ec1c06",
+    "build/seeded-planets/planet-9.png": "867061e7178e932a5171dbaac42b219e7c41562dbc6e0e5c8ddf757f877e096f",
+    "build/seeded-planets/views.json": "23dca6b9c27aacdabd9137c3ad799e4bb5ef9151cc38c824c46ff59eaba9f854",
+    "build/seeded-planets/verification.json": "d869c40766ffcc3c43efd9790f8a375771daf886d18fdb2d80299d07108699b4",
+    "build/seeded-planets/pane-bytecode.txt": "88b74259a1728791e7712698560bf51078792ad58bfce38a9d19a37dfd097ba2",
+    "build/seeded-planets/core-shapes-bytecode.txt": "01940da250d85b2d1826f50b95f44a3f295e58b3c5920d956e24438497707da8",
+    "build/seeded-planets/client-mappings.txt": "f72a4675ae77fa16966a0338567e30ee3a64bb7476932e264e8b25937f664a1b"
+  }
+}

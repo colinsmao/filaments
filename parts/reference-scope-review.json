@@ -1,0 +1,3665 @@
+{
+  "date": "2026-10-15",
+  "candidate": "screenshot-only-planets",
+  "scope": "Current planet work is restricted to examples visible in the screenshots. Whole components and per-example source evidence remain separate from historical extensions. Historical canopy matching remains failed and stopped.",
+  "verdict": "Restricted active set to five source examples. Added source-linked slime and corrected blue terracotta identification. No larger geometry invented; exact reconstruction remains incomplete.",
+  "requirements_sha256": "2f6b73cbd13c09d5a821133a8fd99a56b08e39117fb53388bfdc04a945a81b6a",
+  "legacy_requirements_sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+  "checks": {
+    "P01": {
+      "status": "pass",
+      "reason": "Default body/ring dictionaries show four whole components used by the screenshot examples. All twenty-one components remain available as history.",
+      "evidence": [
+        "src/planet_gallery.h",
+        "src/planet_families.h",
+        "build/planet-reference-scope/planet-1.png",
+        "build/planet-reference-scope/planet-2.png"
+      ]
+    },
+    "P02": {
+      "status": "pass",
+      "reason": "Active shallow surround is2.125x1x2.125 blocks; tall surround2.125x2x2.125. Literal upright pane geometry and all component cells unchanged.",
+      "evidence": [
+        "build/planet-reference-scope/planet-61.png",
+        "build/planet-reference-scope/verification.json"
+      ]
+    },
+    "P03": {
+      "status": "pass",
+      "reason": "All earlier pane states remain in Block assets; current dictionary and inspector label resolved mesh bounds.",
+      "evidence": [
+        "build/planet-families/inputs/src/parts_gallery.h",
+        "build/planet-families/inputs/src/planet_gallery.h",
+        "build/planet-families/planet-73.png"
+      ]
+    },
+    "P04": {
+      "status": "pass",
+      "reason": "Earlier full-glass examples retained. New generated set uses panes only. Source alpha and reverse-order GPU checks retained.",
+      "evidence": [
+        "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+        "build/planet-families/verification.json"
+      ]
+    },
+    "P05": {
+      "status": "pass",
+      "reason": "Emission remains literal material metadata. Slime/honey/terracotta unlit; pearl and lower jack are sources. No atmosphere shader or arbitrary highlight introduced.",
+      "evidence": [
+        "build/planet-reference-scope/active-night.png",
+        "parts/catalog.json"
+      ]
+    },
+    "P06": {
+      "status": "pass",
+      "reason": "Single pane colour per new family palette. Earlier mixed-colour silhouette comparison remains available separately.",
+      "evidence": [
+        "build/planet-families/inputs/parts/planet-families.json",
+        "build/planet-families/planet-3.png"
+      ]
+    },
+    "P07": {
+      "status": "pass",
+      "reason": "Five source-backed palettes and one-block reference inspected below; existing texture mapping used. Blue core corrected after direct texture comparison.",
+      "evidence": [
+        "build/planet-reference-scope/active-night.png",
+        "build/planet-reference-scope/blue-material-comparison.png",
+        "build/planet-reference-scope/planet-61.png"
+      ]
+    },
+    "P08": {
+      "status": "partial",
+      "reason": "Default below and front/side/above native overview rendered; direct inspector retained. Manual mouse interaction remains untested.",
+      "evidence": [
+        "build/planet-reference-scope/planet-61.png",
+        "build/planet-reference-scope/planet-62.png",
+        "build/planet-reference-scope/planet-63.png",
+        "build/planet-reference-scope/planet-64.png"
+      ]
+    },
+    "P09": {
+      "status": "pass",
+      "reason": "Protected user settings/lighting hashes unchanged. Old generator, dictionary, assembly, renderer and imported asset manifest unchanged.",
+      "evidence": [
+        "build/planet-reference-scope/verification.json"
+      ]
+    },
+    "P10": {
+      "status": "pass",
+      "reason": "Scope narrowed explicitly; larger reference structures remain unresolved. Minecraft1.19.3 assets, unknown source camera/material assignments and untested manual clicks remain limitations.",
+      "evidence": [
+        "README.md",
+        "parts/reference-observations.json"
+      ]
+    },
+    "P11": {
+      "status": "pass",
+      "reason": "Generated family has exactly two whole parts. Components own original cells; family selection changes pair/palette, not their arrangement.",
+      "evidence": [
+        "build/planet-families/inputs/src/planet_families.h",
+        "build/planet-families/inputs/tests/planet_parts_test.cpp"
+      ]
+    },
+    "P12": {
+      "status": "pass",
+      "reason": "All 18 palette assemblies retain component counts, reject overlapping cells and resolve material-dependent pane connections. All new ring blocks remain upright.",
+      "evidence": [
+        "build/planet-families/inputs/src/planet_parts.h",
+        "build/planet-families/inputs/tests/planet_parts_test.cpp"
+      ]
+    },
+    "P13": {
+      "status": "partial",
+      "reason": "Existing geometry retained, active set selected from literal crops. Only slime and blue core material assignments changed. Exact reference camera/hidden cells remain unrecovered.",
+      "evidence": [
+        "build/planet-reference-scope/blue-material-comparison.png",
+        "parts/reference-observations.json",
+        "build/planet-reference-scope/verification.json"
+      ]
+    },
+    "P14": {
+      "status": "pass",
+      "reason": "Same-material full glass internal-face culling retained; connected pane end caps now use source flags. Different-material interfaces retained; nonintersecting recipes only.",
+      "evidence": [
+        "build/planet-families/inputs/src/parts_renderer.h",
+        "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+        "build/planet-families/verification.json"
+      ]
+    },
+    "P15": {
+      "status": "pass",
+      "reason": "Every new ring is single-colour panes; mixed/full-glass examples remain earlier-only.",
+      "evidence": [
+        "build/planet-families/inputs/src/planet_families.h",
+        "build/planet-families/inputs/parts/planet-families.json"
+      ]
+    },
+    "P16": {
+      "status": "pass",
+      "reason": "Full-height two-row surround paired with tall core in new family. Earlier one-high/two-high comparison retained as history.",
+      "evidence": [
+        "build/planet-families/planet-73.png",
+        "build/planet-families/planet-38.png"
+      ]
+    },
+    "P17": {
+      "status": "pass",
+      "reason": "Indexed family selection retained, palette selection restricted to source-linked indices. 12000 new-family choices check that no unsupported palette is selected; older12000-choice checks also pass.",
+      "evidence": [
+        "src/planet_families.h",
+        "tests/planet_parts_test.cpp",
+        "build/planet-reference-scope/tests.log"
+      ]
+    },
+    "P18": {
+      "status": "pass",
+      "reason": "Every active grid label names its source crop; exact inspector shows materials/emission/counts and per-palette observations/assumptions. Manual interaction untested.",
+      "evidence": [
+        "build/planet-reference-scope/planet-61.png",
+        "build/planet-reference-scope/planet-91.png",
+        "src/planet_gallery.h"
+      ]
+    },
+    "P19": {
+      "status": "pass",
+      "reason": "Honey/pumpkin/jack variants retain detached panes; normal core materials accept arms. Literal same belt cells can therefore resolve differently.",
+      "evidence": [
+        "build/planet-families/reference-comparison.png",
+        "build/planet-families/inputs/tests/planet_parts_test.cpp",
+        "build/planet-families/inputs/parts/catalog.json"
+      ]
+    },
+    "P20": {
+      "status": "pass",
+      "reason": "Per-exhibit light groups retained. No shared lighting formula edits. Night previews have no shadows, occlusion or bloom.",
+      "evidence": [
+        "build/planet-families/night-palettes.png",
+        "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+        "build/planet-families/verification.json"
+      ]
+    },
+    "P21": {
+      "status": "pass",
+      "reason": "Active set contains only horizontal shallow/full-height surrounds. Historical vertical experiments remain outside active set.",
+      "evidence": [
+        "build/planet-reference-scope/planet-61.png",
+        "src/planet_families.h"
+      ]
+    },
+    "P22": {
+      "status": "pass",
+      "reason": "Each of five active examples has its own source crop, observations and explicit inferences. Larger orange/lime observations are recorded without inventing a reconstruction.",
+      "evidence": [
+        "parts/reference-observations.json",
+        "parts/planet-families.json",
+        "build/planet-reference-scope/blue-material-comparison.png"
+      ]
+    },
+    "P23": {
+      "status": "pass",
+      "reason": "Latest scope clarification supersedes increasing shape variety with inventions. Current active set deliberately has two body arrangements, three pairings and five source examples.",
+      "evidence": [
+        "parts/requirements.json",
+        "README.md"
+      ]
+    },
+    "P24": {
+      "status": "pass",
+      "reason": "Complete pairing remains intact; active palettes must cite a source crop. Long/flat/stepped extensions and unsupported colour swaps are historical only.",
+      "evidence": [
+        "src/planet_families.h",
+        "src/planet_gallery.h",
+        "parts/planet-families.json"
+      ]
+    },
+    "P25": {
+      "status": "pass",
+      "reason": "Only source-tagged touching same-material pane end caps are omitted. Top/bottom untagged faces remain; tall-row seam is a documented discrepancy. Source flags and exact connected-pair face count checked.",
+      "evidence": [
+        "build/planet-families/inputs/scripts/build_parts_dictionary.py",
+        "build/planet-families/inputs/src/parts_renderer.h",
+        "build/planet-families/inputs/tests/test_parts_dictionary.py",
+        "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+        "build/planet-families/verification.json"
+      ]
+    },
+    "P26": {
+      "status": "pass",
+      "reason": "Default overview is exactly pink/slime/honey/yellow-stack/blue-stack. Generated seeds contain only these sources. Body/ring dictionaries default to their components. History requires explicit selection.",
+      "evidence": [
+        "build/planet-reference-scope/planet-61.png",
+        "build/planet-reference-scope/planet-111.png",
+        "build/planet-reference-scope/planet-112.png",
+        "build/planet-reference-scope/planet-113.png",
+        "tests/planet_parts_test.cpp"
+      ]
+    }
+  },
+  "legacy_requirements": {
+    "D01": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "D02": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "D03": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "D04": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "D05": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "D06": {
+      "status": "pass",
+      "reason": "Current work report and README explain baseline, mechanisms, values, tests and remaining limits.",
+      "evidence": [
+        "README.md",
+        "AGENTS.md"
+      ]
+    },
+    "D07": {
+      "status": "pass",
+      "reason": "Existing experiments, user settings and accepted lighting retained.",
+      "evidence": [
+        "build/planet-reference-scope/verification.json"
+      ]
+    },
+    "V01": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V02": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V03": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V04": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V05": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V06": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V07": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V08": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V09": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V10": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V11": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V12": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V13": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V14": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V15": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    },
+    "V16": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+      "evidence": [
+        "reference-match-review.json"
+      ]
+    }
+  },
+  "candidates": [
+    {
+      "id": "pink",
+      "verdict": "Retained screenshot study, not an exact reconstruction or user-accepted match.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Default body/ring dictionaries show four whole components used by the screenshot examples. All twenty-one components remain available as history.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "src/planet_families.h",
+            "build/planet-reference-scope/planet-1.png",
+            "build/planet-reference-scope/planet-2.png"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Active shallow surround is2.125x1x2.125 blocks; tall surround2.125x2x2.125. Literal upright pane geometry and all component cells unchanged.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "All earlier pane states remain in Block assets; current dictionary and inspector label resolved mesh bounds.",
+          "evidence": [
+            "build/planet-families/inputs/src/parts_gallery.h",
+            "build/planet-families/inputs/src/planet_gallery.h",
+            "build/planet-families/planet-73.png"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Earlier full-glass examples retained. New generated set uses panes only. Source alpha and reverse-order GPU checks retained.",
+          "evidence": [
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Emission remains literal material metadata. Slime/honey/terracotta unlit; pearl and lower jack are sources. No atmosphere shader or arbitrary highlight introduced.",
+          "evidence": [
+            "build/planet-reference-scope/active-night.png",
+            "parts/catalog.json"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Single pane colour per new family palette. Earlier mixed-colour silhouette comparison remains available separately.",
+          "evidence": [
+            "build/planet-families/inputs/parts/planet-families.json",
+            "build/planet-families/planet-3.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Five source-backed palettes and one-block reference inspected below; existing texture mapping used. Blue core corrected after direct texture comparison.",
+          "evidence": [
+            "build/planet-reference-scope/active-night.png",
+            "build/planet-reference-scope/blue-material-comparison.png",
+            "build/planet-reference-scope/planet-61.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Default below and front/side/above native overview rendered; direct inspector retained. Manual mouse interaction remains untested.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-62.png",
+            "build/planet-reference-scope/planet-63.png",
+            "build/planet-reference-scope/planet-64.png"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Protected user settings/lighting hashes unchanged. Old generator, dictionary, assembly, renderer and imported asset manifest unchanged.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Scope narrowed explicitly; larger reference structures remain unresolved. Minecraft1.19.3 assets, unknown source camera/material assignments and untested manual clicks remain limitations.",
+          "evidence": [
+            "README.md",
+            "parts/reference-observations.json"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Generated family has exactly two whole parts. Components own original cells; family selection changes pair/palette, not their arrangement.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_families.h",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 18 palette assemblies retain component counts, reject overlapping cells and resolve material-dependent pane connections. All new ring blocks remain upright.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_parts.h",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "partial",
+          "reason": "Existing geometry retained, active set selected from literal crops. Only slime and blue core material assignments changed. Exact reference camera/hidden cells remain unrecovered.",
+          "evidence": [
+            "build/planet-reference-scope/blue-material-comparison.png",
+            "parts/reference-observations.json",
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Same-material full glass internal-face culling retained; connected pane end caps now use source flags. Different-material interfaces retained; nonintersecting recipes only.",
+          "evidence": [
+            "build/planet-families/inputs/src/parts_renderer.h",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P15": {
+          "status": "pass",
+          "reason": "Every new ring is single-colour panes; mixed/full-glass examples remain earlier-only.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_families.h",
+            "build/planet-families/inputs/parts/planet-families.json"
+          ]
+        },
+        "P16": {
+          "status": "pass",
+          "reason": "Full-height two-row surround paired with tall core in new family. Earlier one-high/two-high comparison retained as history.",
+          "evidence": [
+            "build/planet-families/planet-73.png",
+            "build/planet-families/planet-38.png"
+          ]
+        },
+        "P17": {
+          "status": "pass",
+          "reason": "Indexed family selection retained, palette selection restricted to source-linked indices. 12000 new-family choices check that no unsupported palette is selected; older12000-choice checks also pass.",
+          "evidence": [
+            "src/planet_families.h",
+            "tests/planet_parts_test.cpp",
+            "build/planet-reference-scope/tests.log"
+          ]
+        },
+        "P18": {
+          "status": "pass",
+          "reason": "Every active grid label names its source crop; exact inspector shows materials/emission/counts and per-palette observations/assumptions. Manual interaction untested.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-91.png",
+            "src/planet_gallery.h"
+          ]
+        },
+        "P19": {
+          "status": "pass",
+          "reason": "Honey/pumpkin/jack variants retain detached panes; normal core materials accept arms. Literal same belt cells can therefore resolve differently.",
+          "evidence": [
+            "build/planet-families/reference-comparison.png",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp",
+            "build/planet-families/inputs/parts/catalog.json"
+          ]
+        },
+        "P20": {
+          "status": "pass",
+          "reason": "Per-exhibit light groups retained. No shared lighting formula edits. Night previews have no shadows, occlusion or bloom.",
+          "evidence": [
+            "build/planet-families/night-palettes.png",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P21": {
+          "status": "pass",
+          "reason": "Active set contains only horizontal shallow/full-height surrounds. Historical vertical experiments remain outside active set.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "src/planet_families.h"
+          ]
+        },
+        "P22": {
+          "status": "pass",
+          "reason": "One pale bright cube inside a pink shallow pane surround, with inward connections. Inference/limit: Pearlescent froglight identification is inferred from colour and texture. Eight perimeter cells include symmetric completion of the hidden rear.",
+          "evidence": [
+            "parts/reference-observations.json",
+            "parts/planet-families.json",
+            "build/planet-reference-scope/blue-material-comparison.png"
+          ]
+        },
+        "P23": {
+          "status": "pass",
+          "reason": "Latest scope clarification supersedes increasing shape variety with inventions. Current active set deliberately has two body arrangements, three pairings and five source examples.",
+          "evidence": [
+            "parts/requirements.json",
+            "README.md"
+          ]
+        },
+        "P24": {
+          "status": "pass",
+          "reason": "Complete pairing remains intact; active palettes must cite a source crop. Long/flat/stepped extensions and unsupported colour swaps are historical only.",
+          "evidence": [
+            "src/planet_families.h",
+            "src/planet_gallery.h",
+            "parts/planet-families.json"
+          ]
+        },
+        "P25": {
+          "status": "pass",
+          "reason": "Only source-tagged touching same-material pane end caps are omitted. Top/bottom untagged faces remain; tall-row seam is a documented discrepancy. Source flags and exact connected-pair face count checked.",
+          "evidence": [
+            "build/planet-families/inputs/scripts/build_parts_dictionary.py",
+            "build/planet-families/inputs/src/parts_renderer.h",
+            "build/planet-families/inputs/tests/test_parts_dictionary.py",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P26": {
+          "status": "pass",
+          "reason": "Default overview is exactly pink/slime/honey/yellow-stack/blue-stack. Generated seeds contain only these sources. Body/ring dictionaries default to their components. History requires explicit selection.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-111.png",
+            "build/planet-reference-scope/planet-112.png",
+            "build/planet-reference-scope/planet-113.png",
+            "tests/planet_parts_test.cpp"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README explain baseline, mechanisms, values, tests and remaining limits.",
+          "evidence": [
+            "README.md",
+            "AGENTS.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Existing experiments, user settings and accepted lighting retained.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        }
+      }
+    },
+    {
+      "id": "slime",
+      "verdict": "Retained screenshot study, not an exact reconstruction or user-accepted match.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Default body/ring dictionaries show four whole components used by the screenshot examples. All twenty-one components remain available as history.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "src/planet_families.h",
+            "build/planet-reference-scope/planet-1.png",
+            "build/planet-reference-scope/planet-2.png"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Active shallow surround is2.125x1x2.125 blocks; tall surround2.125x2x2.125. Literal upright pane geometry and all component cells unchanged.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "All earlier pane states remain in Block assets; current dictionary and inspector label resolved mesh bounds.",
+          "evidence": [
+            "build/planet-families/inputs/src/parts_gallery.h",
+            "build/planet-families/inputs/src/planet_gallery.h",
+            "build/planet-families/planet-73.png"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Earlier full-glass examples retained. New generated set uses panes only. Source alpha and reverse-order GPU checks retained.",
+          "evidence": [
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Emission remains literal material metadata. Slime/honey/terracotta unlit; pearl and lower jack are sources. No atmosphere shader or arbitrary highlight introduced.",
+          "evidence": [
+            "build/planet-reference-scope/active-night.png",
+            "parts/catalog.json"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Single pane colour per new family palette. Earlier mixed-colour silhouette comparison remains available separately.",
+          "evidence": [
+            "build/planet-families/inputs/parts/planet-families.json",
+            "build/planet-families/planet-3.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Five source-backed palettes and one-block reference inspected below; existing texture mapping used. Blue core corrected after direct texture comparison.",
+          "evidence": [
+            "build/planet-reference-scope/active-night.png",
+            "build/planet-reference-scope/blue-material-comparison.png",
+            "build/planet-reference-scope/planet-61.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Default below and front/side/above native overview rendered; direct inspector retained. Manual mouse interaction remains untested.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-62.png",
+            "build/planet-reference-scope/planet-63.png",
+            "build/planet-reference-scope/planet-64.png"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Protected user settings/lighting hashes unchanged. Old generator, dictionary, assembly, renderer and imported asset manifest unchanged.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Scope narrowed explicitly; larger reference structures remain unresolved. Minecraft1.19.3 assets, unknown source camera/material assignments and untested manual clicks remain limitations.",
+          "evidence": [
+            "README.md",
+            "parts/reference-observations.json"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Generated family has exactly two whole parts. Components own original cells; family selection changes pair/palette, not their arrangement.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_families.h",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 18 palette assemblies retain component counts, reject overlapping cells and resolve material-dependent pane connections. All new ring blocks remain upright.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_parts.h",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "partial",
+          "reason": "Existing geometry retained, active set selected from literal crops. Only slime and blue core material assignments changed. Exact reference camera/hidden cells remain unrecovered.",
+          "evidence": [
+            "build/planet-reference-scope/blue-material-comparison.png",
+            "parts/reference-observations.json",
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Same-material full glass internal-face culling retained; connected pane end caps now use source flags. Different-material interfaces retained; nonintersecting recipes only.",
+          "evidence": [
+            "build/planet-families/inputs/src/parts_renderer.h",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P15": {
+          "status": "pass",
+          "reason": "Every new ring is single-colour panes; mixed/full-glass examples remain earlier-only.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_families.h",
+            "build/planet-families/inputs/parts/planet-families.json"
+          ]
+        },
+        "P16": {
+          "status": "pass",
+          "reason": "Full-height two-row surround paired with tall core in new family. Earlier one-high/two-high comparison retained as history.",
+          "evidence": [
+            "build/planet-families/planet-73.png",
+            "build/planet-families/planet-38.png"
+          ]
+        },
+        "P17": {
+          "status": "pass",
+          "reason": "Indexed family selection retained, palette selection restricted to source-linked indices. 12000 new-family choices check that no unsupported palette is selected; older12000-choice checks also pass.",
+          "evidence": [
+            "src/planet_families.h",
+            "tests/planet_parts_test.cpp",
+            "build/planet-reference-scope/tests.log"
+          ]
+        },
+        "P18": {
+          "status": "pass",
+          "reason": "Every active grid label names its source crop; exact inspector shows materials/emission/counts and per-palette observations/assumptions. Manual interaction untested.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-91.png",
+            "src/planet_gallery.h"
+          ]
+        },
+        "P19": {
+          "status": "pass",
+          "reason": "Honey/pumpkin/jack variants retain detached panes; normal core materials accept arms. Literal same belt cells can therefore resolve differently.",
+          "evidence": [
+            "build/planet-families/reference-comparison.png",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp",
+            "build/planet-families/inputs/parts/catalog.json"
+          ]
+        },
+        "P20": {
+          "status": "pass",
+          "reason": "Per-exhibit light groups retained. No shared lighting formula edits. Night previews have no shadows, occlusion or bloom.",
+          "evidence": [
+            "build/planet-families/night-palettes.png",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P21": {
+          "status": "pass",
+          "reason": "Active set contains only horizontal shallow/full-height surrounds. Historical vertical experiments remain outside active set.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "src/planet_families.h"
+          ]
+        },
+        "P22": {
+          "status": "pass",
+          "reason": "A green translucent cube inside a light shallow pane surround; inward arms are visible. Inference/limit: Slime block inferred from visible translucency and texture. White versus clear panes and hidden rear cells remain uncertain.",
+          "evidence": [
+            "parts/reference-observations.json",
+            "parts/planet-families.json",
+            "build/planet-reference-scope/blue-material-comparison.png"
+          ]
+        },
+        "P23": {
+          "status": "pass",
+          "reason": "Latest scope clarification supersedes increasing shape variety with inventions. Current active set deliberately has two body arrangements, three pairings and five source examples.",
+          "evidence": [
+            "parts/requirements.json",
+            "README.md"
+          ]
+        },
+        "P24": {
+          "status": "pass",
+          "reason": "Complete pairing remains intact; active palettes must cite a source crop. Long/flat/stepped extensions and unsupported colour swaps are historical only.",
+          "evidence": [
+            "src/planet_families.h",
+            "src/planet_gallery.h",
+            "parts/planet-families.json"
+          ]
+        },
+        "P25": {
+          "status": "pass",
+          "reason": "Only source-tagged touching same-material pane end caps are omitted. Top/bottom untagged faces remain; tall-row seam is a documented discrepancy. Source flags and exact connected-pair face count checked.",
+          "evidence": [
+            "build/planet-families/inputs/scripts/build_parts_dictionary.py",
+            "build/planet-families/inputs/src/parts_renderer.h",
+            "build/planet-families/inputs/tests/test_parts_dictionary.py",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P26": {
+          "status": "pass",
+          "reason": "Default overview is exactly pink/slime/honey/yellow-stack/blue-stack. Generated seeds contain only these sources. Body/ring dictionaries default to their components. History requires explicit selection.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-111.png",
+            "build/planet-reference-scope/planet-112.png",
+            "build/planet-reference-scope/planet-113.png",
+            "tests/planet_parts_test.cpp"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README explain baseline, mechanisms, values, tests and remaining limits.",
+          "evidence": [
+            "README.md",
+            "AGENTS.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Existing experiments, user settings and accepted lighting retained.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        }
+      }
+    },
+    {
+      "id": "honey",
+      "verdict": "Retained screenshot study, not an exact reconstruction or user-accepted match.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Default body/ring dictionaries show four whole components used by the screenshot examples. All twenty-one components remain available as history.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "src/planet_families.h",
+            "build/planet-reference-scope/planet-1.png",
+            "build/planet-reference-scope/planet-2.png"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Active shallow surround is2.125x1x2.125 blocks; tall surround2.125x2x2.125. Literal upright pane geometry and all component cells unchanged.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "All earlier pane states remain in Block assets; current dictionary and inspector label resolved mesh bounds.",
+          "evidence": [
+            "build/planet-families/inputs/src/parts_gallery.h",
+            "build/planet-families/inputs/src/planet_gallery.h",
+            "build/planet-families/planet-73.png"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Earlier full-glass examples retained. New generated set uses panes only. Source alpha and reverse-order GPU checks retained.",
+          "evidence": [
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Emission remains literal material metadata. Slime/honey/terracotta unlit; pearl and lower jack are sources. No atmosphere shader or arbitrary highlight introduced.",
+          "evidence": [
+            "build/planet-reference-scope/active-night.png",
+            "parts/catalog.json"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Single pane colour per new family palette. Earlier mixed-colour silhouette comparison remains available separately.",
+          "evidence": [
+            "build/planet-families/inputs/parts/planet-families.json",
+            "build/planet-families/planet-3.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Five source-backed palettes and one-block reference inspected below; existing texture mapping used. Blue core corrected after direct texture comparison.",
+          "evidence": [
+            "build/planet-reference-scope/active-night.png",
+            "build/planet-reference-scope/blue-material-comparison.png",
+            "build/planet-reference-scope/planet-61.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Default below and front/side/above native overview rendered; direct inspector retained. Manual mouse interaction remains untested.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-62.png",
+            "build/planet-reference-scope/planet-63.png",
+            "build/planet-reference-scope/planet-64.png"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Protected user settings/lighting hashes unchanged. Old generator, dictionary, assembly, renderer and imported asset manifest unchanged.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Scope narrowed explicitly; larger reference structures remain unresolved. Minecraft1.19.3 assets, unknown source camera/material assignments and untested manual clicks remain limitations.",
+          "evidence": [
+            "README.md",
+            "parts/reference-observations.json"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Generated family has exactly two whole parts. Components own original cells; family selection changes pair/palette, not their arrangement.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_families.h",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 18 palette assemblies retain component counts, reject overlapping cells and resolve material-dependent pane connections. All new ring blocks remain upright.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_parts.h",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "partial",
+          "reason": "Existing geometry retained, active set selected from literal crops. Only slime and blue core material assignments changed. Exact reference camera/hidden cells remain unrecovered.",
+          "evidence": [
+            "build/planet-reference-scope/blue-material-comparison.png",
+            "parts/reference-observations.json",
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Same-material full glass internal-face culling retained; connected pane end caps now use source flags. Different-material interfaces retained; nonintersecting recipes only.",
+          "evidence": [
+            "build/planet-families/inputs/src/parts_renderer.h",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P15": {
+          "status": "pass",
+          "reason": "Every new ring is single-colour panes; mixed/full-glass examples remain earlier-only.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_families.h",
+            "build/planet-families/inputs/parts/planet-families.json"
+          ]
+        },
+        "P16": {
+          "status": "pass",
+          "reason": "Full-height two-row surround paired with tall core in new family. Earlier one-high/two-high comparison retained as history.",
+          "evidence": [
+            "build/planet-families/planet-73.png",
+            "build/planet-families/planet-38.png"
+          ]
+        },
+        "P17": {
+          "status": "pass",
+          "reason": "Indexed family selection retained, palette selection restricted to source-linked indices. 12000 new-family choices check that no unsupported palette is selected; older12000-choice checks also pass.",
+          "evidence": [
+            "src/planet_families.h",
+            "tests/planet_parts_test.cpp",
+            "build/planet-reference-scope/tests.log"
+          ]
+        },
+        "P18": {
+          "status": "pass",
+          "reason": "Every active grid label names its source crop; exact inspector shows materials/emission/counts and per-palette observations/assumptions. Manual interaction untested.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-91.png",
+            "src/planet_gallery.h"
+          ]
+        },
+        "P19": {
+          "status": "pass",
+          "reason": "Honey/pumpkin/jack variants retain detached panes; normal core materials accept arms. Literal same belt cells can therefore resolve differently.",
+          "evidence": [
+            "build/planet-families/reference-comparison.png",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp",
+            "build/planet-families/inputs/parts/catalog.json"
+          ]
+        },
+        "P20": {
+          "status": "pass",
+          "reason": "Per-exhibit light groups retained. No shared lighting formula edits. Night previews have no shadows, occlusion or bloom.",
+          "evidence": [
+            "build/planet-families/night-palettes.png",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P21": {
+          "status": "pass",
+          "reason": "Active set contains only horizontal shallow/full-height surrounds. Historical vertical experiments remain outside active set.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "src/planet_families.h"
+          ]
+        },
+        "P22": {
+          "status": "pass",
+          "reason": "Amber translucent cube inside a light pane outline, with a gap instead of inward spokes. Inference/limit: Honey identification is supported by texture and the user correction. White versus clear panes and rear cells remain uncertain.",
+          "evidence": [
+            "parts/reference-observations.json",
+            "parts/planet-families.json",
+            "build/planet-reference-scope/blue-material-comparison.png"
+          ]
+        },
+        "P23": {
+          "status": "pass",
+          "reason": "Latest scope clarification supersedes increasing shape variety with inventions. Current active set deliberately has two body arrangements, three pairings and five source examples.",
+          "evidence": [
+            "parts/requirements.json",
+            "README.md"
+          ]
+        },
+        "P24": {
+          "status": "pass",
+          "reason": "Complete pairing remains intact; active palettes must cite a source crop. Long/flat/stepped extensions and unsupported colour swaps are historical only.",
+          "evidence": [
+            "src/planet_families.h",
+            "src/planet_gallery.h",
+            "parts/planet-families.json"
+          ]
+        },
+        "P25": {
+          "status": "pass",
+          "reason": "Only source-tagged touching same-material pane end caps are omitted. Top/bottom untagged faces remain; tall-row seam is a documented discrepancy. Source flags and exact connected-pair face count checked.",
+          "evidence": [
+            "build/planet-families/inputs/scripts/build_parts_dictionary.py",
+            "build/planet-families/inputs/src/parts_renderer.h",
+            "build/planet-families/inputs/tests/test_parts_dictionary.py",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P26": {
+          "status": "pass",
+          "reason": "Default overview is exactly pink/slime/honey/yellow-stack/blue-stack. Generated seeds contain only these sources. Body/ring dictionaries default to their components. History requires explicit selection.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-111.png",
+            "build/planet-reference-scope/planet-112.png",
+            "build/planet-reference-scope/planet-113.png",
+            "tests/planet_parts_test.cpp"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README explain baseline, mechanisms, values, tests and remaining limits.",
+          "evidence": [
+            "README.md",
+            "AGENTS.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Existing experiments, user settings and accepted lighting retained.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        }
+      }
+    },
+    {
+      "id": "yellow-stack",
+      "verdict": "Retained screenshot study, not an exact reconstruction or user-accepted match.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Default body/ring dictionaries show four whole components used by the screenshot examples. All twenty-one components remain available as history.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "src/planet_families.h",
+            "build/planet-reference-scope/planet-1.png",
+            "build/planet-reference-scope/planet-2.png"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Active shallow surround is2.125x1x2.125 blocks; tall surround2.125x2x2.125. Literal upright pane geometry and all component cells unchanged.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "All earlier pane states remain in Block assets; current dictionary and inspector label resolved mesh bounds.",
+          "evidence": [
+            "build/planet-families/inputs/src/parts_gallery.h",
+            "build/planet-families/inputs/src/planet_gallery.h",
+            "build/planet-families/planet-73.png"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Earlier full-glass examples retained. New generated set uses panes only. Source alpha and reverse-order GPU checks retained.",
+          "evidence": [
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Emission remains literal material metadata. Slime/honey/terracotta unlit; pearl and lower jack are sources. No atmosphere shader or arbitrary highlight introduced.",
+          "evidence": [
+            "build/planet-reference-scope/active-night.png",
+            "parts/catalog.json"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Single pane colour per new family palette. Earlier mixed-colour silhouette comparison remains available separately.",
+          "evidence": [
+            "build/planet-families/inputs/parts/planet-families.json",
+            "build/planet-families/planet-3.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Five source-backed palettes and one-block reference inspected below; existing texture mapping used. Blue core corrected after direct texture comparison.",
+          "evidence": [
+            "build/planet-reference-scope/active-night.png",
+            "build/planet-reference-scope/blue-material-comparison.png",
+            "build/planet-reference-scope/planet-61.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Default below and front/side/above native overview rendered; direct inspector retained. Manual mouse interaction remains untested.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-62.png",
+            "build/planet-reference-scope/planet-63.png",
+            "build/planet-reference-scope/planet-64.png"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Protected user settings/lighting hashes unchanged. Old generator, dictionary, assembly, renderer and imported asset manifest unchanged.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Scope narrowed explicitly; larger reference structures remain unresolved. Minecraft1.19.3 assets, unknown source camera/material assignments and untested manual clicks remain limitations.",
+          "evidence": [
+            "README.md",
+            "parts/reference-observations.json"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Generated family has exactly two whole parts. Components own original cells; family selection changes pair/palette, not their arrangement.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_families.h",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 18 palette assemblies retain component counts, reject overlapping cells and resolve material-dependent pane connections. All new ring blocks remain upright.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_parts.h",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "partial",
+          "reason": "Existing geometry retained, active set selected from literal crops. Only slime and blue core material assignments changed. Exact reference camera/hidden cells remain unrecovered.",
+          "evidence": [
+            "build/planet-reference-scope/blue-material-comparison.png",
+            "parts/reference-observations.json",
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Same-material full glass internal-face culling retained; connected pane end caps now use source flags. Different-material interfaces retained; nonintersecting recipes only.",
+          "evidence": [
+            "build/planet-families/inputs/src/parts_renderer.h",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P15": {
+          "status": "pass",
+          "reason": "Every new ring is single-colour panes; mixed/full-glass examples remain earlier-only.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_families.h",
+            "build/planet-families/inputs/parts/planet-families.json"
+          ]
+        },
+        "P16": {
+          "status": "pass",
+          "reason": "Full-height two-row surround paired with tall core in new family. Earlier one-high/two-high comparison retained as history.",
+          "evidence": [
+            "build/planet-families/planet-73.png",
+            "build/planet-families/planet-38.png"
+          ]
+        },
+        "P17": {
+          "status": "pass",
+          "reason": "Indexed family selection retained, palette selection restricted to source-linked indices. 12000 new-family choices check that no unsupported palette is selected; older12000-choice checks also pass.",
+          "evidence": [
+            "src/planet_families.h",
+            "tests/planet_parts_test.cpp",
+            "build/planet-reference-scope/tests.log"
+          ]
+        },
+        "P18": {
+          "status": "pass",
+          "reason": "Every active grid label names its source crop; exact inspector shows materials/emission/counts and per-palette observations/assumptions. Manual interaction untested.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-91.png",
+            "src/planet_gallery.h"
+          ]
+        },
+        "P19": {
+          "status": "pass",
+          "reason": "Honey/pumpkin/jack variants retain detached panes; normal core materials accept arms. Literal same belt cells can therefore resolve differently.",
+          "evidence": [
+            "build/planet-families/reference-comparison.png",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp",
+            "build/planet-families/inputs/parts/catalog.json"
+          ]
+        },
+        "P20": {
+          "status": "pass",
+          "reason": "Per-exhibit light groups retained. No shared lighting formula edits. Night previews have no shadows, occlusion or bloom.",
+          "evidence": [
+            "build/planet-families/night-palettes.png",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P21": {
+          "status": "pass",
+          "reason": "Active set contains only horizontal shallow/full-height surrounds. Historical vertical experiments remain outside active set.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "src/planet_families.h"
+          ]
+        },
+        "P22": {
+          "status": "pass",
+          "reason": "Tall amber core inside a yellow surround spanning its height. Inference/limit: Two blocks, pumpkin above jack-o-lantern, are inferred. Exact hidden geometry and texture orientation are not recovered.",
+          "evidence": [
+            "parts/reference-observations.json",
+            "parts/planet-families.json",
+            "build/planet-reference-scope/blue-material-comparison.png"
+          ]
+        },
+        "P23": {
+          "status": "pass",
+          "reason": "Latest scope clarification supersedes increasing shape variety with inventions. Current active set deliberately has two body arrangements, three pairings and five source examples.",
+          "evidence": [
+            "parts/requirements.json",
+            "README.md"
+          ]
+        },
+        "P24": {
+          "status": "pass",
+          "reason": "Complete pairing remains intact; active palettes must cite a source crop. Long/flat/stepped extensions and unsupported colour swaps are historical only.",
+          "evidence": [
+            "src/planet_families.h",
+            "src/planet_gallery.h",
+            "parts/planet-families.json"
+          ]
+        },
+        "P25": {
+          "status": "pass",
+          "reason": "Only source-tagged touching same-material pane end caps are omitted. Top/bottom untagged faces remain; tall-row seam is a documented discrepancy. Source flags and exact connected-pair face count checked.",
+          "evidence": [
+            "build/planet-families/inputs/scripts/build_parts_dictionary.py",
+            "build/planet-families/inputs/src/parts_renderer.h",
+            "build/planet-families/inputs/tests/test_parts_dictionary.py",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P26": {
+          "status": "pass",
+          "reason": "Default overview is exactly pink/slime/honey/yellow-stack/blue-stack. Generated seeds contain only these sources. Body/ring dictionaries default to their components. History requires explicit selection.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-111.png",
+            "build/planet-reference-scope/planet-112.png",
+            "build/planet-reference-scope/planet-113.png",
+            "tests/planet_parts_test.cpp"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README explain baseline, mechanisms, values, tests and remaining limits.",
+          "evidence": [
+            "README.md",
+            "AGENTS.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Existing experiments, user settings and accepted lighting retained.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        }
+      }
+    },
+    {
+      "id": "blue-stack",
+      "verdict": "Retained screenshot study, not an exact reconstruction or user-accepted match.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Default body/ring dictionaries show four whole components used by the screenshot examples. All twenty-one components remain available as history.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "src/planet_families.h",
+            "build/planet-reference-scope/planet-1.png",
+            "build/planet-reference-scope/planet-2.png"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Active shallow surround is2.125x1x2.125 blocks; tall surround2.125x2x2.125. Literal upright pane geometry and all component cells unchanged.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "All earlier pane states remain in Block assets; current dictionary and inspector label resolved mesh bounds.",
+          "evidence": [
+            "build/planet-families/inputs/src/parts_gallery.h",
+            "build/planet-families/inputs/src/planet_gallery.h",
+            "build/planet-families/planet-73.png"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Earlier full-glass examples retained. New generated set uses panes only. Source alpha and reverse-order GPU checks retained.",
+          "evidence": [
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Emission remains literal material metadata. Slime/honey/terracotta unlit; pearl and lower jack are sources. No atmosphere shader or arbitrary highlight introduced.",
+          "evidence": [
+            "build/planet-reference-scope/active-night.png",
+            "parts/catalog.json"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Single pane colour per new family palette. Earlier mixed-colour silhouette comparison remains available separately.",
+          "evidence": [
+            "build/planet-families/inputs/parts/planet-families.json",
+            "build/planet-families/planet-3.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Five source-backed palettes and one-block reference inspected below; existing texture mapping used. Blue core corrected after direct texture comparison.",
+          "evidence": [
+            "build/planet-reference-scope/active-night.png",
+            "build/planet-reference-scope/blue-material-comparison.png",
+            "build/planet-reference-scope/planet-61.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Default below and front/side/above native overview rendered; direct inspector retained. Manual mouse interaction remains untested.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-62.png",
+            "build/planet-reference-scope/planet-63.png",
+            "build/planet-reference-scope/planet-64.png"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Protected user settings/lighting hashes unchanged. Old generator, dictionary, assembly, renderer and imported asset manifest unchanged.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Scope narrowed explicitly; larger reference structures remain unresolved. Minecraft1.19.3 assets, unknown source camera/material assignments and untested manual clicks remain limitations.",
+          "evidence": [
+            "README.md",
+            "parts/reference-observations.json"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Generated family has exactly two whole parts. Components own original cells; family selection changes pair/palette, not their arrangement.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_families.h",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 18 palette assemblies retain component counts, reject overlapping cells and resolve material-dependent pane connections. All new ring blocks remain upright.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_parts.h",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "partial",
+          "reason": "Existing geometry retained, active set selected from literal crops. Only slime and blue core material assignments changed. Exact reference camera/hidden cells remain unrecovered.",
+          "evidence": [
+            "build/planet-reference-scope/blue-material-comparison.png",
+            "parts/reference-observations.json",
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Same-material full glass internal-face culling retained; connected pane end caps now use source flags. Different-material interfaces retained; nonintersecting recipes only.",
+          "evidence": [
+            "build/planet-families/inputs/src/parts_renderer.h",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P15": {
+          "status": "pass",
+          "reason": "Every new ring is single-colour panes; mixed/full-glass examples remain earlier-only.",
+          "evidence": [
+            "build/planet-families/inputs/src/planet_families.h",
+            "build/planet-families/inputs/parts/planet-families.json"
+          ]
+        },
+        "P16": {
+          "status": "pass",
+          "reason": "Full-height two-row surround paired with tall core in new family. Earlier one-high/two-high comparison retained as history.",
+          "evidence": [
+            "build/planet-families/planet-73.png",
+            "build/planet-families/planet-38.png"
+          ]
+        },
+        "P17": {
+          "status": "pass",
+          "reason": "Indexed family selection retained, palette selection restricted to source-linked indices. 12000 new-family choices check that no unsupported palette is selected; older12000-choice checks also pass.",
+          "evidence": [
+            "src/planet_families.h",
+            "tests/planet_parts_test.cpp",
+            "build/planet-reference-scope/tests.log"
+          ]
+        },
+        "P18": {
+          "status": "pass",
+          "reason": "Every active grid label names its source crop; exact inspector shows materials/emission/counts and per-palette observations/assumptions. Manual interaction untested.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-91.png",
+            "src/planet_gallery.h"
+          ]
+        },
+        "P19": {
+          "status": "pass",
+          "reason": "Honey/pumpkin/jack variants retain detached panes; normal core materials accept arms. Literal same belt cells can therefore resolve differently.",
+          "evidence": [
+            "build/planet-families/reference-comparison.png",
+            "build/planet-families/inputs/tests/planet_parts_test.cpp",
+            "build/planet-families/inputs/parts/catalog.json"
+          ]
+        },
+        "P20": {
+          "status": "pass",
+          "reason": "Per-exhibit light groups retained. No shared lighting formula edits. Night previews have no shadows, occlusion or bloom.",
+          "evidence": [
+            "build/planet-families/night-palettes.png",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P21": {
+          "status": "pass",
+          "reason": "Active set contains only horizontal shallow/full-height surrounds. Historical vertical experiments remain outside active set.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "src/planet_families.h"
+          ]
+        },
+        "P22": {
+          "status": "pass",
+          "reason": "Tall white/cyan patterned core inside a blue surround spanning its height. Inference/limit: Light-blue glazed terracotta is supported by direct source-texture comparison; two blocks are inferred. Exact terracotta rotations and hidden rear cells are not recovered.",
+          "evidence": [
+            "parts/reference-observations.json",
+            "parts/planet-families.json",
+            "build/planet-reference-scope/blue-material-comparison.png"
+          ]
+        },
+        "P23": {
+          "status": "pass",
+          "reason": "Latest scope clarification supersedes increasing shape variety with inventions. Current active set deliberately has two body arrangements, three pairings and five source examples.",
+          "evidence": [
+            "parts/requirements.json",
+            "README.md"
+          ]
+        },
+        "P24": {
+          "status": "pass",
+          "reason": "Complete pairing remains intact; active palettes must cite a source crop. Long/flat/stepped extensions and unsupported colour swaps are historical only.",
+          "evidence": [
+            "src/planet_families.h",
+            "src/planet_gallery.h",
+            "parts/planet-families.json"
+          ]
+        },
+        "P25": {
+          "status": "pass",
+          "reason": "Only source-tagged touching same-material pane end caps are omitted. Top/bottom untagged faces remain; tall-row seam is a documented discrepancy. Source flags and exact connected-pair face count checked.",
+          "evidence": [
+            "build/planet-families/inputs/scripts/build_parts_dictionary.py",
+            "build/planet-families/inputs/src/parts_renderer.h",
+            "build/planet-families/inputs/tests/test_parts_dictionary.py",
+            "build/planet-families/inputs/tests/parts_renderer_test.cpp",
+            "build/planet-families/verification.json"
+          ]
+        },
+        "P26": {
+          "status": "pass",
+          "reason": "Default overview is exactly pink/slime/honey/yellow-stack/blue-stack. Generated seeds contain only these sources. Body/ring dictionaries default to their components. History requires explicit selection.",
+          "evidence": [
+            "build/planet-reference-scope/planet-61.png",
+            "build/planet-reference-scope/planet-111.png",
+            "build/planet-reference-scope/planet-112.png",
+            "build/planet-reference-scope/planet-113.png",
+            "tests/planet_parts_test.cpp"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README explain baseline, mechanisms, values, tests and remaining limits.",
+          "evidence": [
+            "README.md",
+            "AGENTS.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Existing experiments, user settings and accepted lighting retained.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        }
+      }
+    },
+    {
+      "id": "broad-core",
+      "verdict": "Historical extension only: excluded from the current screenshot-only scope. This body/ring geometry is not established by a reference image.",
+      "checks": {
+        "P01": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P02": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P03": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P04": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P05": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P06": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P07": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P08": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P09": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P10": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P11": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P12": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P13": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P14": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P15": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P16": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P17": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P18": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P19": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P20": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P21": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P22": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P23": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P24": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P25": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P26": {
+          "status": "pass",
+          "reason": "Excluded from active overview and generation; available only as labelled history.",
+          "evidence": [
+            "parts/planet-families.json",
+            "src/planet_gallery.h"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README explain baseline, mechanisms, values, tests and remaining limits.",
+          "evidence": [
+            "README.md",
+            "AGENTS.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Existing experiments, user settings and accepted lighting retained.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        }
+      }
+    },
+    {
+      "id": "flat-core",
+      "verdict": "Historical extension only: excluded from the current screenshot-only scope. This body/ring geometry is not established by a reference image.",
+      "checks": {
+        "P01": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P02": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P03": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P04": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P05": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P06": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P07": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P08": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P09": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P10": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P11": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P12": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P13": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P14": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P15": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P16": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P17": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P18": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P19": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P20": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P21": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P22": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P23": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P24": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P25": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P26": {
+          "status": "pass",
+          "reason": "Excluded from active overview and generation; available only as labelled history.",
+          "evidence": [
+            "parts/planet-families.json",
+            "src/planet_gallery.h"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README explain baseline, mechanisms, values, tests and remaining limits.",
+          "evidence": [
+            "README.md",
+            "AGENTS.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Existing experiments, user settings and accepted lighting retained.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        }
+      }
+    },
+    {
+      "id": "stepped-core",
+      "verdict": "Historical extension only: excluded from the current screenshot-only scope. This body/ring geometry is not established by a reference image.",
+      "checks": {
+        "P01": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P02": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P03": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P04": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P05": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P06": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P07": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P08": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P09": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P10": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P11": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P12": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P13": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P14": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P15": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P16": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P17": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P18": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P19": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P20": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P21": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P22": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P23": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P24": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P25": {
+          "status": "not_evaluated",
+          "reason": "Historical extension removed from active scope; its prior geometry assessment remains in family-review.json.",
+          "evidence": [
+            "parts/family-review.json"
+          ]
+        },
+        "P26": {
+          "status": "pass",
+          "reason": "Excluded from active overview and generation; available only as labelled history.",
+          "evidence": [
+            "parts/planet-families.json",
+            "src/planet_gallery.h"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README explain baseline, mechanisms, values, tests and remaining limits.",
+          "evidence": [
+            "README.md",
+            "AGENTS.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Existing experiments, user settings and accepted lighting retained.",
+          "evidence": [
+            "build/planet-reference-scope/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion. This separate planet assembly does not regenerate or promote a canopy; prior failures remain.",
+          "evidence": [
+            "reference-match-review.json"
+          ]
+        }
+      }
+    }
+  ],
+  "larger_reference_status": "Observed layered/uneven surrounds, not reconstructed. Question about generic highlights/thicker rings answered separately from the explicit screenshot-only scope instruction.",
+  "frozen_inputs": {
+    "README.md": {
+      "path": "build/planet-reference-scope/inputs/README.md",
+      "sha256": "6055c9c697aae6408c6658f66cbdab3d8cc2bc4df2ee2ac6142f8b4cee707810"
+    },
+    "AGENTS.md": {
+      "path": "build/planet-reference-scope/inputs/AGENTS.md",
+      "sha256": "142b89175e8d57598d30ea98d114cfcc48ae0dca6d3e9696941da283ee244045"
+    },
+    "parts/planet-families.json": {
+      "path": "build/planet-reference-scope/inputs/parts/planet-families.json",
+      "sha256": "b3705a3d6fe2a79f0428b6a9fcc8074b8ef5ae86584d83a96890ac37bd14d48f"
+    },
+    "parts/requirements.json": {
+      "path": "build/planet-reference-scope/inputs/parts/requirements.json",
+      "sha256": "2f6b73cbd13c09d5a821133a8fd99a56b08e39117fb53388bfdc04a945a81b6a"
+    },
+    "parts/reference-observations.json": {
+      "path": "build/planet-reference-scope/inputs/parts/reference-observations.json",
+      "sha256": "62260ea52e0f491ea01bb5497d5c2ebfa50b35d1bb972fbbc4e5f0b63eded420"
+    },
+    "parts/family-review.json": {
+      "path": "build/planet-reference-scope/inputs/parts/family-review.json",
+      "sha256": "7c44eda5453791414c15337cd219b2d5343aaf1af5ff6ca0610f2d5fca02f5ba"
+    },
+    "src/planet_families.h": {
+      "path": "build/planet-reference-scope/inputs/src/planet_families.h",
+      "sha256": "240b9a2e22633c9826950f2cbb3cd4163fa014921018d9c31a8365544f737d32"
+    },
+    "src/planet_gallery.h": {
+      "path": "build/planet-reference-scope/inputs/src/planet_gallery.h",
+      "sha256": "b9eade6f033b12b0b0ae1a39c0248a8c546c178c8c312829eb215c670e9475c9"
+    },
+    "tests/planet_parts_test.cpp": {
+      "path": "build/planet-reference-scope/inputs/tests/planet_parts_test.cpp",
+      "sha256": "9907ffe4df58f07beeb85c618e958aff2bb1fc6b0403674895dc6907524374d2"
+    },
+    "tests/parts_renderer_test.cpp": {
+      "path": "build/planet-reference-scope/inputs/tests/parts_renderer_test.cpp",
+      "sha256": "48e61b10d6a70ec3d50cdc4e366455842f89eb1625caf77b851773ef2068da8e"
+    },
+    "reference-match-requirements.json": {
+      "path": "build/planet-reference-scope/inputs/reference-match-requirements.json",
+      "sha256": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a"
+    },
+    "reference-match-review.json": {
+      "path": "build/planet-reference-scope/inputs/reference-match-review.json",
+      "sha256": "48cf7dab0b360d83ba5fff65ec04d8edb1c881e6b91e83f14e9be34e5ab39f12"
+    },
+    "build/planet-reference-scope/record_review.py": {
+      "path": "build/planet-reference-scope/inputs/build/planet-reference-scope/record_review.py",
+      "sha256": "fbbc090618e8c508de773b0f41d89391e23136f8e726577dc09b635088b1ce38"
+    },
+    "scar/2026-10-15_00.38.19.png": {
+      "path": "build/planet-reference-scope/inputs/scar/2026-10-15_00.38.19.png",
+      "sha256": "492e2fea44c1177c23c4ff2dd017813ffd3d05b4f279ce0a3030d398f94dae33"
+    },
+    "src/parts_renderer.h": {
+      "path": "build/planet-reference-scope/inputs/src/parts_renderer.h",
+      "sha256": "6250d922a70212215c17879c730f1982433a654fdf558b53285abe4e2d308d22"
+    },
+    "src/parts_dictionary.h": {
+      "path": "build/planet-reference-scope/inputs/src/parts_dictionary.h",
+      "sha256": "61167c3976c98213b2ad0851fe35667d0debaa7b91e68b4bf71bb11f18f2c777"
+    },
+    "src/planet_parts.h": {
+      "path": "build/planet-reference-scope/inputs/src/planet_parts.h",
+      "sha256": "641b9bd68e868704c20e7f7246d1b44184b671b243c109c008973f9da205fab7"
+    },
+    "parts/planets.json": {
+      "path": "build/planet-reference-scope/inputs/parts/planets.json",
+      "sha256": "5e70278088397cfc8f840f05e1b2c522b802ddc201faa373a5ec0142db40b68c"
+    },
+    "src/planet_generator.h": {
+      "path": "build/planet-reference-scope/inputs/src/planet_generator.h",
+      "sha256": "bacb96b43d65f98c6bdbf6adb6bfd41f42a130834eca0dac780a39a4e395130a"
+    },
+    "build/parts-library/parts.json": {
+      "path": "build/planet-reference-scope/inputs/build/parts-library/parts.json",
+      "sha256": "500dbfb967d62eb1193ab2360a176bba85fefd51370a664daec733a5dd9d65b9"
+    },
+    "config/plot.json": {
+      "path": "build/planet-reference-scope/inputs/config/plot.json",
+      "sha256": "14ad8e79785f1f9450ae3c8896260a8eabe5427f72c3b40cb8bd47e8d164069e"
+    },
+    "config/controls.ini": {
+      "path": "build/planet-reference-scope/inputs/config/controls.ini",
+      "sha256": "c1196b7fa93dcca508580c9dcd08fd5bf4b8a15a9f352cc5354fa7e29791c85f"
+    },
+    "generators/_block_lighting.py": {
+      "path": "build/planet-reference-scope/inputs/generators/_block_lighting.py",
+      "sha256": "00822f71f24a4b61203e2600296ebf44abc4151366274bb46f03ba0bd52734bb"
+    }
+  },
+  "evidence_sha256": {
+    "build/planet-reference-scope/active-night.png": "0e8ac32b73a16954032d16038dce801acdca624832281e0ca2565fc6f696689d",
+    "build/planet-reference-scope/before-planet-families.json": "a3b881a029d507f0170ad3828a71ab7d40757e7b74526709ea0b7c41205c463a",
+    "build/planet-reference-scope/blue-material-comparison.png": "5aa3ad7cd561e331f740bfc5cbe6cdf022ef6ff86b1f266c461146cbb39a6e4c",
+    "build/planet-reference-scope/planet-0.png": "e672f21d61a46c8d23f9a823eddb51c2e2f5fa7c0d90242eeb29ed2abff25ac9",
+    "build/planet-reference-scope/planet-1.png": "2b0ee2cde0407edc068b015d5ea4b72a9ee9de734f0c6f381f5bb3ec9e855593",
+    "build/planet-reference-scope/planet-10.png": "7384ed912a7f484671fe954fe8a3c175c926065140c286bbe3fb75a004bc3f2f",
+    "build/planet-reference-scope/planet-100.png": "455b25e7979ebb1c12c0cac53ea9ab87748848d5c9793dd15b43b0c5eaee2d75",
+    "build/planet-reference-scope/planet-101.png": "a20c4de0419990091f17c3c1ea4be1e662b5010c496e2f0f040b3f5b78f2e5e4",
+    "build/planet-reference-scope/planet-102.png": "0edbb1a78ab2091ab1fbb8997cf8b1b4ebdcc44d4bf59e5dd618c390372912c6",
+    "build/planet-reference-scope/planet-103.png": "3dfde337ef7102dca51f4c90404a4b71f1a72b916f922fae9788a0bab76582bf",
+    "build/planet-reference-scope/planet-104.png": "6442821a72b5dbc95aaa140aea621ef65a3a7b82fa07553719173ed11c61c601",
+    "build/planet-reference-scope/planet-105.png": "a027e010313aba849c5e515ea425668801cac1418a299d7e5cfbb37ca473fca5",
+    "build/planet-reference-scope/planet-106.png": "6a3d96936fbb010ccbf0e1f2f1a9e8904029257dbad1be9b89f65618d3c47c00",
+    "build/planet-reference-scope/planet-107.png": "23f74894b63be1891f9858a2982eefbfc4eeb25775ffee329e73c814a1c95164",
+    "build/planet-reference-scope/planet-108.png": "71845abc49b523f9fbba3a72b286da3375d766fc0d80e56e4084d9c98d3168d5",
+    "build/planet-reference-scope/planet-109.png": "624d3f29862a5383aa31b3b2531580cf4b2f30903a946fa6ae80d9fa13ac2af7",
+    "build/planet-reference-scope/planet-11.png": "03ba5fbc42d5cb37cfecb44ca5ea9115fa8de7fa279539ab045e6aa865fcac9b",
+    "build/planet-reference-scope/planet-110.png": "f11f727f6811e270541a50fbdd3cfbbb15c20f9f0c30e1579a77517ce5d085c7",
+    "build/planet-reference-scope/planet-111.png": "2a18bd260830d57d0cc44264011d838ce8efbb2d053b425a1e9a2b37bd074cf6",
+    "build/planet-reference-scope/planet-112.png": "0844ff4d73d8de907023495622d31078e7b9057927d47ba0d498d487cae6af70",
+    "build/planet-reference-scope/planet-113.png": "9197debc99db54d7d35f12dc3f81410a1806261aa7033f8d915908e62ff23c58",
+    "build/planet-reference-scope/planet-12.png": "ece73197b5e7993ff4ff060448c49f5210b512d83fd3e19567f7e21762b4a0b0",
+    "build/planet-reference-scope/planet-13.png": "d1702c3aa13839f09b8716c8a1c62ac61f4cb981c0c598ece7a2b537cdd0150e",
+    "build/planet-reference-scope/planet-14.png": "74e6f54c1804620c1065fb7d20b4a96f50bb1a1d20259ee6b60f3a3c8802f61b",
+    "build/planet-reference-scope/planet-15.png": "63f63e6d16f118f75c4a017adeecb5787a5a6760f7ac1962373cb8531ae5aed7",
+    "build/planet-reference-scope/planet-16.png": "8d9810f49850cf44556c6133e2450fdcd20298bde5f0e5f4407c2ddb55ef6fcf",
+    "build/planet-reference-scope/planet-17.png": "628aa890500156e221824d659accc00837db51bce26d0b8624e7011c38e8d3be",
+    "build/planet-reference-scope/planet-18.png": "12428a9784dfe6f7798273ef87f310d1d3b38c2841154ca9d51ccf6481b7e66d",
+    "build/planet-reference-scope/planet-19.png": "f8b858e4a0fafd03173a36843008058e4a401ec4ead0c42ea0bc9084c646d4b5",
+    "build/planet-reference-scope/planet-2.png": "fd322acdac2e7bfde246b47a3031d6f4982c50beaaa7f313dd089476c3451605",
+    "build/planet-reference-scope/planet-20.png": "a119e9343b80b7ea5358f986ce8a4e4c73ab9b9c667cdcdd4a5ceb03348665b7",
+    "build/planet-reference-scope/planet-21.png": "edaee8bea5f7fccb9138614fac681f14a15217186f6d8820dfac7a8fa386e0ab",
+    "build/planet-reference-scope/planet-22.png": "3c7b973d2d6c36f629ad5fec0047dc927ac78b1804a09731134e4d8ebf2f875f",
+    "build/planet-reference-scope/planet-23.png": "ac60009986070bec14ece56412605d55c5f6e8a758d30f68ca891fdf3eec3295",
+    "build/planet-reference-scope/planet-24.png": "8b8724be7a732c9fa29fab876070eb007de976cdf7804def713ce4c311ae5b1a",
+    "build/planet-reference-scope/planet-25.png": "bef8c91b96df434ec618cb57021900bb3da998200b0add87b6cff174e663c594",
+    "build/planet-reference-scope/planet-26.png": "2002fad0a3bc0cb662ccdac83a1a47ad1b01773405b4a30ba164b2e9e5ce04c3",
+    "build/planet-reference-scope/planet-27.png": "7543da9b5343a5f021bfdf941251b724b67b8cfe8e426f1ebcef68fdaf2a13fc",
+    "build/planet-reference-scope/planet-28.png": "4097c517e5b213939193c3244e7ea411220279c3ad782dbabaeec9ea006f01b0",
+    "build/planet-reference-scope/planet-29.png": "beaeff5acc382037dcad663c89ff99e8b0fb8b047b445ec15fc2038a4ce1a130",
+    "build/planet-reference-scope/planet-3.png": "ec30cff0652c1c24e77a5dd83b6e77e626104f306be7f897268a942ca2af2216",
+    "build/planet-reference-scope/planet-30.png": "d561e5ffa96c0ec3101d8b9dcaae140ed97fbffcf09c606d6f96dbcf0e53340b",
+    "build/planet-reference-scope/planet-31.png": "6c002c37694fa46532a0b1e1353a71d3d85e0f1d78bda15f8e7e5d27faf08d6a",
+    "build/planet-reference-scope/planet-32.png": "2e708fae9d2f4bd341c2984f7b02363b17f2dddcfe153217ee14963de5b57e84",
+    "build/planet-reference-scope/planet-33.png": "22c93561e52174e46883c17c33f97682bbdf5577c9c8a92b175c6bf5ab6f1b8d",
+    "build/planet-reference-scope/planet-34.png": "62bd4da97683733574734a02ef3de006631d90a644e03438d72086e7c676139d",
+    "build/planet-reference-scope/planet-35.png": "f110f14e3218da1610b794240943d565b47ce48931e3cec3427c8204ddaf7693",
+    "build/planet-reference-scope/planet-36.png": "ea33096f412dd4caf8b193023b3c96314eb075872d264cd2fac3122cce82bd2f",
+    "build/planet-reference-scope/planet-37.png": "f364bf9b933366c84d72661b38bdb4c2f87f11d14311366b8caebc2256d7a669",
+    "build/planet-reference-scope/planet-38.png": "d943e65fc8e5f531c0e90f40f5d8c7bfe3806df285c5151ab78d98554bf13288",
+    "build/planet-reference-scope/planet-39.png": "65c9c4c9826248ab14eee9e39cbf6c08b8256e4c8a34c6e4f66d0b1084bf5223",
+    "build/planet-reference-scope/planet-4.png": "5e7f952d6e91cde777ca9f3ec72d41b0d89bb3e4e184985347c1febcaae1b483",
+    "build/planet-reference-scope/planet-40.png": "beaf8e51444167ba4fd53f310c099a4568fe4e8372655fb4598e7fd276b33492",
+    "build/planet-reference-scope/planet-41.png": "108ce73876d71db9cc5aed0aeb23c6e9f80b29a352afca1e846864b1aa9411ef",
+    "build/planet-reference-scope/planet-42.png": "9ad5a314c0f929f6ac7153a88c34544f6da57ead3f7f2ba56a56ab648b2f6f76",
+    "build/planet-reference-scope/planet-43.png": "0e28e376de8031cd223839cfd1aae63ba8860a7d1386abeffa6c4eb20d311a47",
+    "build/planet-reference-scope/planet-44.png": "57e1775af3010eb83a23f558aaf7dd5ec1284af1b65ad9f4b70a390372d55580",
+    "build/planet-reference-scope/planet-45.png": "7167d78736423ef53bfbae9794d77153d8bddec58204ed430ed55618a01cbd5c",
+    "build/planet-reference-scope/planet-46.png": "d5e0f6e26e1581c06fa6ad4c9c110c69c1b05ebe850ace134f475e47b7d0215b",
+    "build/planet-reference-scope/planet-47.png": "f43650ce60b594e29182f485d73439fd22fac3e9bca831a11f0e5e526fb9c9b7",
+    "build/planet-reference-scope/planet-48.png": "e4eb4399ca0b703f75312b2a4467b009afb505973b8b40522d2e4a1e9a30e58d",
+    "build/planet-reference-scope/planet-49.png": "9a9be9895ec038393e2e9a9f7f6a101c5d328d89580badc5ac819f4e8146cc1b",
+    "build/planet-reference-scope/planet-5.png": "26122f37ffef71b41956e1f2b2e0062f46b1eedef7fba1a8cb4029f927439343",
+    "build/planet-reference-scope/planet-50.png": "d7d8aef20e57dd60f51dabf4476bb515cfe734d24eb93c704887de8ae2bf814c",
+    "build/planet-reference-scope/planet-51.png": "b26c6784c8936f0528baaa8314d433e936ea90c4d557e823f90a5a084396842a",
+    "build/planet-reference-scope/planet-52.png": "c2b11aaa8d43d046091b23c6d8d2bc8df564dfcb58af2b3c352f6a1724fa12ac",
+    "build/planet-reference-scope/planet-53.png": "360e9a51be28bafaf1396a22ef984bc727549b7f1340315cf8b1a58d53dba373",
+    "build/planet-reference-scope/planet-54.png": "e54e7e9e15b8ab63c0ec7bb8527417294795598b7c7931de0e50a3fa237e5740",
+    "build/planet-reference-scope/planet-55.png": "aecb38dbc1d0f4f65c0228517afc99de6cc741382b78231fd2fae8ed2bff5812",
+    "build/planet-reference-scope/planet-56.png": "ea6ba787ef87e76a66a6b09d21057f065ee6c1114b26052620f24006c5a3a2df",
+    "build/planet-reference-scope/planet-57.png": "aac9ce785f105c51c84be8ed0c9efdcb4aa55f8d11d3a41792012e264d0d8885",
+    "build/planet-reference-scope/planet-58.png": "2cc7099a04753fd62ecf835c6749a4dec0d5389b8cb515747e60b6a37b80865e",
+    "build/planet-reference-scope/planet-59.png": "b525912826cfe5653a9a5bd56c3c3ea3698d84314c0862e37c7aac7b04eeda7c",
+    "build/planet-reference-scope/planet-6.png": "cb25eac91c08e84da20b3a608bf9f8888f5b6cd342e850eff10626447bf8ea63",
+    "build/planet-reference-scope/planet-60.png": "ffb644082f286c1fe4aa02c24a8da771395c94d0310c62a055660b1f878e9d3c",
+    "build/planet-reference-scope/planet-61.png": "3474ed7ec2830060f0cba7601cd8dca6b54f11572f22a66c8978e36518ec91c9",
+    "build/planet-reference-scope/planet-62.png": "10e25bf21ab28a2a331d61a404809dc39c372dc4a5f4b913ab3dbe663c2d1dbc",
+    "build/planet-reference-scope/planet-63.png": "f07a0c68d2e25a0a95e6892496649bbc4ddfc40f5b0e9f8ff3d1a1711fa6a608",
+    "build/planet-reference-scope/planet-64.png": "20840b54ff1bf0ba13091f9e2ae92dca676cbdc55bbe3d2123e02d3b09f4e071",
+    "build/planet-reference-scope/planet-65.png": "a3ae809e01681890e0d69d56e2fe159a35a5a19dff0ea639c2a19f71870f948c",
+    "build/planet-reference-scope/planet-66.png": "f702e1956c19d117a37b18f1f150683198a306a17c892702cfc379afaa5032f9",
+    "build/planet-reference-scope/planet-67.png": "20df98858f1786e0eb07a38528d9ec2091feef30f3aa81a3f3cccb5e29c4ee22",
+    "build/planet-reference-scope/planet-68.png": "1437ec339a45f42fa0465857b9062489d2424b706c0f498c5ecf8c13dd5128e1",
+    "build/planet-reference-scope/planet-69.png": "c44599e7ceb4e0366fe52ff74e6b4f9fb4248b0f4ddf533bf895a5a9411282ac",
+    "build/planet-reference-scope/planet-7.png": "9542a090addbe9d1baa51eef3789d08f79b76134b96d3c82e7100698d183291f",
+    "build/planet-reference-scope/planet-70.png": "14dd53820e05aba776f83a9e5b48c7e087db5f0528a9211c81f74de688b9c47f",
+    "build/planet-reference-scope/planet-71.png": "7e71e5f607f89c0fb934953fd84c4d425a7bfdb571bc31a55d28662c3dc6d2c6",
+    "build/planet-reference-scope/planet-72.png": "5efdae3ce4b25ad2147e70653abb85198f1bf0b47f188a2459c83df42eece822",
+    "build/planet-reference-scope/planet-73.png": "7383c11199da5c93fa54a33803c1bfc77ea25049d495f3839e2d9fef403077ec",
+    "build/planet-reference-scope/planet-74.png": "29d0d5b3bd84019ec662d31601921ff0ca3d154c481f2414509efe366bb1b145",
+    "build/planet-reference-scope/planet-75.png": "2286f0450332acb663b6eefbb5c0ab7dff977f8627db8a3c99cc2cf9490968cc",
+    "build/planet-reference-scope/planet-76.png": "17ea7f979663d5e031114c0e50d15a2f04a2c3632ce1a19d8c00b8c39e2f5cd9",
+    "build/planet-reference-scope/planet-77.png": "e46776f9ba0da64212533cfd67e5432593d112ebebc4ce56e4006020a3ea4bbc",
+    "build/planet-reference-scope/planet-78.png": "b3f969b8c98e45421eb81b064607d3ecb5164f817330e5a191aea8ca01ce4753",
+    "build/planet-reference-scope/planet-79.png": "8a1ec42eff4b8c78267a42f8401649b94ed0b4e761acbaa6aae96d2dac5b49eb",
+    "build/planet-reference-scope/planet-8.png": "1c3cef54bc7dcee331cd6dd8265225a54a6794fc0225e209ce53bf67f2a6a379",
+    "build/planet-reference-scope/planet-80.png": "99a484f8f7828db72161ff5e0a5f1fd170309907ad97e794c45b9ac932243ee5",
+    "build/planet-reference-scope/planet-81.png": "e9be642ea9eb386973bbc60f73e59a0d24b61ca54a7694b2fb2225e0bb37f36b",
+    "build/planet-reference-scope/planet-82.png": "99232ba64a9b53a9dbaa946f708558381b4c4245aa0c35779a67bc192190a64a",
+    "build/planet-reference-scope/planet-83.png": "f1aaf38fea8c3e7ad0104dbd91aabc4e0535d7027b55a0e4702cbf62abe12255",
+    "build/planet-reference-scope/planet-84.png": "3e7531125b966eaa31ad32e61f8519d58805a42f57ab3aec9dc7baa3a34ac725",
+    "build/planet-reference-scope/planet-85.png": "bd3a8729dfcd4369e8ab3997f2eab0a3945a8aff72b6d0ffdb2f228eb3fc8528",
+    "build/planet-reference-scope/planet-86.png": "c85409796d2a7ab3c3acbe896448bcf4a91d4a6c1a467007ecea8ccda9d23a5d",
+    "build/planet-reference-scope/planet-87.png": "c3fc579387053d96c816eeb9b918f11de43d314797f477f849a065b85481d5a8",
+    "build/planet-reference-scope/planet-88.png": "0f9feeda59e7eb6ddaee3a28dc94806bc101ed212603074426d6f022e0d0fe7b",
+    "build/planet-reference-scope/planet-89.png": "454ed34ab5691b8a75291c3579467f38b3be180c7c33aaad9cdc370501978b64",
+    "build/planet-reference-scope/planet-9.png": "82be6e93c92b4fa4742c7892df3850b483c350820c8a51fcc3e3af00a10df541",
+    "build/planet-reference-scope/planet-90.png": "188438b560380ad72b2fa84ed1f3961353ef5d048582551e4f7232c4f3e737ab",
+    "build/planet-reference-scope/planet-91.png": "72aaaf04a55e15231fd9648faf46e1037e5bfea1a6b6991bf1884e35a48d0e33",
+    "build/planet-reference-scope/planet-92.png": "f19f06517a2b5f13477fd93e7e00b4ffae98a394799af5e9883795907f44234f",
+    "build/planet-reference-scope/planet-93.png": "60afcc19e30421c23b52200094f6b5d2e358756c39d7cf12d5663cfd14cf5db9",
+    "build/planet-reference-scope/planet-94.png": "8ef691f007669b5e698bf6285dd41fa17614edbc919a99ddfbb04fbcc9b89e1a",
+    "build/planet-reference-scope/planet-95.png": "3de4c0e671b1a1612152a89c6877db57e3ae1d533402587a72fa0db1be0c47cc",
+    "build/planet-reference-scope/planet-96.png": "dca841ef63809d6b7769d52669d995354daf4dd1cb02d80851ee4316ba6c806a",
+    "build/planet-reference-scope/planet-97.png": "778a4b314efb8011039d4b8694e1faad0ac4cabf0f06d825e2ab9b3e0852c18b",
+    "build/planet-reference-scope/planet-98.png": "caff799386051f8ad8f7725aae2483ebcfcdccc07adc97ec54fddbdce392c4d2",
+    "build/planet-reference-scope/planet-99.png": "6746aef19d1140359ea1a0dc6d186d0687def25e8f30e240cab02221399277af",
+    "build/planet-reference-scope/screenshot-studies.png": "fb8293c162d8e86a7e96208b5f4cb35829519a19e52f123141b2fc39605dcd08",
+    "build/planet-reference-scope/tests.log": "5a0c8aeb103a9f45d2ce819fed6b7520a84be95084440fe050d1334f2417a0a3",
+    "build/planet-reference-scope/verification.json": "3f35f260e4936e20bbad92b6d27a8fbd01d018b8207b7a1c5af5a9a074c87a47",
+    "build/planet-reference-scope/views.json": "23648d363f4bbeda2c2e8c649643201fa847dcedd3db46ad5e5934647f48df4b"
+  }
+}

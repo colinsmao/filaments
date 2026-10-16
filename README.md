@@ -18,6 +18,286 @@ evidence freshness and candidate inventory; this does not measure visual quality
 New generations start with every criterion marked unreviewed, including when a
 candidate name is reused.
 
+## Current scope: planets visible in the screenshots
+
+**Planet parts** opens **Screenshot studies**, viewed from below. The default grid
+contains five source-linked examples: pink pale cube, green/slime cube, honey cube,
+yellow tall core and blue tall core. These use three pairings and two body shapes;
+material variations are not counted as new geometry. Each palette now names its
+specific source crop and separates observations from inferred materials/rear cells.
+
+**Generated references** chooses only those five examples. The previous active set
+had five families and fifteen palettes, including invented flat/stepped bodies.
+It now has three families and five source-backed palettes. The Slime white example
+replaces the unsupported Moss white swap; it uses the existing slime asset, not a
+new shape. The long, flat and nineteen-block stepped bodies are historical only.
+Direct comparison with the installed textures corrected the blue core to
+light-blue glazed terracotta (white/cyan pattern), replacing dark blue terracotta.
+Enable **Include earlier studies** to inspect those trials. The body/ring dictionaries
+also default to the four whole components used by the current references.
+
+The user's question about asymmetric atmosphere-like highlights is recorded as a
+question, not an instruction to add a generic effect. The large orange reference
+has uneven orange/red translucent sections around a smaller bright centre; the
+lime example also has a taller layered surround. This differs from the uniformly
+bright enlarged body that was invented previously. Exact hidden layers, depth,
+material assignment and projected versus physical asymmetry remain unresolved.
+No larger reference body or atmosphere effect was added in this scope correction.
+See `parts/reference-observations.json` for the observations and limits. Horizontal
+rings, literal pane geometry and existing lighting remain unchanged.
+
+Open `build/Release/filaments.exe --planet-gallery`, or use **Planet parts**.
+Click a label to inspect that example. The previous broader study report below is
+historical; the current scope review is `parts/reference-scope-review.json`, with
+native evidence under `build/planet-reference-scope/`.
+The three affected native test groups pass; all five active examples were inspected
+below and at night, plus three generated seeds. Manual mouse interaction remains
+untested. User settings, component cells and rendering/lighting code are unchanged.
+
+## Earlier horizontal family experiment
+
+**Planet parts** now opens **Planet studies**, viewed from below. The earlier
+generator had two body shapes (cube and vertical stack). The new dictionary in
+`parts/planet-families.json` contains five distinct body arrangements and five
+horizontal rings, assembled into six complete studies. Three studies follow
+identified reference examples; three are explicitly new design extensions.
+Reference observations and inferred rear cells/materials are recorded separately.
+
+| Body study | Body bounds X x Y x Z (blocks) | Body blocks | Ring and result |
+| --- | --- | --- | --- |
+| Pearl cube | 1 x 1 x 1 | 1 | 8-pane shallow belt; retained reference study |
+| Honey cube | 1 x 1 x 1 | 1 | Same belt, no inward arms; retained reference study |
+| Tall amber core | 1 x 2 x 1 | 2 | 16-pane full-height surround; retained reference study |
+| Broad core | 3 x 1 x 1 | 3 | 12-pane long belt; excluded from generation |
+| Flat core | 3 x 1 x 3 | 5 | 16-pane shallow belt; retained design extension |
+| Stepped core | 3 x 3 x 3 | 19 | 24-pane stepped ring; retained design extension |
+
+The broad bar reads as a rectangular ornament below, so it remains an excluded
+study. The five eligible families contain **four body shapes and fifteen palettes**;
+material permutations are not additional shapes. Each generated planet still has
+two whole parts, body and ring. The tall recipe keeps a lower jack-o'-lantern and
+upper pumpkin unless its palette explicitly replaces both blocks.
+
+All new rings surround the body horizontally, following the user's instruction
+to avoid vertical rings. Individual panes remain upright, one block high and
+.125 blocks thick. The two-row surround is two blocks high. Ring mesh bounds are
+2.125 x 1 x 2.125 (shallow), 2.125 x 2 x 2.125 (tall), 4.125 x 1 x 2.125 (long),
+4.125 x 1 x 4.125 (wide square), and 6.125 x 1 x 6.125 (wide stepped), in blocks.
+The stepped body has three layers of 5/9/5 blocks, with the eight cube corners absent.
+
+Open `build/Release/filaments.exe --planet-gallery`, or use the **Planet parts**
+button. Click any study label to inspect its exact body, ring, palette, emission,
+bounds, reference observations and assumptions. **Generated families** selects an
+inspected pairing and one of its palettes by seed; changing count preserves existing
+indices. It does not independently shuffle arbitrary body/ring pairs. The body and
+ring dictionaries show the study components first; **Include earlier components**
+also exposes the original dictionary. All current rings use a single pane colour.
+
+**Stepped-ring comparison** holds the nineteen-block body, purple panes, viewing
+angle and scale fixed. Its 4.125-block square belt sits close to the body; the
+6.125-block stepped ring extends farther and reads as a separate band below.
+**Planet studies** and generated grids use equal-angle, equal-scale orthographic
+slots. Individual inspection uses perspective and fits each object separately.
+The reference cube is always one block. No smooth sphere or circular mesh is added.
+
+The importer now preserves source-model `cullface` flags. The separate textured
+renderer removes only tagged touching end caps between connected same-material
+panes. Untagged top/bottom faces remain, including the seam between stacked rows;
+different-colour interfaces remain. Re-run `scripts/build_parts_dictionary.py`
+when updating an older local imported library. Existing model faces, textures and
+light lookup are unchanged. Source assets are installed Minecraft 1.19.3, not a
+recovered version of the reference. Lighting has no shadows, occlusion or bloom,
+and animated textures use frame zero. No shared lighting formula or user setting
+was changed.
+
+`parts/family-review.json` records the current criterion-by-criterion assessment;
+`build/planet-families/` holds source crops, native views, controlled comparisons
+and frozen inputs. All previous reviews and evidence remain historical. The native
+test mode `--planet-gallery-test <output-directory>` now produces 114 views,
+including all six studies in four directions, all eighteen palettes at night,
+the controlled ring comparison and three generated seeds. CPU checks cover 12,000
+new family choices plus 12,000 earlier choices. GPU checks include all eighteen
+palettes from front and below with reversed block submission. Manual mouse use
+remains untested; retained studies are not claims of a screenshot match or user
+visual acceptance. All ten focused test groups passed, with the unrelated settings
+test passing on a rerun after one temporary-file save failure. No settings code
+was changed. No canopy placement is implemented.
+
+## Earlier planet component and independent-selection experiment
+
+The following describes the preserved earlier stage. Its seeded combinations,
+upright frames and one-row/tall-body experiment remain available under **Earlier**
+views and comparisons. They are not the new generated family set. The current
+gallery default and current test inventory are described above.
+
+**Planet parts** opens a seeded small-planet gallery backed by the whole-component
+dictionary: **4 bodies and 7 rings**, with six earlier authored examples retained.
+A planet selects one body and optionally one ring.
+Individual blocks are the assets inside those components. The separate **Block
+assets** browser still exposes all 203 imported block/model states.
+
+Open the component gallery directly:
+
+```powershell
+.\build\Release\filaments.exe --planet-gallery
+```
+
+The **Planet parts** button provides the same view. Development initially used
+`build/planet-preview/filaments.exe` while the original viewer was running; the
+normal Release executable was rebuilt once that session had closed. No session
+was stopped or restarted automatically.
+
+The default **Generated small planets** view selects cube or two-block stack bodies,
+optional compatible rings, body material and a single pane colour. Seed 42 initially
+shows nine planets. Set Seed, Next seed, Planets (3-12), Ring chance (default .8) and
+Luminous bodies (default .5); the last two are probabilities, not exact quotas.
+Click a generated label to inspect that exact result, including full materials,
+emission, mesh dimensions and separate component/block counts. Increasing count
+preserves existing indices. Choices are deterministic for a fixed dictionary and
+generator version. Grid labels abbreviate glazed terracotta names.
+
+Other views include **Earlier examples**, **Body dictionary**, **Ring dictionary**,
+**Assemble a planet**, **Earlier glass comparison**, **Single component**,
+**Tall-body ring comparison** and **Pane attachment comparison**. Click an exhibit
+label to inspect it. Assembly offers body/ring dropdowns, None for the ring, and
+independent visibility toggles. Incompatible rings are disabled with an overlap
+label. Front/Side/Below/Oblique/Top, orbit/pan/zoom, neutral background and night
+lighting are available. The reference cube is always 1 x 1 x 1 block.
+
+`parts/planets.json` is the editable component dictionary. Each complete component
+has an ID, body/ring role, description and explicit `[x,y,z,block]` cells. Coordinates
+are integer block centres relative to the mounting block at `[0,0,0]`; Y is vertical.
+The two-block amber body's geometric centre is at Y=.5, while its mounting point
+stays at Y=0. Gallery layout centres exhibits for inspection without changing their
+internal coordinates. The six examples reference component IDs, not copied blocks.
+The component shapes remain authored recipes. `small_planets` in the same file
+lists allowed body/ring pairs, five luminous and seven unlit body materials, and
+nine pane colours. `src/planet_generator.h` makes repeatable choices among these
+whole components; it does not procedurally invent shapes, create spheres or place
+planets in the canopy. These are reference-inspired examples, not recovered builds.
+
+| Component | Actual X x Y x Z mesh bounds (blocks) | Internal blocks |
+| --- | --- | --- |
+| Pearl cube / moss cube | 1 x 1 x 1 | 1 each |
+| Amber stack | 1 x 2 x 1 | 2 |
+| Glass-cased lantern | 3 x 3 x 3 | 27 |
+| Pink pane / mixed pane surround | 2.125 x 1 x 2.125 | 8 each |
+| Two-high pane surround | 2.125 x 2 x 2.125 | 16 |
+| Full-glass surround | 3 x 1 x 3 | 8 |
+| Upright frames (earlier mixed / new single-colour) | 2.125 x 3 x .125 | 8 each |
+| Wide blue/clear surround | 4.125 x 1 x 4.125 | 16 |
+
+The one-row horizontal pane ring is one block tall. Its individual arms remain
+.125 blocks thick; it is not a thin horizontal disc. The upright frame nearly
+disappears edge-on. Small generated planets use one pane colour per ring and no
+full glass. Cube bodies can have the one-row surround or upright frame; stacks can
+have the one-row or two-row surround. The two-row ring stacks two literal rows of
+panes, with no stretching. The height comparison holds body, colour, viewing angle
+and scale fixed while adding only the second row of eight panes.
+
+Different colours interrupt the visible outline while leaving
+the physical bounds unchanged. The comparison view uses the same pearl body and
+ring cells, changing only colour between its first two entries, then changing
+panes to full glass in the third. This comparison uses orthographic projection;
+exhibit centres stay at equal camera depth and share viewing angle, lighting mode
+and scale even while orbiting. The generated grid and height/attachment comparisons
+also use orthographic projection; individual inspection uses normal perspective.
+
+`src/planet_parts.h` rejects cell overlaps and resolves NESW pane connections from
+the actual assembled neighbours and explicit `pane_attach` block metadata. Visible
+cube bounds do not determine attachment: pumpkin, jack-o'-lantern and honey reject
+pane arms. Pane-to-pane corners still connect; removing the body removes inward
+arms where applicable. Changing body material can therefore change pane geometry
+without changing either component's cell arrangement. The attachment comparison
+holds eight white pane cells fixed around sea lantern, jack-o'-lantern and honey.
+There are 20 nonoverlapping body/ring pairs in the full dictionary, plus four bodies with
+no ring. The stack cannot fit the upright frame; the glass-cased body requires the
+wide ring. Compatibility here means no occupied-cell overlap, not aesthetic approval.
+
+Connected full glass of the same material omits shared interior faces. Different
+colours retain their interfaces. Face sorting supports these nonoverlapping block
+recipes; arbitrary intersecting transparent meshes remain unsupported. The large
+clear shell has conspicuous texture borders and reads as a glass box. Colour alone
+does not make a smooth sphere or circular ring. Emission comes from block metadata;
+night lighting still has no shadows, occlusion or bloom. Planet exhibits have
+separate light groups so a nearby luminous example cannot light an unlit example.
+The existing shared lighting formula is unchanged. Animated textures remain frozen
+at frame zero. Transparent faces sort by depth with a deterministic geometry/material
+tie-breaker; reverse block submission gives identical tested pixels.
+
+`parts/seeded-review.json` records this stage against all current P criteria and
+preserves a disposition for all historical D/V canopy criteria. The earlier
+`parts/planet-review.json` and its frozen evidence remain a historical baseline.
+The previous `parts/review.json` is the historical block-library assessment, whose
+original wording used "parts" at the wrong abstraction level. Native renders and
+frozen inputs for this stage are under `build/seeded-planets/`; the earlier stage is
+under `build/planet-components/`. Reproduce 61 hidden views with
+`--planet-gallery-test <output-directory>`. CPU checks cover 12,000 generated
+choices, bounds, valid pairs, collisions, material and connection changes,
+probability endpoints and repeatability. GPU checks cover glass submission order
+and light isolation. Ten focused test groups pass. Manual mouse interaction remains
+untested; screenshots do not establish an accepted reference match.
+
+## Block asset library and gallery
+
+The native viewer now has a **Block assets** button. It opens an independent
+inspection view with local camera/background settings and no star generation.
+You can also start directly in the gallery:
+
+```powershell
+.\build\Release\filaments.exe --parts-gallery
+```
+
+The gallery reads the imported parts dictionary directly. **Overview**, **Pane
+connections**, **Glass colours**, **Core materials**, **Fence connections**, and
+**Single part** views show names and actual X/Y/Z mesh bounds in blocks. Click a
+label to inspect that entry, or select it in Single part. Left drag orbits, middle
+drag pans, the wheel zooms; Front, Side, Below and Oblique buttons set view angles.
+Dark/neutral backgrounds change only the backdrop. Unit-cube comparisons preserve
+physical scale; shapes are never stretched to fit their display slots.
+
+The initial library has **203 entries and 44 native textures**: one reference
+cube, 16 cores, 10 full-glass colours, 160 panes (16 connection states per colour),
+and 16 oak-fence states. A pane's central post is .125 x 1 x .125 blocks; one arm
+extends the corresponding total width to .5625 blocks, while opposed connections
+span 1 block. A four-arm pane has 1 x 1 x 1 bounds but retains its cross-shaped
+geometry and empty quadrants. It is not a solid cube. Y stays vertical.
+
+`parts/catalog.json` is the editable selection and material-property catalog.
+`scripts/build_parts_dictionary.py` resolves actual blockstate/model inheritance,
+connections, face UVs and textures from a **local Minecraft client JAR**. The
+initial import uses the installed **1.19.3.jar**. It does not assert that this is
+the reference screenshot's game version. Reproduce the local import with:
+
+```powershell
+& 'C:/Users/colin/miniconda3/envs/py310/python.exe' scripts/build_parts_dictionary.py --jar "$env:APPDATA/.minecraft/versions/1.19.3/1.19.3.jar"
+```
+
+The generated `build/parts-library/parts.json` contains the reusable mesh dictionary,
+source hashes, connection states, measured bounds and lighting lookup. Its adjacent
+`textures.rgba` preserves original texture pixels and alpha. These game assets stay
+in ignored build output and are not bundled into the repository. Another machine
+must import its own client archive. Unsupported model rotations fail explicitly.
+Regenerate after changing the catalog, then reopen the gallery to load the result.
+
+Material inspection shows textures with the existing fixed block-face shading.
+**Night + block lighting** uses the existing Python light-colour formula, frozen
+into a 16-level lookup during import (sky .35, ambient .03, lift 1), with maximum
+emission minus Manhattan distance between gallery part origins. Cores emit only
+the catalogued levels; glass colour is independent of emission. Opaque faces write
+depth first, and transparent faces are sorted by camera depth with depth writes
+off. Shared faces between adjacent full-glass blocks of the same material are
+omitted. This is not a general solution for intersecting transparent meshes.
+Animated textures use their first frame; ambient occlusion,
+shadows and bloom are absent. Accepted star lighting and FSTAR formats are unchanged.
+
+`parts/requirements.json` records the cumulative parts-specific requirements. This
+block library supplies the component dictionary described above; it does not
+itself define whole bodies or rings and is not a screenshot match.
+Hidden native evidence is generated with `--parts-gallery-test <output-directory>`;
+the parts tests check bounds, texture/alpha fidelity, repeatability, depth/blending,
+local emission and visible pane silhouettes. No visible viewer launch is needed.
+
 ## Stars on the unguided scaffold (experiment)
 
 **Work stopped after the final failed attempt on October 14.** The user required

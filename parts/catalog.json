@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "description": "Reusable Minecraft block parts. Geometry/textures are imported from the user's local client archive; no planets or complete arrangements are stored here.",
+  "core_blocks": [
+    {"block": "shroomlight", "emission": 15, "pane_attach": true},
+    {"block": "sea_lantern", "emission": 15, "pane_attach": true},
+    {"block": "glowstone", "emission": 15, "pane_attach": true},
+    {"block": "ochre_froglight", "state": "axis=y", "emission": 15, "pane_attach": true},
+    {"block": "verdant_froglight", "state": "axis=y", "emission": 15, "pane_attach": true},
+    {"block": "pearlescent_froglight", "state": "axis=y", "emission": 15, "pane_attach": true},
+    {"block": "jack_o_lantern", "state": "facing=north", "emission": 15, "pane_attach": false},
+    {"block": "pumpkin", "emission": 0, "pane_attach": false},
+    {"block": "blue_glazed_terracotta", "state": "facing=north", "emission": 0, "pane_attach": true},
+    {"block": "light_blue_glazed_terracotta", "state": "facing=north", "emission": 0, "pane_attach": true},
+    {"block": "lime_glazed_terracotta", "state": "facing=north", "emission": 0, "pane_attach": true},
+    {"block": "purple_glazed_terracotta", "state": "facing=north", "emission": 0, "pane_attach": true},
+    {"block": "redstone_block", "emission": 0, "pane_attach": true},
+    {"block": "moss_block", "emission": 0, "pane_attach": true},
+    {"block": "honey_block", "emission": 0, "translucent": true, "pane_attach": false},
+    {"block": "slime_block", "emission": 0, "translucent": true, "pane_attach": true}
+  ],
+  "glass_colours": ["clear", "white", "gray", "orange", "red", "yellow", "lime", "blue", "purple", "pink"],
+  "fences": ["oak_fence"],
+  "connections": {"north": 1, "east": 2, "south": 4, "west": 8},
+  "lighting": {"pop_light_ambient": 0.03, "pop_light_sky": 0.35, "pop_light_brightness": 1.0}
+}

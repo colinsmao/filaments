@@ -1,0 +1,58 @@
+{
+  "reference": "scar/2026-10-15_00.38.19.png",
+  "current_scope": "Only screenshot examples; no new large-body hypothesis is implemented in this scope correction.",
+  "active_examples": [
+    {
+      "family": "pearl-belt",
+      "palette": "Pearl pink",
+      "crop": "pink",
+      "observed": "One pale bright cube inside a pink shallow pane surround, with inward connections.",
+      "assumed": "Pearlescent froglight identification is inferred from colour and texture. Eight perimeter cells include symmetric completion of the hidden rear."
+    },
+    {
+      "family": "pearl-belt",
+      "palette": "Slime white",
+      "crop": "slime",
+      "observed": "A green translucent cube inside a light shallow pane surround; inward arms are visible.",
+      "assumed": "Slime block inferred from visible translucency and texture. White versus clear panes and hidden rear cells remain uncertain."
+    },
+    {
+      "family": "detached-belt",
+      "palette": "Honey white",
+      "crop": "honey",
+      "observed": "Amber translucent cube inside a light pane outline, with a gap instead of inward spokes.",
+      "assumed": "Honey identification is supported by texture and the user correction. White versus clear panes and rear cells remain uncertain."
+    },
+    {
+      "family": "tall-surround",
+      "palette": "Amber yellow",
+      "crop": "yellow-stack",
+      "observed": "Tall amber core inside a yellow surround spanning its height.",
+      "assumed": "Two blocks, pumpkin above jack-o-lantern, are inferred. Exact hidden geometry and texture orientation are not recovered."
+    },
+    {
+      "family": "tall-surround",
+      "palette": "Light-blue ceramic",
+      "crop": "blue-stack",
+      "observed": "Tall white/cyan patterned core inside a blue surround spanning its height.",
+      "assumed": "Light-blue glazed terracotta is supported by direct source-texture comparison; two blocks are inferred. Exact terracotta rotations and hidden rear cells are not recovered."
+    }
+  ],
+  "larger_examples": [
+    {
+      "crop": "large-orange",
+      "observed": "Compact bright central region with orange and red translucent sections extending unevenly above and around it. Apparent colour mass and outer outline are asymmetric in this view.",
+      "interpretation": "The surround contributes much of the apparent body. A uniformly luminous nineteen-block core with a shallow uniform belt is not supported by this example.",
+      "unresolved": "Exact core count, rear layers, pane versus full-glass assignment, physical versus projected asymmetry, and classification as atmosphere/shell/ring are not recovered.",
+      "implementation": "Not reconstructed; invented large and long bodies removed from active selection."
+    },
+    {
+      "crop": "lime-box",
+      "observed": "Pale bright centre inside a taller lime/green translucent volume, with darker and brighter sections above and below it.",
+      "interpretation": "Reads as layered translucent volume around a smaller core. No evidence for imposing a generic thick equatorial ring.",
+      "unresolved": "Depth, hidden arrangement and whether apparent differences come from separate colours, overlap or lighting remain uncertain.",
+      "implementation": "Not reconstructed; existing vertical-ring exclusion still applies."
+    }
+  ],
+  "question_answer": "The larger references support studying uneven colour and translucent layers around the bright core. They do not establish a universal rule that every larger body needs a thicker ring. The user question is not treated as authorization for an invented atmosphere shader or new large shape."
+}

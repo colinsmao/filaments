@@ -1,0 +1,957 @@
+{
+  "version": 1,
+  "units": "blocks",
+  "description": "Current scope is screenshot examples only. Each active palette names a source crop and separates observation from inference. Invented bodies and unsupported palettes remain historical.",
+  "reference": "scar/2026-10-15_00.38.19.png",
+  "components": [
+    {
+      "id": "study-cube",
+      "kind": "body",
+      "name": "Study cube",
+      "description": "One cube. Palette is chosen by the complete study; material determines attachment.",
+      "cells": [
+        [
+          0,
+          0,
+          0,
+          "pearlescent_froglight"
+        ]
+      ]
+    },
+    {
+      "id": "study-stack",
+      "kind": "body",
+      "name": "Study tall body",
+      "description": "Two blocks, lower mounting origin. Amber recipe retains a luminous lower block and unlit upper block.",
+      "cells": [
+        [
+          0,
+          0,
+          0,
+          "jack_o_lantern"
+        ],
+        [
+          0,
+          1,
+          0,
+          "pumpkin"
+        ]
+      ]
+    },
+    {
+      "id": "study-bar",
+      "kind": "body",
+      "name": "Broad three-block body",
+      "description": "Design extension: three horizontal blocks centred on the mounting origin.",
+      "cells": [
+        [
+          -1,
+          0,
+          0,
+          "ochre_froglight"
+        ],
+        [
+          0,
+          0,
+          0,
+          "ochre_froglight"
+        ],
+        [
+          1,
+          0,
+          0,
+          "ochre_froglight"
+        ]
+      ]
+    },
+    {
+      "id": "study-disc",
+      "kind": "body",
+      "name": "Flat five-block body",
+      "description": "Design extension: five blocks in an XZ cross, one block high. Corners are empty.",
+      "cells": [
+        [
+          0,
+          0,
+          0,
+          "sea_lantern"
+        ],
+        [
+          -1,
+          0,
+          0,
+          "sea_lantern"
+        ],
+        [
+          1,
+          0,
+          0,
+          "sea_lantern"
+        ],
+        [
+          0,
+          0,
+          -1,
+          "sea_lantern"
+        ],
+        [
+          0,
+          0,
+          1,
+          "sea_lantern"
+        ]
+      ]
+    },
+    {
+      "id": "study-stepped",
+      "kind": "body",
+      "name": "Stepped nineteen-block body",
+      "description": "Design extension: a 3x3x3 body with all eight corners absent. Three layers contain 5,9,5 blocks.",
+      "cells": [
+        [
+          -1,
+          -1,
+          0,
+          "verdant_froglight"
+        ],
+        [
+          -1,
+          0,
+          -1,
+          "verdant_froglight"
+        ],
+        [
+          -1,
+          0,
+          0,
+          "verdant_froglight"
+        ],
+        [
+          -1,
+          0,
+          1,
+          "verdant_froglight"
+        ],
+        [
+          -1,
+          1,
+          0,
+          "verdant_froglight"
+        ],
+        [
+          0,
+          -1,
+          -1,
+          "verdant_froglight"
+        ],
+        [
+          0,
+          -1,
+          0,
+          "verdant_froglight"
+        ],
+        [
+          0,
+          -1,
+          1,
+          "verdant_froglight"
+        ],
+        [
+          0,
+          0,
+          -1,
+          "verdant_froglight"
+        ],
+        [
+          0,
+          0,
+          0,
+          "verdant_froglight"
+        ],
+        [
+          0,
+          0,
+          1,
+          "verdant_froglight"
+        ],
+        [
+          0,
+          1,
+          -1,
+          "verdant_froglight"
+        ],
+        [
+          0,
+          1,
+          0,
+          "verdant_froglight"
+        ],
+        [
+          0,
+          1,
+          1,
+          "verdant_froglight"
+        ],
+        [
+          1,
+          -1,
+          0,
+          "verdant_froglight"
+        ],
+        [
+          1,
+          0,
+          -1,
+          "verdant_froglight"
+        ],
+        [
+          1,
+          0,
+          0,
+          "verdant_froglight"
+        ],
+        [
+          1,
+          0,
+          1,
+          "verdant_froglight"
+        ],
+        [
+          1,
+          1,
+          0,
+          "verdant_froglight"
+        ]
+      ]
+    },
+    {
+      "id": "study-belt",
+      "kind": "ring",
+      "name": "Shallow pane belt",
+      "description": "Eight panes, 2.125x1x2.125 blocks. Core determines the inward connections.",
+      "cells": [
+        [
+          -1,
+          0,
+          -1,
+          "pink_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          0,
+          "pink_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          1,
+          "pink_stained_glass_pane"
+        ],
+        [
+          0,
+          0,
+          -1,
+          "pink_stained_glass_pane"
+        ],
+        [
+          0,
+          0,
+          1,
+          "pink_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          -1,
+          "pink_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          0,
+          "pink_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          1,
+          "pink_stained_glass_pane"
+        ]
+      ]
+    },
+    {
+      "id": "study-tall-belt",
+      "kind": "ring",
+      "name": "Two-row pane surround",
+      "description": "Sixteen panes surround both blocks of the tall core.",
+      "cells": [
+        [
+          -1,
+          0,
+          -1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          0,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          0,
+          0,
+          -1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          0,
+          0,
+          1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          -1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          0,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          -1,
+          1,
+          -1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          -1,
+          1,
+          0,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          -1,
+          1,
+          1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          0,
+          1,
+          -1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          0,
+          1,
+          1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          1,
+          1,
+          -1,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          1,
+          1,
+          0,
+          "yellow_stained_glass_pane"
+        ],
+        [
+          1,
+          1,
+          1,
+          "yellow_stained_glass_pane"
+        ]
+      ]
+    },
+    {
+      "id": "study-wide-belt",
+      "kind": "ring",
+      "name": "Wide shallow belt",
+      "description": "Sixteen panes around a 3x3 opening; 4.125x1x4.125 alone.",
+      "cells": [
+        [
+          -2,
+          0,
+          -2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -2,
+          0,
+          -1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -2,
+          0,
+          0,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -2,
+          0,
+          1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -2,
+          0,
+          2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          -2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          0,
+          0,
+          -2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          0,
+          0,
+          2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          -2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          -2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          -1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          0,
+          "purple_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          2,
+          "purple_stained_glass_pane"
+        ]
+      ]
+    },
+    {
+      "id": "study-long-belt",
+      "kind": "ring",
+      "name": "Long horizontal belt",
+      "description": "Twelve upright panes arranged horizontally around a 3x1 opening; 4.125x1x2.125 blocks.",
+      "cells": [
+        [
+          -2,
+          0,
+          -1,
+          "orange_stained_glass_pane"
+        ],
+        [
+          -2,
+          0,
+          0,
+          "orange_stained_glass_pane"
+        ],
+        [
+          -2,
+          0,
+          1,
+          "orange_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          -1,
+          "orange_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          1,
+          "orange_stained_glass_pane"
+        ],
+        [
+          0,
+          0,
+          -1,
+          "orange_stained_glass_pane"
+        ],
+        [
+          0,
+          0,
+          1,
+          "orange_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          -1,
+          "orange_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          1,
+          "orange_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          -1,
+          "orange_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          0,
+          "orange_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          1,
+          "orange_stained_glass_pane"
+        ]
+      ]
+    },
+    {
+      "id": "study-stepped-belt",
+      "kind": "ring",
+      "name": "Wide stepped horizontal ring",
+      "description": "Face-connected stepped loop with 6.125x1x6.125 mesh bounds. Wider reach around the three-block body; every pane remains upright.",
+      "cells": [
+        [
+          -1,
+          0,
+          -3,
+          "purple_stained_glass_pane"
+        ],
+        [
+          0,
+          0,
+          -3,
+          "purple_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          -3,
+          "purple_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          -2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          -2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          -1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          3,
+          0,
+          -1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          3,
+          0,
+          0,
+          "purple_stained_glass_pane"
+        ],
+        [
+          3,
+          0,
+          1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          2,
+          0,
+          2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          1,
+          0,
+          3,
+          "purple_stained_glass_pane"
+        ],
+        [
+          0,
+          0,
+          3,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          3,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -2,
+          0,
+          2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -2,
+          0,
+          1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -3,
+          0,
+          1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -3,
+          0,
+          0,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -3,
+          0,
+          -1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -2,
+          0,
+          -1,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -2,
+          0,
+          -2,
+          "purple_stained_glass_pane"
+        ],
+        [
+          -1,
+          0,
+          -2,
+          "purple_stained_glass_pane"
+        ]
+      ]
+    }
+  ],
+  "examples": [
+    {
+      "name": "Pearl / shallow belt",
+      "body": "study-cube",
+      "ring": "study-belt"
+    },
+    {
+      "name": "Honey / detached belt",
+      "body": "study-cube",
+      "ring": "study-belt"
+    },
+    {
+      "name": "Tall core / full surround",
+      "body": "study-stack",
+      "ring": "study-tall-belt"
+    },
+    {
+      "name": "Broad core / long belt",
+      "body": "study-bar",
+      "ring": "study-long-belt"
+    },
+    {
+      "name": "Flat core / shallow belt",
+      "body": "study-disc",
+      "ring": "study-wide-belt"
+    },
+    {
+      "name": "Stepped core / wide ring",
+      "body": "study-stepped",
+      "ring": "study-stepped-belt"
+    }
+  ],
+  "families": [
+    {
+      "id": "pearl-belt",
+      "name": "Attached cube / shallow belt",
+      "body": "study-cube",
+      "ring": "study-belt",
+      "reference_crop": "pink",
+      "basis": "Reference study",
+      "observed": "Pink pale cube and green translucent cube both sit inside shallow pane surrounds with inward connections.",
+      "assumed": "Eight perimeter cells inferred; hidden rear cells are completed symmetrically.",
+      "palettes": [
+        {
+          "name": "Pearl pink",
+          "body_material": "pearlescent_froglight",
+          "ring_colour": "pink",
+          "reference_crop": "pink",
+          "observed": "One pale bright cube inside a pink shallow pane surround, with inward connections.",
+          "assumed": "Pearlescent froglight identification is inferred from colour and texture. Eight perimeter cells include symmetric completion of the hidden rear."
+        },
+        {
+          "name": "Sea blue",
+          "body_material": "sea_lantern",
+          "ring_colour": "blue"
+        },
+        {
+          "name": "Slime white",
+          "body_material": "slime_block",
+          "ring_colour": "white",
+          "reference_crop": "slime",
+          "observed": "A green translucent cube inside a light shallow pane surround; inward arms are visible.",
+          "assumed": "Slime block inferred from visible translucency and texture. White versus clear panes and hidden rear cells remain uncertain."
+        }
+      ],
+      "verdict": "Screenshot study: pink pale cube and green/slime cube use an attached shallow surround. Rear layout and exact white/clear pane identification remain inferred.",
+      "selectable": true
+    },
+    {
+      "id": "detached-belt",
+      "name": "Honey / detached belt",
+      "body": "study-cube",
+      "ring": "study-belt",
+      "reference_crop": "honey",
+      "basis": "Reference study",
+      "observed": "Amber translucent cube inside a light pane outline; there is a clear gap rather than spokes to the body.",
+      "assumed": "Honey identification supported by visible texture and user correction. White versus clear pane colour is uncertain.",
+      "palettes": [
+        {
+          "name": "Honey white",
+          "body_material": "honey_block",
+          "ring_colour": "white",
+          "reference_crop": "honey",
+          "observed": "Amber translucent cube inside a light pane outline, with a gap instead of inward spokes.",
+          "assumed": "Honey identification is supported by texture and the user correction. White versus clear panes and rear cells remain uncertain."
+        },
+        {
+          "name": "Pumpkin gray",
+          "body_material": "pumpkin",
+          "ring_colour": "gray"
+        },
+        {
+          "name": "Jack orange",
+          "body_material": "jack_o_lantern",
+          "ring_colour": "orange"
+        }
+      ],
+      "verdict": "Retained reference study: detached belt preserves the visible honey gap. White versus clear panes and the rear layout remain uncertain.",
+      "selectable": true
+    },
+    {
+      "id": "tall-surround",
+      "name": "Tall core / full surround",
+      "body": "study-stack",
+      "ring": "study-tall-belt",
+      "reference_crop": "yellow-stack",
+      "basis": "Reference study",
+      "observed": "Tall amber core within a yellow surround spanning its height. The blue example shows an analogous tall core and surround.",
+      "assumed": "Two core blocks, pumpkin above jack-o-lantern, are an interpretation of the textures and proportions. Hidden rear perimeter is completed symmetrically.",
+      "palettes": [
+        {
+          "name": "Amber yellow",
+          "body_material": null,
+          "ring_colour": "yellow",
+          "reference_crop": "yellow-stack",
+          "observed": "Tall amber core inside a yellow surround spanning its height.",
+          "assumed": "Two blocks, pumpkin above jack-o-lantern, are inferred. Exact hidden geometry and texture orientation are not recovered."
+        },
+        {
+          "name": "Light-blue ceramic",
+          "body_material": "light_blue_glazed_terracotta",
+          "ring_colour": "blue",
+          "reference_crop": "blue-stack",
+          "observed": "Tall white/cyan patterned core inside a blue surround spanning its height.",
+          "assumed": "Light-blue glazed terracotta is supported by direct source-texture comparison; two blocks are inferred. Exact terracotta rotations and hidden rear cells are not recovered."
+        },
+        {
+          "name": "Mint lime",
+          "body_material": "verdant_froglight",
+          "ring_colour": "lime"
+        }
+      ],
+      "verdict": "Retained reference study: full-height surround follows the tall reference arrangement. It reads as an enclosure with a visible middle seam, not a spherical body; exact core recipe is inferred.",
+      "selectable": true
+    },
+    {
+      "id": "broad-core",
+      "name": "Broad core / long belt",
+      "body": "study-bar",
+      "ring": "study-long-belt",
+      "reference_crop": "orange-cross",
+      "basis": "Design extension",
+      "observed": "Reference has a bright centre and orange panes protruding above, below and to the sides.",
+      "assumed": "Three-block horizontal body is a deliberate extension; the reference does not establish that count. Twelve-pane horizontal belt follows the body footprint. No upright ring.",
+      "palettes": [
+        {
+          "name": "Warm orange",
+          "body_material": "ochre_froglight",
+          "ring_colour": "orange"
+        },
+        {
+          "name": "Sea blue",
+          "body_material": "sea_lantern",
+          "ring_colour": "blue"
+        },
+        {
+          "name": "Ceramic white",
+          "body_material": "light_blue_glazed_terracotta",
+          "ring_colour": "white"
+        }
+      ],
+      "verdict": "Historical extension only: excluded from the current screenshot-only scope. This body/ring geometry is not established by a reference image.",
+      "selectable": false
+    },
+    {
+      "id": "flat-core",
+      "name": "Flat core / shallow belt",
+      "body": "study-disc",
+      "ring": "study-wide-belt",
+      "reference_crop": "orange-cross",
+      "basis": "Design extension",
+      "observed": "Uses the reference language of a compact body inside a horizontal pane belt.",
+      "assumed": "Five-cell flat body and sixteen-pane belt are new geometry, not recovered from the screenshot. This replaces the initial upright frame at user direction.",
+      "palettes": [
+        {
+          "name": "Sea blue",
+          "body_material": "sea_lantern",
+          "ring_colour": "blue"
+        },
+        {
+          "name": "Pearl pink",
+          "body_material": "pearlescent_froglight",
+          "ring_colour": "pink"
+        },
+        {
+          "name": "Moss lime",
+          "body_material": "moss_block",
+          "ring_colour": "lime"
+        }
+      ],
+      "verdict": "Historical extension only: excluded from the current screenshot-only scope. This body/ring geometry is not established by a reference image.",
+      "selectable": false
+    },
+    {
+      "id": "stepped-core",
+      "name": "Stepped core / wide ring",
+      "body": "study-stepped",
+      "ring": "study-stepped-belt",
+      "reference_crop": "large-orange",
+      "basis": "Design extension",
+      "observed": "Larger reference ornament has a broader centre and a more extensive pane structure; its hidden core shape is uncertain.",
+      "assumed": "Nineteen-block body is a deliberate intermediate-size shape trial. Its 5/9/5 layers and shallow belt are not a screenshot reconstruction. Wider stepped horizontal ring is an intentional shape extension, not reference reconstruction.",
+      "palettes": [
+        {
+          "name": "Mint purple",
+          "body_material": "verdant_froglight",
+          "ring_colour": "purple"
+        },
+        {
+          "name": "Warm orange",
+          "body_material": "ochre_froglight",
+          "ring_colour": "orange"
+        },
+        {
+          "name": "Moss gray",
+          "body_material": "moss_block",
+          "ring_colour": "gray"
+        }
+      ],
+      "verdict": "Historical extension only: excluded from the current screenshot-only scope. This body/ring geometry is not established by a reference image.",
+      "selectable": false
+    }
+  ],
+  "excluded_first_pass": [
+    {
+      "id": "upright-frame",
+      "reason": "User excludes vertical rings; upright and crossed-plane silhouettes are unsuitable from below."
+    },
+    {
+      "id": "crossed-frames",
+      "reason": "User excludes vertical rings; upright and crossed-plane silhouettes are unsuitable from below."
+    }
+  ]
+}

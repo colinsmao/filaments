@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "units": "blocks",
+  "description": "Authored whole-component recipes. A planet has one body and zero or one ring. Cells are block centres relative to the shared mounting origin [0,0,0]; Y stays vertical. No scaling or arbitrary pane rotation.",
+  "components": [
+    {
+      "id": "body-pearl", "kind": "body", "name": "Pearl cube",
+      "description": "One luminous cube, 1 x 1 x 1 blocks. Smallest body.",
+      "cells": [[0,0,0,"pearlescent_froglight"]]
+    },
+    {
+      "id": "body-moss", "kind": "body", "name": "Moss cube",
+      "description": "One unlit moss cube. Green material does not imply emission.",
+      "cells": [[0,0,0,"moss_block"]]
+    },
+    {
+      "id": "body-stack", "kind": "body", "name": "Amber stack",
+      "description": "Two-block body: jack o lantern below pumpkin. Mounting origin is the lower block; geometric centre is half a block higher.",
+      "cells": [[0,0,0,"jack_o_lantern"],[0,1,0,"pumpkin"]]
+    },
+    {
+      "id": "body-cased", "kind": "body", "name": "Glass-cased lantern",
+      "description": "Sea lantern inside a complete 3 x 3 x 3 glass shell. Clear upper/lower layers and blue side panels belong to the body. Fits the wide ring only.",
+      "cells": [
+        [0,0,0,"sea_lantern"],
+        [-1,-1,-1,"glass"],[0,-1,-1,"glass"],[1,-1,-1,"glass"],
+        [-1,-1,0,"glass"],[0,-1,0,"glass"],[1,-1,0,"glass"],
+        [-1,-1,1,"glass"],[0,-1,1,"glass"],[1,-1,1,"glass"],
+        [-1,0,-1,"blue_stained_glass"],[0,0,-1,"blue_stained_glass"],[1,0,-1,"glass"],
+        [-1,0,0,"blue_stained_glass"],[1,0,0,"blue_stained_glass"],
+        [-1,0,1,"glass"],[0,0,1,"blue_stained_glass"],[1,0,1,"blue_stained_glass"],
+        [-1,1,-1,"glass"],[0,1,-1,"glass"],[1,1,-1,"glass"],
+        [-1,1,0,"glass"],[0,1,0,"glass"],[1,1,0,"glass"],
+        [-1,1,1,"glass"],[0,1,1,"glass"],[1,1,1,"glass"]
+      ]
+    },
+    {
+      "id": "ring-pink", "kind": "ring", "name": "Pink pane surround",
+      "description": "Eight upright panes around a one-cell hole. Horizontal XZ arrangement, but still one block tall. Actual outer span is 2.125 x 1 x 2.125 blocks.",
+      "cells": [
+        [-1,0,-1,"pink_stained_glass_pane"],[0,0,-1,"pink_stained_glass_pane"],[1,0,-1,"pink_stained_glass_pane"],
+        [-1,0,0,"pink_stained_glass_pane"],[1,0,0,"pink_stained_glass_pane"],
+        [-1,0,1,"pink_stained_glass_pane"],[0,0,1,"pink_stained_glass_pane"],[1,0,1,"pink_stained_glass_pane"]
+      ]
+    },
+    {
+      "id": "ring-broken", "kind": "ring", "name": "Pink / gray / clear surround",
+      "description": "Same cells as the pink surround. Gray and clear sections interrupt the perceived pink outline; physical bounds are identical.",
+      "cells": [
+        [-1,0,-1,"pink_stained_glass_pane"],[0,0,-1,"pink_stained_glass_pane"],[1,0,-1,"glass_pane"],
+        [-1,0,0,"pink_stained_glass_pane"],[1,0,0,"gray_stained_glass_pane"],
+        [-1,0,1,"gray_stained_glass_pane"],[0,0,1,"glass_pane"],[1,0,1,"gray_stained_glass_pane"]
+      ]
+    },
+    {
+      "id": "ring-glass", "kind": "ring", "name": "Full-glass surround",
+      "description": "Same eight cells and colour pattern as the mixed pane surround, using full glass blocks. Outer span increases to 3 x 1 x 3 blocks; the volume is visibly chunkier.",
+      "cells": [
+        [-1,0,-1,"pink_stained_glass"],[0,0,-1,"pink_stained_glass"],[1,0,-1,"glass"],
+        [-1,0,0,"pink_stained_glass"],[1,0,0,"gray_stained_glass"],
+        [-1,0,1,"gray_stained_glass"],[0,0,1,"glass"],[1,0,1,"gray_stained_glass"]
+      ]
+    },
+    {
+      "id": "ring-tall", "kind": "ring", "name": "Lime upright frame",
+      "description": "Eight upright panes arranged in the XY plane. Three blocks tall and only 0.125 blocks deep alone. A single-cube body fits; a two-block stack overlaps the upper frame.",
+      "cells": [
+        [-1,-1,0,"gray_stained_glass_pane"],[0,-1,0,"lime_stained_glass_pane"],[1,-1,0,"gray_stained_glass_pane"],
+        [-1,0,0,"lime_stained_glass_pane"],[1,0,0,"lime_stained_glass_pane"],
+        [-1,1,0,"lime_stained_glass_pane"],[0,1,0,"lime_stained_glass_pane"],[1,1,0,"gray_stained_glass_pane"]
+      ]
+    },
+    {
+      "id": "ring-double", "kind": "ring", "name": "Two-high pane surround",
+      "description": "Sixteen single-colour panes in two rows at Y=0 and Y=1. Surrounds both blocks of a stack, with literal 2.125 x 2 x 2.125 mesh bounds. No pane is stretched.",
+      "cells": [
+        [-1,0,-1,"yellow_stained_glass_pane"],[0,0,-1,"yellow_stained_glass_pane"],[1,0,-1,"yellow_stained_glass_pane"],
+        [-1,0,0,"yellow_stained_glass_pane"],[1,0,0,"yellow_stained_glass_pane"],
+        [-1,0,1,"yellow_stained_glass_pane"],[0,0,1,"yellow_stained_glass_pane"],[1,0,1,"yellow_stained_glass_pane"],
+        [-1,1,-1,"yellow_stained_glass_pane"],[0,1,-1,"yellow_stained_glass_pane"],[1,1,-1,"yellow_stained_glass_pane"],
+        [-1,1,0,"yellow_stained_glass_pane"],[1,1,0,"yellow_stained_glass_pane"],
+        [-1,1,1,"yellow_stained_glass_pane"],[0,1,1,"yellow_stained_glass_pane"],[1,1,1,"yellow_stained_glass_pane"]
+      ]
+    },
+    {
+      "id": "ring-upright", "kind": "ring", "name": "Single-colour upright frame",
+      "description": "Eight lime panes in the XY plane, all upright. The whole frame is 2.125 x 3 x 0.125 blocks. A cube fits its centre; a stack overlaps the upper edge.",
+      "cells": [
+        [-1,-1,0,"lime_stained_glass_pane"],[0,-1,0,"lime_stained_glass_pane"],[1,-1,0,"lime_stained_glass_pane"],
+        [-1,0,0,"lime_stained_glass_pane"],[1,0,0,"lime_stained_glass_pane"],
+        [-1,1,0,"lime_stained_glass_pane"],[0,1,0,"lime_stained_glass_pane"],[1,1,0,"lime_stained_glass_pane"]
+      ]
+    },
+    {
+      "id": "ring-wide", "kind": "ring", "name": "Wide blue / clear surround",
+      "description": "Sixteen upright panes around a 3 x 3 cell opening. Fits the glass-cased body. Mesh span 4.125 x 1 x 4.125 blocks.",
+      "cells": [
+        [-2,0,-2,"blue_stained_glass_pane"],[-1,0,-2,"blue_stained_glass_pane"],[0,0,-2,"blue_stained_glass_pane"],[1,0,-2,"glass_pane"],[2,0,-2,"glass_pane"],
+        [-2,0,-1,"blue_stained_glass_pane"],[2,0,-1,"gray_stained_glass_pane"],
+        [-2,0,0,"blue_stained_glass_pane"],[2,0,0,"gray_stained_glass_pane"],
+        [-2,0,1,"glass_pane"],[2,0,1,"gray_stained_glass_pane"],
+        [-2,0,2,"glass_pane"],[-1,0,2,"glass_pane"],[0,0,2,"blue_stained_glass_pane"],[1,0,2,"blue_stained_glass_pane"],[2,0,2,"blue_stained_glass_pane"]
+      ]
+    }
+  ],
+  "small_planets": {
+    "version": 1,
+    "bodies": [
+      {"component":"body-pearl", "label":"Cube", "rings":["ring-pink","ring-upright"]},
+      {"component":"body-stack", "label":"Stack", "rings":["ring-pink","ring-double"]}
+    ],
+    "rings": {"ring-pink":"1-high surround", "ring-upright":"Upright frame", "ring-double":"2-high surround"},
+    "luminous_materials": ["sea_lantern","shroomlight","ochre_froglight","verdant_froglight","pearlescent_froglight"],
+    "unlit_materials": ["moss_block","redstone_block","blue_glazed_terracotta","light_blue_glazed_terracotta","lime_glazed_terracotta","purple_glazed_terracotta","pumpkin"],
+    "ring_colours": ["white","gray","orange","red","yellow","lime","blue","purple","pink"]
+  },
+  "examples": [
+    {"name":"Pearl / pink panes", "body":"body-pearl", "ring":"ring-pink"},
+    {"name":"Pearl / mixed panes", "body":"body-pearl", "ring":"ring-broken"},
+    {"name":"Pearl / full glass", "body":"body-pearl", "ring":"ring-glass"},
+    {"name":"Amber / mixed panes", "body":"body-stack", "ring":"ring-broken"},
+    {"name":"Moss / lime frame", "body":"body-moss", "ring":"ring-tall"},
+    {"name":"Cased lantern / wide panes", "body":"body-cased", "ring":"ring-wide"}
+  ]
+}

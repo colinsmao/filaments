@@ -1,0 +1,127 @@
+{
+  "scope": "Current planet work is restricted to examples visible in the screenshots. Whole components and per-example source evidence remain separate from historical extensions. Historical canopy matching remains failed and stopped.",
+  "reference": "scar/2026-10-15_00.38.19.png",
+  "requirements": [
+    {
+      "id": "P01",
+      "requirement": "Build a reusable dictionary of parts and show the exact dictionary geometry in the gallery.",
+      "clarification": "User clarified that a part means a complete body or ring, potentially containing many blocks. The old 203-entry library is a block asset library, not the intended component dictionary."
+    },
+    {
+      "id": "P02",
+      "requirement": "Account for actual assembled geometry and silhouette; pane height, arm width and thickness must remain literal block dimensions."
+    },
+    {
+      "id": "P03",
+      "requirement": "Keep all pane connection states inspectable and label actual mesh bounds, not only occupied cells."
+    },
+    {
+      "id": "P04",
+      "requirement": "Include full glass blocks alongside panes, with original texture alpha and correct opaque/transparent ordering."
+    },
+    {
+      "id": "P05",
+      "requirement": "Keep geometry, texture/colour, transparency and emission distinct; colour alone does not imply emission."
+    },
+    {
+      "id": "P06",
+      "requirement": "Provide different glass colours for breaking up the eventual perceived silhouette; evaluate their arrangement during planet assembly.",
+      "clarification": "User subsequently specified that small planets need no mixed panes and full glass is mainly relevant to larger planets. Keep earlier comparisons as history; small generated rings use one pane colour."
+    },
+    {
+      "id": "P07",
+      "requirement": "Show native textures, luminous and non-luminous cores at actual block scale alongside a reference cube."
+    },
+    {
+      "id": "P08",
+      "requirement": "Allow orbit/zoom, front/side/below inspection, dark/neutral background comparison, and individual part inspection."
+    },
+    {
+      "id": "P09",
+      "requirement": "Preserve existing generators, star data formats, accepted lighting formula and user settings. Keep gallery preferences separate."
+    },
+    {
+      "id": "P10",
+      "requirement": "Report the asset version, executed verification and remaining appearance limitations; do not claim a planet or canopy match from a parts gallery."
+    },
+    {
+      "id": "P11",
+      "requirement": "A planet selects one whole body and optionally one whole ring. Preserve the component identity and original cell arrangement; distinguish component count from block count."
+    },
+    {
+      "id": "P12",
+      "requirement": "Reject body/ring cell overlaps instead of resizing or deleting blocks. Resolve pane connections from assembled neighbours, with the same upright geometry and a shared mounting origin."
+    },
+    {
+      "id": "P13",
+      "requirement": "Inspect authored examples before procedural generation. Compare colours on identical cells and compare panes/full glass with the same palette, camera angle, depth and scale. Describe colour changes as changes to perceived outline, not physical bounds."
+    },
+    {
+      "id": "P14",
+      "requirement": "Inspect connected full glass as well as isolated assets. Remove same-material internal full-glass faces; preserve interfaces between different glass colours. Record limitations of transparent face sorting and source lighting."
+    },
+    {
+      "id": "P15",
+      "requirement": "Small generated planets use single-colour pane rings; keep full glass and mixed-pane examples available separately.",
+      "source": "User small-planet material correction"
+    },
+    {
+      "id": "P16",
+      "requirement": "Provide a two-block-high surround as a whole ring component. Keep the one-high option for tall bodies and show their actual shapes at equal scale.",
+      "source": "Accepted next step following the user's tall-body/ring-height question",
+      "clarification": "The earlier one-high/tall-body comparison remains historical. New tall family pairs the two-high body with its full-height surround."
+    },
+    {
+      "id": "P17",
+      "requirement": "Choose complete compatible components and materials reproducibly by seed. Keep choice streams independent and existing item indices stable when count changes; probabilities are not quotas.",
+      "source": "Authorized procedural assembly plan and explicit implementation contract",
+      "clarification": "Earlier independent choice controls remain historical. New selection independently hashes family and palette; the family fixes the body/ring pairing. Materials and pane colours stay coupled within an inspected palette."
+    },
+    {
+      "id": "P18",
+      "requirement": "Label generated choices and permit inspecting each exact result, including material, emission, actual dimensions, component count and block count.",
+      "source": "Authorized labelled gallery plan"
+    },
+    {
+      "id": "P19",
+      "requirement": "Pane connections depend on block attachment rules, not rendered cube bounds. Honey, jack-o'-lantern and pumpkin do not accept inward pane arms; pane-to-pane connections remain intact.",
+      "source": "User attachment correction; installed client connection exceptions and honey support shape"
+    },
+    {
+      "id": "P20",
+      "requirement": "Inspection lighting must not let neighbouring gallery planets alter one another's apparent emission. Keep the existing light formula and document renderer limitations.",
+      "source": "Assistant inspection finding while adding seeded luminous/unlit examples"
+    },
+    {
+      "id": "P21",
+      "requirement": "Avoid vertical rings in new planet studies and generation. Prioritize appearance from below; individual pane blocks remain upright. Preserve earlier vertical experiments as history.",
+      "source": "Explicit user correction: avoid vertical rings, they dont look good from below"
+    },
+    {
+      "id": "P22",
+      "requirement": "Base reference studies on identified screenshot examples. Separate visible observations from inferred hidden geometry/materials, and label new designs as extensions rather than reconstructions.",
+      "source": "User questions exposed unsupported reference claims; authorized continuation of reference-led studies"
+    },
+    {
+      "id": "P23",
+      "requirement": "Expand actual body and ring arrangements, not merely material permutations. Report distinct shape counts separately from family and palette counts.",
+      "source": "User identified only two current body options; authorized further shape studies",
+      "clarification": "Current screenshot-only scope supersedes inventing extra shapes to increase variety. Shape count is descriptive, not a target or quota."
+    },
+    {
+      "id": "P24",
+      "requirement": "Select complete inspected body/ring pairings and their authored palettes in the new generator. Cell overlap is only a geometric check, not evidence that a combination looks like a planet. Keep excluded studies inspectable.",
+      "source": "Authorized complete-study workflow following the premature independent-combination experiment"
+    },
+    {
+      "id": "P25",
+      "requirement": "Respect source-model pane end-face culling for connected same-material panes. Retain untagged faces and differing-material interfaces; distinguish this rendering correction from geometry or lighting changes.",
+      "source": "Native inspection found duplicate touching pane end caps"
+    },
+    {
+      "id": "P26",
+      "requirement": "Focus current planet studies and generation on planets seen in the screenshots. Hide invented body/ring extensions and unsupported palette swaps from the default active set; retain them as labelled history.",
+      "source": "User: just focus on the planets seen in the screenshots for now"
+    }
+  ]
+}

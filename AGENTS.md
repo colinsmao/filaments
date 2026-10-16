@@ -3,6 +3,12 @@
 Read this file and `README.md` before changing the project. This is a handoff of
 the current implementation, not a commitment to continue any particular experiment.
 
+## Core instruction: answer questions as questions
+
+The user explicitly requires questions to be answered, not treated as instructions
+to change the plan or implementation. Explain what is actually being done or
+proposed before offering alternatives.
+
 ## Core instruction: always explain what you did
 
 The user explicitly requires this in every substantive work report, not only when
@@ -32,6 +38,116 @@ requirement when adding new findings. Each candidate needs a verdict and evidenc
 for every listed requirement; conversation memory and passing tests are insufficient.
 
 ## Purpose and user preferences
+
+- Screenshot-only planet scope (2026-10-15): user asked about long bodies and
+  asymmetric/atmosphere-like highlights, then explicitly limited work to planets
+  seen in screenshots. Do not invent shapes or generic effects from that question.
+  Active set is pink, slime, honey, yellow-stack and blue-stack:3families/5palettes,
+  2body shapes,4whole components. Source crop/observations/assumptions are per palette.
+  Long, flat and19-block stepped bodies plus unsupported colour swaps are historical,
+  hidden by default and excluded from Generated references. Existing Slime white
+  replaces unsupported Moss white. Default Screenshot studies; Include earlier
+  studies exposes history. Larger orange/lime examples remain unreconstructed:
+  translucent uneven layers around compact bright cores are observed; exact hidden
+  layout/materials and geometric versus projected asymmetry remain unresolved.
+  No new body/ring geometry, rendering, lighting or user-setting changes. P26 and
+  parts/reference-observations.json record scope/evidence; current review is
+  parts/reference-scope-review.json; evidence build/planet-reference-scope/.
+  Prior family-review.json/build/planet-families/ remain frozen historical evidence.
+  Direct source-texture comparison also corrected the blue-stack body from blue
+  to light_blue_glazed_terracotta; white/cyan pattern matches the visible texture.
+  Three affected native test groups pass (components/gallery/materials);114 hidden
+  views rendered, active overview/night palettes and3generated seeds inspected.
+  No visible launch or commit; manual mouse interaction remains untested.
+
+- Horizontal planet families (2026-10-15): user authorized continuing beyond the
+  two-body prototype, then explicitly said avoid vertical rings because they look
+  poor from below. New studies/generation must use horizontal rings; old vertical
+  examples remain historical. `parts/planet-families.json` adds five body cell
+  arrangements (1,2,3,5,19 blocks) and five whole rings. Six complete studies have
+  explicit observations, assumptions, palettes and verdicts: pearl belt, detached
+  honey belt and tall full surround follow source crops; broad, flat and stepped
+  bodies are extensions. Broad three-block bar is excluded as rectangular below.
+  Five eligible families/15 palettes contain FOUR distinct generated body shapes,
+  not five. New `planet_families.h` selects a family then an authored palette;
+  pairing stays intact. Old independent generator/dictionary remain unchanged.
+  New default gallery is Planet studies viewed below; exact study/palette inspector,
+  paginated body/ring dictionaries and Generated families are available. Stepped
+  body uses 5/9/5 layers; controlled comparison changes only ring geometry from
+  4.125-block square to 6.125-block stepped horizontal loop, with24 panes. Wider
+  reach separates the ring below; block steps remain. Tall surround remains boxy
+  with a middle seam, and reference hidden cells/materials are inferred.
+  Importer now retains source cullface metadata. Textured renderer omits tagged
+  touching end caps for connected same-material panes, not untagged top/bottom
+  faces. Reimport old parts libraries. No texture/geometry/light-lookup edits.
+  Requirements P01-P25 and new review parts/family-review.json; evidence and frozen
+  inputs build/planet-families/. First vertical study pass retained as excluded;
+  older square-ring trial retained. Native114-view run covers four directions,
+  18 night palettes, controlled ring comparison and3generated seeds; CPU checks
+  12000new/12000old choices, GPU all18palettes front/below/order reversal.
+  Ten focused groups pass; settings had one temporary-file migration save failure
+  then passed alone without code changes. Cause not established; logs retained.
+  Manual mouse use remains untested; no accepted screenshot match or canopy
+  placement. No live settings/accepted-lighting edits, visible launch, stop or
+  commit. Historical canopy matching remains failed and stopped.
+
+- Seeded small planets (2026-10-15): user authorized the next generation stage.
+  Whole dictionary now4 bodies/7 rings; six earlier examples retained. Added
+  single-colour upright frame and16-pane two-high surround. Small generator uses
+  cube/stack bodies, three allowed pane-ring shapes, five luminous/seven unlit
+  body materials and nine pane colours. No full glass or mixed panes in small
+  generation. Seed42/count9/ring chance.8/luminous chance.5 are gallery defaults;
+  probabilities are not quotas. Indexed choices preserve count prefixes and
+  independent component/material/colour decisions. Geometry is selected from
+  authored components, not generated spheres or canopy placement.
+  User correction: honey and jack-o'-lanterns do not attach to panes. Added explicit
+  pane_attach metadata rather than cube-bounds inference; pumpkin also rejects
+  attachment, matching installed1.19.3 connection exceptions. Material changes can
+  change inward arms without changing component cells. Top-view controlled
+  comparison demonstrates sea-lantern arms versus jack/honey gaps. Each gallery
+  planet now has separate light group; shared formula unchanged. Equal-depth
+  transparent faces get deterministic tie-breaking (reverse submission now exact).
+  Default gallery is generated grid; click for exact-result inspection. Height
+  and attachment comparisons retain equal scale/angle.10 focused groups pass,
+  including12000 generated choices and attachment tests;61 hidden views rendered.
+  Grid labels shortened after12-item overlap was found. Manual mouse use untested.
+  Requirements/review: parts/requirements.json, parts/seeded-review.json; frozen
+  evidence build/seeded-planets/. Earlier review/evidence kept unchanged. No live
+  settings/accepted-lighting edits, visible launch, process stop or commit.
+  Historical canopy matching remains failed and stopped.
+
+- Planet components (2026-10-15): user clarified that a part is a whole body or
+  ring, then authorized building the initial examples. `parts/planets.json` has
+  4 bodies/5 rings and6 examples; `planet_parts.h` assembles one body + optional
+  ring, rejects cell overlap and derives pane connections from actual neighbours.
+  Pane ring2.125x1x2.125 versus full glass3x1x3 blocks at identical8 cells;
+  upright frame2.125x3x.125. All panes stay upright. Mixed colours change perceived
+  outline, not bounds.15 valid body/ring pairs plus4 bodies alone. New Planet parts
+  gallery includes component dictionaries, assembly, equal-depth colour/volume
+  comparison, all-angle inspection and1-block reference. Old gallery is relabeled
+  Block assets. Same-colour full-glass interior faces are culled in the separate
+  textured renderer. No procedural generation, sphere meshes or canopy placement.
+  Original viewer was running; built separately at build/planet-preview/filaments.exe
+  (`--planet-gallery`), without stopping/restarting it. After the session closed,
+  also rebuilt build/Release/filaments.exe.10 focused native/asset test groups pass;
+  final gallery/smoke rechecks pass;36 hidden views inspected. Manual UI clicks
+  remain untested. Settings/controls/lighting hashes unchanged. Review and evidence:
+  parts/planet-review.json and build/planet-components/. Preserve prior experiments,
+  user settings and accepted lighting. Historical canopy work remains stopped.
+
+- Parts dictionary/gallery (2026-10-15): user authorized beginning the parts
+  dictionary and native gallery after planning small planets. `parts/catalog.json`
+  selects actual local Minecraft models/textures; importer writes ignored
+  `build/parts-library/` (initial source installed1.19.3.jar, not a recovered
+  reference version).203 entries/44 textures, including all16 pane connection
+  states per10 colours. Actual pane bounds: post .125x1x.125 blocks, one arm gives
+  .5625 span, opposed arms1. Full glass,16 core materials and oak fences included.
+  C++ data loader and separate textured gallery renderer leave star formats and
+  accepted lighting untouched. Gallery button or `--parts-gallery`; no plot/control
+  autosave in gallery. Tests and evidence under build/parts-gallery/. Read
+  `parts/requirements.json` for this scope. Planet assembly, colour arrangement to
+  break silhouettes and complete-planet comparison remain later work. Historical
+  canopy work remains stopped. Do not treat a parts gallery as a planet match.
 
 - Stopped after failed final attempt (2026-10-14): user required delivery of the
   screenshot match or an explicit admission of inability and stopping. Final

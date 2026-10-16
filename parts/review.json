@@ -1,0 +1,215 @@
+{
+  "date": "2026-10-15",
+  "candidate": "parts-gallery-v1",
+  "scope": "Parts dictionary and gallery only",
+  "verdict": "Dictionary and gallery implemented and checked; no complete planet or canopy match claimed.",
+  "requirements_sha256": "cb2915866eb6a1d16add23120ac6b02f89d06974b4ca42b2821f524558e633e8",
+  "checks": {
+    "P01": {
+      "status": "pass",
+      "reason": "203 unique imported parts; native gallery reads the same mesh dictionary used for future assembly.",
+      "evidence": [
+        "src/parts_dictionary.h"
+      ]
+    },
+    "P02": {
+      "status": "partial",
+      "reason": "Literal part bounds and visible pane silhouettes checked. Complete assembled-planet silhouettes remain untested.",
+      "evidence": [
+        "build/parts-gallery/gallery-5.png"
+      ]
+    },
+    "P03": {
+      "status": "pass",
+      "reason": "All 160 pane entries have expected bounds; all 16 lime states inspected together, plus individual side/underside views.",
+      "evidence": [
+        "build/parts-gallery/gallery-1.png"
+      ]
+    },
+    "P04": {
+      "status": "pass",
+      "reason": "Full glass and panes shown together; native pixel tests verify clear/tinted alpha, opaque occlusion and order independence.",
+      "evidence": [
+        "tests/parts_renderer_test.cpp"
+      ]
+    },
+    "P05": {
+      "status": "pass",
+      "reason": "Meshes, original texture alpha and catalogued emission remain independent; nearby receiver light test passes.",
+      "evidence": [
+        "parts/catalog.json"
+      ]
+    },
+    "P06": {
+      "status": "partial",
+      "reason": "Ten glass colours are available and inspected. Colour placement to break a complete planet silhouette has not been implemented or tested.",
+      "evidence": [
+        "build/parts-gallery/gallery-2.png"
+      ]
+    },
+    "P07": {
+      "status": "pass",
+      "reason": "Native texture bytes/alpha match their archive sources; all 16 cores and reference cube inspected at block scale.",
+      "evidence": [
+        "build/parts-gallery/gallery-3.png"
+      ]
+    },
+    "P08": {
+      "status": "partial",
+      "reason": "Gallery controls and label selection implemented; hidden native views cover overview, individual, side and underside. Human mouse interaction has not been manually exercised.",
+      "evidence": [
+        "build/parts-gallery/gallery-9.png"
+      ]
+    },
+    "P09": {
+      "status": "pass",
+      "reason": "Separate gallery renderer and local settings; FSTAR layouts and accepted Python lighting code unchanged. All ten regression groups passed.",
+      "evidence": [
+        "src/parts_gallery.h"
+      ]
+    },
+    "P10": {
+      "status": "pass",
+      "reason": "1.19.3 source and static-texture/no-shadow limitations documented. This is a parts library, with no claimed planet/canopy match.",
+      "evidence": [
+        "README.md"
+      ]
+    }
+  },
+  "legacy_requirements": {
+    "D01": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "D02": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "D03": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "D04": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "D05": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "D06": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "D07": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V01": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V02": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V03": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V04": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V05": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V06": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V07": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V08": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V09": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V10": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V11": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V12": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V13": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V14": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V15": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    },
+    "V16": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate parts-only gallery does not regenerate, evaluate or promote a star/scaffold candidate."
+    }
+  },
+  "verification": {
+    "full_ctest_groups": 10,
+    "full_ctest_failed": 0,
+    "parts_python_checks": 5,
+    "final_ui_checks": [
+      "parts_gallery",
+      "renderer_smoke"
+    ],
+    "render_views": 10,
+    "manual_interaction": "not performed"
+  },
+  "limitations": [
+    "Original assets are from installed Minecraft 1.19.3, not a recovered reference version.",
+    "Animated textures use the first frame. No shadows, ambient occlusion or bloom.",
+    "Transparent face ordering is validated for separated gallery parts, not arbitrary intersecting assembled meshes.",
+    "Adjacent-part face suppression and automatic connection selection belong to future assembly.",
+    "Complete planet shapes, ring proportions and colour-based silhouette breakup remain untested."
+  ],
+  "evidence_sha256": {
+    "parts/catalog.json": "ec1fc546546340e97f3bc64e1f134670caa763d58ce88074b6e663debc3675b6",
+    "parts/requirements.json": "cb2915866eb6a1d16add23120ac6b02f89d06974b4ca42b2821f524558e633e8",
+    "scripts/build_parts_dictionary.py": "60372ce08d9f837d0b5dad523053dc8322ba9c981deebda66b57298ef2224184",
+    "src/parts_dictionary.h": "74e5f3f2740ef514ac023da863c5fe00f4924f9f687bfaa3ca0262f136805395",
+    "src/parts_renderer.h": "1dd9b453e119698b7e5d51df2df696e4133f8418bbf5b35bfc2da90dacd53eb8",
+    "src/parts_gallery.h": "60cc26f5b1013936aa47d86824034ccbf48cfb987ecf6cc38a715dcb43286a9c",
+    "src/main.cpp": "dde825a13ab84329eb29e71a426f21e4c2d06e629c6d60738c93117c8e13c903",
+    "tests/test_parts_dictionary.py": "fdfa4dfc0db113bbdc146838a4270ef5e145daa9450f385612a8543a126d8b43",
+    "tests/parts_renderer_test.cpp": "d6e7807def24d1ee09f61bd6b93ab075a95ccc96186f868b7a63e799260bf2ed",
+    "build/parts-library/parts.json": "2def73cb974050164d7c8839389ec7536e319ddba60e56ec6eeb5af23d40eea3",
+    "build/parts-library/textures.rgba": "e00d2893e3b4a0dc27481b3de2bd57028217703ead5d6bea65d53cfe7a534e1e",
+    "scar/2026-10-15_00.38.19.png": "492e2fea44c1177c23c4ff2dd017813ffd3d05b4f279ce0a3030d398f94dae33",
+    "build/parts-gallery/gallery-0.png": "ce6dd60c0d26bb680f4ab550530d57b2fb2b0db7036cce9568de4184e85f8e06",
+    "build/parts-gallery/gallery-1.png": "d7445408f13c69f537492522158753046344ed5f7dbf86977e94a2c64c421a20",
+    "build/parts-gallery/gallery-2.png": "b478a36339b5f11040f9fecfd3c2255eea479a617196d047081c984fc2232bbb",
+    "build/parts-gallery/gallery-3.png": "4b0775f5b604a4d1f82ed353dd0140b25d9c87ed477405c0e2896c537e8e6d69",
+    "build/parts-gallery/gallery-4.png": "4fa0d01470f7a2f1ffd699c3759ea9bcaa80ea8e2c6645821cbda0bbacf886e7",
+    "build/parts-gallery/gallery-5.png": "f9c5b375b6d945087c412c45e431eb952353b882fbf9bd1f11397c7c1808527d",
+    "build/parts-gallery/gallery-6.png": "77e48a6933360653a93da8bd474ff10a0c4745ad8863532900bc4acc746c7aa5",
+    "build/parts-gallery/gallery-7.png": "a8a134414b8a92e3c2bf0d8bf0b12798c39744c1e536bdd45e1a27f256ea7e7f",
+    "build/parts-gallery/gallery-8.png": "6ff32c90cbe7999089b7c0a6bcce20466842003ff2d26ba40e21d18be135a64e",
+    "build/parts-gallery/gallery-9.png": "971cb2fc29453a69f2f8836ac5bd6f2fb294e73ed384b252248c95ce009e1daf"
+  }
+}

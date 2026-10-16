@@ -1,0 +1,1625 @@
+{
+  "date": "2026-10-15",
+  "candidate": "planet-components-v1",
+  "scope": "Block asset library plus whole-body/whole-ring dictionary and native component/planet inspection. User authorized the component stage on 2026-10-15. Historical canopy matching remains failed and stopped.",
+  "verdict": "Whole components and gallery implemented. Initial authored examples inspected; no procedural generation or accepted screenshot match.",
+  "requirements_sha256": "b3c261d9eac7b9c1106ab2d3b2598fd4f61b255257d0e04bef33f597aac01d92",
+  "checks": {
+    "P01": {
+      "status": "pass",
+      "reason": "Whole-component dictionary has four bodies and five rings; six examples reference component IDs. The underlying 203 block assets are separate.",
+      "evidence": [
+        "parts/planets.json",
+        "src/planet_parts.h"
+      ]
+    },
+    "P02": {
+      "status": "pass",
+      "reason": "Mesh bounds checked in CPU tests and all six assemblies viewed from front, side, below and oblique. Panes are never stretched or tipped; the upright frame becomes thin edge-on. No recovered screenshot geometry is claimed.",
+      "evidence": [
+        "tests/planet_parts_test.cpp",
+        "build/planet-components/contact.png"
+      ]
+    },
+    "P03": {
+      "status": "pass",
+      "reason": "Original 160 pane states remain inspectable; importer tests pass. Whole-component assembly derives actual NESW states from adjacent cells, including changed arms when the body is absent.",
+      "evidence": [
+        "tests/test_parts_dictionary.py",
+        "tests/planet_parts_test.cpp"
+      ]
+    },
+    "P04": {
+      "status": "pass",
+      "reason": "Mixed panes and full glass share the same eight cells and palette. Native tests cover clear/tinted alpha, opaque depth, and submission-order invariance for all six assemblies.",
+      "evidence": [
+        "tests/parts_renderer_test.cpp",
+        "build/planet-components/planet-3.png"
+      ]
+    },
+    "P05": {
+      "status": "pass",
+      "reason": "Texture and original alpha come from imported assets. Emission remains per-block metadata; moss and coloured glass have no intrinsic emission. Shared light formula is unchanged.",
+      "evidence": [
+        "parts/catalog.json",
+        "src/parts_renderer.h"
+      ]
+    },
+    "P06": {
+      "status": "pass",
+      "reason": "Gray and clear sectors visibly interrupt the continuous pink outline on identical cells. Their physical mesh bounds remain 2.125 x 1 x 2.125 blocks. Viewed on dark and neutral backgrounds and below.",
+      "evidence": [
+        "build/planet-components/planet-3.png",
+        "build/planet-components/planet-4.png",
+        "build/planet-components/planet-6.png"
+      ]
+    },
+    "P07": {
+      "status": "pass",
+      "reason": "Native texture fidelity tests passed; luminous and unlit bodies shown beside an unscaled unit cube. Large casing remains a visibly cubic grid of glass borders.",
+      "evidence": [
+        "build/planet-components/planet-1.png",
+        "build/planet-components/planet-30.png"
+      ]
+    },
+    "P08": {
+      "status": "partial",
+      "reason": "Gallery exposes orbit/pan/zoom and all named angles, individual inspection, visibility and background controls. Hidden tests exercise all six view modes, component toggles and 36 camera/material views. Human mouse interaction has not been exercised.",
+      "evidence": [
+        "src/planet_gallery.h",
+        "build/planet-components/views.json"
+      ]
+    },
+    "P09": {
+      "status": "pass",
+      "reason": "Plot settings, controls and accepted light formula match beginning-of-turn hashes. No generator or star-format changes. Native regression checks passed. No visible launch or process stop was performed.",
+      "evidence": [
+        "build/planet-components/verification.json"
+      ]
+    },
+    "P10": {
+      "status": "pass",
+      "reason": "Source is local Minecraft 1.19.3, not a recovered reference version. No screenshot or canopy match is claimed. Static textures, square forms, lack of occlusion/shadows/bloom and untested manual interaction are explicit.",
+      "evidence": [
+        "README.md"
+      ]
+    },
+    "P11": {
+      "status": "pass",
+      "reason": "Each planet has one body and at most one ring. Six examples have two components while containing 9 to 43 blocks. Ring=None and standalone component views are exercised.",
+      "evidence": [
+        "src/planet_parts.h",
+        "build/planet-components/planet-31.png"
+      ]
+    },
+    "P12": {
+      "status": "pass",
+      "reason": "All 15 nonoverlapping pairs validated, with four ringless bodies. Collisions and duplicate cells are rejected; stack/upright and small rings/cased body cannot be assembled. Shared mounting origin and context-sensitive pane arms are tested.",
+      "evidence": [
+        "tests/planet_parts_test.cpp"
+      ]
+    },
+    "P13": {
+      "status": "pass",
+      "reason": "Recipes are authored, not randomized. Three comparison entries share a body and cell arrangement; first changes palette only, then swaps panes for full glass. Orthographic projection removes perspective differences between slots.",
+      "evidence": [
+        "parts/planets.json",
+        "src/planet_gallery.h",
+        "build/planet-components/planet-3.png"
+      ]
+    },
+    "P14": {
+      "status": "pass",
+      "reason": "Shared same-material full-glass faces are omitted; different colour interfaces remain. Six assemblies pass reverse-submission GPU checks, and multi-angle renders were inspected. Arbitrary intersecting transparent meshes remain unsupported.",
+      "evidence": [
+        "src/parts_renderer.h",
+        "tests/parts_renderer_test.cpp",
+        "build/planet-components/planet-30.png"
+      ]
+    }
+  },
+  "legacy_requirements": {
+    "D01": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "D02": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "D03": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "D04": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "D05": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "D06": {
+      "status": "pass",
+      "reason": "Current work report and README distinguish assets, components, rendering, comparisons and limitations.",
+      "evidence": [
+        "README.md"
+      ]
+    },
+    "D07": {
+      "status": "pass",
+      "reason": "Previous experiments and block asset gallery retained; accepted lighting and user config preserved.",
+      "evidence": [
+        "build/planet-components/verification.json"
+      ]
+    },
+    "V01": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V02": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V03": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V04": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V05": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V06": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V07": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V08": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V09": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V10": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V11": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V12": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V13": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V14": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V15": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    },
+    "V16": {
+      "status": "not_evaluated",
+      "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+    }
+  },
+  "candidates": [
+    {
+      "candidate": "Pearl / pink panes",
+      "body": "body-pearl",
+      "ring": "ring-pink",
+      "verdict": "Implemented authored example; visual acceptance and screenshot reconstruction not established.",
+      "observation": "Uniform pink panes read as a one-block-tall enclosure. Open top/bottom and the bright cube are apparent from oblique/below views; this is not a thin disc.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Whole-component dictionary has four bodies and five rings; six examples reference component IDs. The underlying 203 block assets are separate.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_parts.h"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Mesh bounds checked in CPU tests and all six assemblies viewed from front, side, below and oblique. Panes are never stretched or tipped; the upright frame becomes thin edge-on. No recovered screenshot geometry is claimed. Observation: Uniform pink panes read as a one-block-tall enclosure. Open top/bottom and the bright cube are apparent from oblique/below views; this is not a thin disc.",
+          "evidence": [
+            "build/planet-components/planet-7.png",
+            "build/planet-components/planet-8.png",
+            "build/planet-components/planet-9.png",
+            "build/planet-components/planet-10.png"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "Original 160 pane states remain inspectable; importer tests pass. Whole-component assembly derives actual NESW states from adjacent cells, including changed arms when the body is absent.",
+          "evidence": [
+            "tests/test_parts_dictionary.py",
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Mixed panes and full glass share the same eight cells and palette. Native tests cover clear/tinted alpha, opaque depth, and submission-order invariance for all six assemblies.",
+          "evidence": [
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Texture and original alpha come from imported assets. Emission remains per-block metadata; moss and coloured glass have no intrinsic emission. Shared light formula is unchanged.",
+          "evidence": [
+            "parts/catalog.json",
+            "src/parts_renderer.h"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Gray and clear sectors visibly interrupt the continuous pink outline on identical cells. Their physical mesh bounds remain 2.125 x 1 x 2.125 blocks. Viewed on dark and neutral backgrounds and below.",
+          "evidence": [
+            "build/planet-components/planet-3.png",
+            "build/planet-components/planet-4.png",
+            "build/planet-components/planet-6.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Native texture fidelity tests passed; luminous and unlit bodies shown beside an unscaled unit cube. Large casing remains a visibly cubic grid of glass borders.",
+          "evidence": [
+            "build/planet-components/planet-1.png",
+            "build/planet-components/planet-30.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Gallery exposes orbit/pan/zoom and all named angles, individual inspection, visibility and background controls. Hidden tests exercise all six view modes, component toggles and 36 camera/material views. Human mouse interaction has not been exercised.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "build/planet-components/views.json"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Plot settings, controls and accepted light formula match beginning-of-turn hashes. No generator or star-format changes. Native regression checks passed. No visible launch or process stop was performed.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Source is local Minecraft 1.19.3, not a recovered reference version. No screenshot or canopy match is claimed. Static textures, square forms, lack of occlusion/shadows/bloom and untested manual interaction are explicit.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Each planet has one body and at most one ring. Six examples have two components while containing 9 to 43 blocks. Ring=None and standalone component views are exercised.",
+          "evidence": [
+            "src/planet_parts.h",
+            "build/planet-components/planet-31.png"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 15 nonoverlapping pairs validated, with four ringless bodies. Collisions and duplicate cells are rejected; stack/upright and small rings/cased body cannot be assembled. Shared mounting origin and context-sensitive pane arms are tested.",
+          "evidence": [
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "pass",
+          "reason": "Recipes are authored, not randomized. Three comparison entries share a body and cell arrangement; first changes palette only, then swaps panes for full glass. Orthographic projection removes perspective differences between slots.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_gallery.h",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Shared same-material full-glass faces are omitted; different colour interfaces remain. Six assemblies pass reverse-submission GPU checks, and multi-angle renders were inspected. Arbitrary intersecting transparent meshes remain unsupported.",
+          "evidence": [
+            "src/parts_renderer.h",
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-30.png"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README distinguish assets, components, rendering, comparisons and limitations.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Previous experiments and block asset gallery retained; accepted lighting and user config preserved.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        }
+      }
+    },
+    {
+      "candidate": "Pearl / mixed panes",
+      "body": "body-pearl",
+      "ring": "ring-broken",
+      "verdict": "Implemented authored example; visual acceptance and screenshot reconstruction not established.",
+      "observation": "Mixed pane colours break the continuous pink outline and reveal the core more clearly. The rectangular physical bounds are unchanged.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Whole-component dictionary has four bodies and five rings; six examples reference component IDs. The underlying 203 block assets are separate.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_parts.h"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Mesh bounds checked in CPU tests and all six assemblies viewed from front, side, below and oblique. Panes are never stretched or tipped; the upright frame becomes thin edge-on. No recovered screenshot geometry is claimed. Observation: Mixed pane colours break the continuous pink outline and reveal the core more clearly. The rectangular physical bounds are unchanged.",
+          "evidence": [
+            "build/planet-components/planet-11.png",
+            "build/planet-components/planet-12.png",
+            "build/planet-components/planet-13.png",
+            "build/planet-components/planet-14.png"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "Original 160 pane states remain inspectable; importer tests pass. Whole-component assembly derives actual NESW states from adjacent cells, including changed arms when the body is absent.",
+          "evidence": [
+            "tests/test_parts_dictionary.py",
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Mixed panes and full glass share the same eight cells and palette. Native tests cover clear/tinted alpha, opaque depth, and submission-order invariance for all six assemblies.",
+          "evidence": [
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Texture and original alpha come from imported assets. Emission remains per-block metadata; moss and coloured glass have no intrinsic emission. Shared light formula is unchanged.",
+          "evidence": [
+            "parts/catalog.json",
+            "src/parts_renderer.h"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Gray and clear sectors visibly interrupt the continuous pink outline on identical cells. Their physical mesh bounds remain 2.125 x 1 x 2.125 blocks. Viewed on dark and neutral backgrounds and below.",
+          "evidence": [
+            "build/planet-components/planet-3.png",
+            "build/planet-components/planet-4.png",
+            "build/planet-components/planet-6.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Native texture fidelity tests passed; luminous and unlit bodies shown beside an unscaled unit cube. Large casing remains a visibly cubic grid of glass borders.",
+          "evidence": [
+            "build/planet-components/planet-1.png",
+            "build/planet-components/planet-30.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Gallery exposes orbit/pan/zoom and all named angles, individual inspection, visibility and background controls. Hidden tests exercise all six view modes, component toggles and 36 camera/material views. Human mouse interaction has not been exercised.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "build/planet-components/views.json"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Plot settings, controls and accepted light formula match beginning-of-turn hashes. No generator or star-format changes. Native regression checks passed. No visible launch or process stop was performed.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Source is local Minecraft 1.19.3, not a recovered reference version. No screenshot or canopy match is claimed. Static textures, square forms, lack of occlusion/shadows/bloom and untested manual interaction are explicit.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Each planet has one body and at most one ring. Six examples have two components while containing 9 to 43 blocks. Ring=None and standalone component views are exercised.",
+          "evidence": [
+            "src/planet_parts.h",
+            "build/planet-components/planet-31.png"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 15 nonoverlapping pairs validated, with four ringless bodies. Collisions and duplicate cells are rejected; stack/upright and small rings/cased body cannot be assembled. Shared mounting origin and context-sensitive pane arms are tested.",
+          "evidence": [
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "pass",
+          "reason": "Recipes are authored, not randomized. Three comparison entries share a body and cell arrangement; first changes palette only, then swaps panes for full glass. Orthographic projection removes perspective differences between slots.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_gallery.h",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Shared same-material full-glass faces are omitted; different colour interfaces remain. Six assemblies pass reverse-submission GPU checks, and multi-angle renders were inspected. Arbitrary intersecting transparent meshes remain unsupported.",
+          "evidence": [
+            "src/parts_renderer.h",
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-30.png"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README distinguish assets, components, rendering, comparisons and limitations.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Previous experiments and block asset gallery retained; accepted lighting and user config preserved.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        }
+      }
+    },
+    {
+      "candidate": "Pearl / full glass",
+      "body": "body-pearl",
+      "ring": "ring-glass",
+      "verdict": "Implemented authored example; visual acceptance and screenshot reconstruction not established.",
+      "observation": "Full glass at the same eight cell centres increases the outer X/Z span from 2.125 to 3 blocks. The ring is chunkier, with broad top and bottom surfaces.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Whole-component dictionary has four bodies and five rings; six examples reference component IDs. The underlying 203 block assets are separate.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_parts.h"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Mesh bounds checked in CPU tests and all six assemblies viewed from front, side, below and oblique. Panes are never stretched or tipped; the upright frame becomes thin edge-on. No recovered screenshot geometry is claimed. Observation: Full glass at the same eight cell centres increases the outer X/Z span from 2.125 to 3 blocks. The ring is chunkier, with broad top and bottom surfaces.",
+          "evidence": [
+            "build/planet-components/planet-15.png",
+            "build/planet-components/planet-16.png",
+            "build/planet-components/planet-17.png",
+            "build/planet-components/planet-18.png"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "Original 160 pane states remain inspectable; importer tests pass. Whole-component assembly derives actual NESW states from adjacent cells, including changed arms when the body is absent.",
+          "evidence": [
+            "tests/test_parts_dictionary.py",
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Mixed panes and full glass share the same eight cells and palette. Native tests cover clear/tinted alpha, opaque depth, and submission-order invariance for all six assemblies.",
+          "evidence": [
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Texture and original alpha come from imported assets. Emission remains per-block metadata; moss and coloured glass have no intrinsic emission. Shared light formula is unchanged.",
+          "evidence": [
+            "parts/catalog.json",
+            "src/parts_renderer.h"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Gray and clear sectors visibly interrupt the continuous pink outline on identical cells. Their physical mesh bounds remain 2.125 x 1 x 2.125 blocks. Viewed on dark and neutral backgrounds and below.",
+          "evidence": [
+            "build/planet-components/planet-3.png",
+            "build/planet-components/planet-4.png",
+            "build/planet-components/planet-6.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Native texture fidelity tests passed; luminous and unlit bodies shown beside an unscaled unit cube. Large casing remains a visibly cubic grid of glass borders.",
+          "evidence": [
+            "build/planet-components/planet-1.png",
+            "build/planet-components/planet-30.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Gallery exposes orbit/pan/zoom and all named angles, individual inspection, visibility and background controls. Hidden tests exercise all six view modes, component toggles and 36 camera/material views. Human mouse interaction has not been exercised.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "build/planet-components/views.json"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Plot settings, controls and accepted light formula match beginning-of-turn hashes. No generator or star-format changes. Native regression checks passed. No visible launch or process stop was performed.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Source is local Minecraft 1.19.3, not a recovered reference version. No screenshot or canopy match is claimed. Static textures, square forms, lack of occlusion/shadows/bloom and untested manual interaction are explicit.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Each planet has one body and at most one ring. Six examples have two components while containing 9 to 43 blocks. Ring=None and standalone component views are exercised.",
+          "evidence": [
+            "src/planet_parts.h",
+            "build/planet-components/planet-31.png"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 15 nonoverlapping pairs validated, with four ringless bodies. Collisions and duplicate cells are rejected; stack/upright and small rings/cased body cannot be assembled. Shared mounting origin and context-sensitive pane arms are tested.",
+          "evidence": [
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "pass",
+          "reason": "Recipes are authored, not randomized. Three comparison entries share a body and cell arrangement; first changes palette only, then swaps panes for full glass. Orthographic projection removes perspective differences between slots.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_gallery.h",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Shared same-material full-glass faces are omitted; different colour interfaces remain. Six assemblies pass reverse-submission GPU checks, and multi-angle renders were inspected. Arbitrary intersecting transparent meshes remain unsupported.",
+          "evidence": [
+            "src/parts_renderer.h",
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-30.png"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README distinguish assets, components, rendering, comparisons and limitations.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Previous experiments and block asset gallery retained; accepted lighting and user config preserved.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        }
+      }
+    },
+    {
+      "candidate": "Amber / mixed panes",
+      "body": "body-stack",
+      "ring": "ring-broken",
+      "verdict": "Implemented authored example; visual acceptance and screenshot reconstruction not established.",
+      "observation": "The two-block amber body projects above the horizontal ring. The stack remains rectangular, with its mounting point at the lower block rather than its geometric centre.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Whole-component dictionary has four bodies and five rings; six examples reference component IDs. The underlying 203 block assets are separate.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_parts.h"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Mesh bounds checked in CPU tests and all six assemblies viewed from front, side, below and oblique. Panes are never stretched or tipped; the upright frame becomes thin edge-on. No recovered screenshot geometry is claimed. Observation: The two-block amber body projects above the horizontal ring. The stack remains rectangular, with its mounting point at the lower block rather than its geometric centre.",
+          "evidence": [
+            "build/planet-components/planet-19.png",
+            "build/planet-components/planet-20.png",
+            "build/planet-components/planet-21.png",
+            "build/planet-components/planet-22.png"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "Original 160 pane states remain inspectable; importer tests pass. Whole-component assembly derives actual NESW states from adjacent cells, including changed arms when the body is absent.",
+          "evidence": [
+            "tests/test_parts_dictionary.py",
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Mixed panes and full glass share the same eight cells and palette. Native tests cover clear/tinted alpha, opaque depth, and submission-order invariance for all six assemblies.",
+          "evidence": [
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Texture and original alpha come from imported assets. Emission remains per-block metadata; moss and coloured glass have no intrinsic emission. Shared light formula is unchanged.",
+          "evidence": [
+            "parts/catalog.json",
+            "src/parts_renderer.h"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Gray and clear sectors visibly interrupt the continuous pink outline on identical cells. Their physical mesh bounds remain 2.125 x 1 x 2.125 blocks. Viewed on dark and neutral backgrounds and below.",
+          "evidence": [
+            "build/planet-components/planet-3.png",
+            "build/planet-components/planet-4.png",
+            "build/planet-components/planet-6.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Native texture fidelity tests passed; luminous and unlit bodies shown beside an unscaled unit cube. Large casing remains a visibly cubic grid of glass borders.",
+          "evidence": [
+            "build/planet-components/planet-1.png",
+            "build/planet-components/planet-30.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Gallery exposes orbit/pan/zoom and all named angles, individual inspection, visibility and background controls. Hidden tests exercise all six view modes, component toggles and 36 camera/material views. Human mouse interaction has not been exercised.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "build/planet-components/views.json"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Plot settings, controls and accepted light formula match beginning-of-turn hashes. No generator or star-format changes. Native regression checks passed. No visible launch or process stop was performed.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Source is local Minecraft 1.19.3, not a recovered reference version. No screenshot or canopy match is claimed. Static textures, square forms, lack of occlusion/shadows/bloom and untested manual interaction are explicit.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Each planet has one body and at most one ring. Six examples have two components while containing 9 to 43 blocks. Ring=None and standalone component views are exercised.",
+          "evidence": [
+            "src/planet_parts.h",
+            "build/planet-components/planet-31.png"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 15 nonoverlapping pairs validated, with four ringless bodies. Collisions and duplicate cells are rejected; stack/upright and small rings/cased body cannot be assembled. Shared mounting origin and context-sensitive pane arms are tested.",
+          "evidence": [
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "pass",
+          "reason": "Recipes are authored, not randomized. Three comparison entries share a body and cell arrangement; first changes palette only, then swaps panes for full glass. Orthographic projection removes perspective differences between slots.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_gallery.h",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Shared same-material full-glass faces are omitted; different colour interfaces remain. Six assemblies pass reverse-submission GPU checks, and multi-angle renders were inspected. Arbitrary intersecting transparent meshes remain unsupported.",
+          "evidence": [
+            "src/parts_renderer.h",
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-30.png"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README distinguish assets, components, rendering, comparisons and limitations.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Previous experiments and block asset gallery retained; accepted lighting and user config preserved.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        }
+      }
+    },
+    {
+      "candidate": "Moss / lime frame",
+      "body": "body-moss",
+      "ring": "ring-tall",
+      "verdict": "Implemented authored example; visual acceptance and screenshot reconstruction not established.",
+      "observation": "The upright lime/gray frame is three blocks tall and .125 deep alone. Seen from the side, the panes nearly disappear and the one-block moss body dominates. This is a literal consequence of the pane geometry.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Whole-component dictionary has four bodies and five rings; six examples reference component IDs. The underlying 203 block assets are separate.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_parts.h"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Mesh bounds checked in CPU tests and all six assemblies viewed from front, side, below and oblique. Panes are never stretched or tipped; the upright frame becomes thin edge-on. No recovered screenshot geometry is claimed. Observation: The upright lime/gray frame is three blocks tall and .125 deep alone. Seen from the side, the panes nearly disappear and the one-block moss body dominates. This is a literal consequence of the pane geometry.",
+          "evidence": [
+            "build/planet-components/planet-23.png",
+            "build/planet-components/planet-24.png",
+            "build/planet-components/planet-25.png",
+            "build/planet-components/planet-26.png"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "Original 160 pane states remain inspectable; importer tests pass. Whole-component assembly derives actual NESW states from adjacent cells, including changed arms when the body is absent.",
+          "evidence": [
+            "tests/test_parts_dictionary.py",
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Mixed panes and full glass share the same eight cells and palette. Native tests cover clear/tinted alpha, opaque depth, and submission-order invariance for all six assemblies.",
+          "evidence": [
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Texture and original alpha come from imported assets. Emission remains per-block metadata; moss and coloured glass have no intrinsic emission. Shared light formula is unchanged.",
+          "evidence": [
+            "parts/catalog.json",
+            "src/parts_renderer.h"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Gray and clear sectors visibly interrupt the continuous pink outline on identical cells. Their physical mesh bounds remain 2.125 x 1 x 2.125 blocks. Viewed on dark and neutral backgrounds and below.",
+          "evidence": [
+            "build/planet-components/planet-3.png",
+            "build/planet-components/planet-4.png",
+            "build/planet-components/planet-6.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Native texture fidelity tests passed; luminous and unlit bodies shown beside an unscaled unit cube. Large casing remains a visibly cubic grid of glass borders.",
+          "evidence": [
+            "build/planet-components/planet-1.png",
+            "build/planet-components/planet-30.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Gallery exposes orbit/pan/zoom and all named angles, individual inspection, visibility and background controls. Hidden tests exercise all six view modes, component toggles and 36 camera/material views. Human mouse interaction has not been exercised.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "build/planet-components/views.json"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Plot settings, controls and accepted light formula match beginning-of-turn hashes. No generator or star-format changes. Native regression checks passed. No visible launch or process stop was performed.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Source is local Minecraft 1.19.3, not a recovered reference version. No screenshot or canopy match is claimed. Static textures, square forms, lack of occlusion/shadows/bloom and untested manual interaction are explicit.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Each planet has one body and at most one ring. Six examples have two components while containing 9 to 43 blocks. Ring=None and standalone component views are exercised.",
+          "evidence": [
+            "src/planet_parts.h",
+            "build/planet-components/planet-31.png"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 15 nonoverlapping pairs validated, with four ringless bodies. Collisions and duplicate cells are rejected; stack/upright and small rings/cased body cannot be assembled. Shared mounting origin and context-sensitive pane arms are tested.",
+          "evidence": [
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "pass",
+          "reason": "Recipes are authored, not randomized. Three comparison entries share a body and cell arrangement; first changes palette only, then swaps panes for full glass. Orthographic projection removes perspective differences between slots.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_gallery.h",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Shared same-material full-glass faces are omitted; different colour interfaces remain. Six assemblies pass reverse-submission GPU checks, and multi-angle renders were inspected. Arbitrary intersecting transparent meshes remain unsupported.",
+          "evidence": [
+            "src/parts_renderer.h",
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-30.png"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README distinguish assets, components, rendering, comparisons and limitations.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Previous experiments and block asset gallery retained; accepted lighting and user config preserved.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        }
+      }
+    },
+    {
+      "candidate": "Cased lantern / wide panes",
+      "body": "body-cased",
+      "ring": "ring-wide",
+      "verdict": "Implemented authored example; visual acceptance and screenshot reconstruction not established.",
+      "observation": "The large glass shell has strong repeated white borders and looks like a box/cage rather than a rounded body. The blue/clear ring is distinct in some views but becomes visually busy against the shell. Retained as an inspection example, not an accepted planet appearance.",
+      "checks": {
+        "P01": {
+          "status": "pass",
+          "reason": "Whole-component dictionary has four bodies and five rings; six examples reference component IDs. The underlying 203 block assets are separate.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_parts.h"
+          ]
+        },
+        "P02": {
+          "status": "pass",
+          "reason": "Mesh bounds checked in CPU tests and all six assemblies viewed from front, side, below and oblique. Panes are never stretched or tipped; the upright frame becomes thin edge-on. No recovered screenshot geometry is claimed. Observation: The large glass shell has strong repeated white borders and looks like a box/cage rather than a rounded body. The blue/clear ring is distinct in some views but becomes visually busy against the shell. Retained as an inspection example, not an accepted planet appearance.",
+          "evidence": [
+            "build/planet-components/planet-27.png",
+            "build/planet-components/planet-28.png",
+            "build/planet-components/planet-29.png",
+            "build/planet-components/planet-30.png"
+          ]
+        },
+        "P03": {
+          "status": "pass",
+          "reason": "Original 160 pane states remain inspectable; importer tests pass. Whole-component assembly derives actual NESW states from adjacent cells, including changed arms when the body is absent.",
+          "evidence": [
+            "tests/test_parts_dictionary.py",
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P04": {
+          "status": "pass",
+          "reason": "Mixed panes and full glass share the same eight cells and palette. Native tests cover clear/tinted alpha, opaque depth, and submission-order invariance for all six assemblies.",
+          "evidence": [
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P05": {
+          "status": "pass",
+          "reason": "Texture and original alpha come from imported assets. Emission remains per-block metadata; moss and coloured glass have no intrinsic emission. Shared light formula is unchanged.",
+          "evidence": [
+            "parts/catalog.json",
+            "src/parts_renderer.h"
+          ]
+        },
+        "P06": {
+          "status": "pass",
+          "reason": "Gray and clear sectors visibly interrupt the continuous pink outline on identical cells. Their physical mesh bounds remain 2.125 x 1 x 2.125 blocks. Viewed on dark and neutral backgrounds and below.",
+          "evidence": [
+            "build/planet-components/planet-3.png",
+            "build/planet-components/planet-4.png",
+            "build/planet-components/planet-6.png"
+          ]
+        },
+        "P07": {
+          "status": "pass",
+          "reason": "Native texture fidelity tests passed; luminous and unlit bodies shown beside an unscaled unit cube. Large casing remains a visibly cubic grid of glass borders.",
+          "evidence": [
+            "build/planet-components/planet-1.png",
+            "build/planet-components/planet-30.png"
+          ]
+        },
+        "P08": {
+          "status": "partial",
+          "reason": "Gallery exposes orbit/pan/zoom and all named angles, individual inspection, visibility and background controls. Hidden tests exercise all six view modes, component toggles and 36 camera/material views. Human mouse interaction has not been exercised.",
+          "evidence": [
+            "src/planet_gallery.h",
+            "build/planet-components/views.json"
+          ]
+        },
+        "P09": {
+          "status": "pass",
+          "reason": "Plot settings, controls and accepted light formula match beginning-of-turn hashes. No generator or star-format changes. Native regression checks passed. No visible launch or process stop was performed.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "P10": {
+          "status": "pass",
+          "reason": "Source is local Minecraft 1.19.3, not a recovered reference version. No screenshot or canopy match is claimed. Static textures, square forms, lack of occlusion/shadows/bloom and untested manual interaction are explicit.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "P11": {
+          "status": "pass",
+          "reason": "Each planet has one body and at most one ring. Six examples have two components while containing 9 to 43 blocks. Ring=None and standalone component views are exercised.",
+          "evidence": [
+            "src/planet_parts.h",
+            "build/planet-components/planet-31.png"
+          ]
+        },
+        "P12": {
+          "status": "pass",
+          "reason": "All 15 nonoverlapping pairs validated, with four ringless bodies. Collisions and duplicate cells are rejected; stack/upright and small rings/cased body cannot be assembled. Shared mounting origin and context-sensitive pane arms are tested.",
+          "evidence": [
+            "tests/planet_parts_test.cpp"
+          ]
+        },
+        "P13": {
+          "status": "pass",
+          "reason": "Recipes are authored, not randomized. Three comparison entries share a body and cell arrangement; first changes palette only, then swaps panes for full glass. Orthographic projection removes perspective differences between slots.",
+          "evidence": [
+            "parts/planets.json",
+            "src/planet_gallery.h",
+            "build/planet-components/planet-3.png"
+          ]
+        },
+        "P14": {
+          "status": "pass",
+          "reason": "Shared same-material full-glass faces are omitted; different colour interfaces remain. Six assemblies pass reverse-submission GPU checks, and multi-angle renders were inspected. Arbitrary intersecting transparent meshes remain unsupported.",
+          "evidence": [
+            "src/parts_renderer.h",
+            "tests/parts_renderer_test.cpp",
+            "build/planet-components/planet-30.png"
+          ]
+        }
+      },
+      "legacy_requirements": {
+        "D01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "D06": {
+          "status": "pass",
+          "reason": "Current work report and README distinguish assets, components, rendering, comparisons and limitations.",
+          "evidence": [
+            "README.md"
+          ]
+        },
+        "D07": {
+          "status": "pass",
+          "reason": "Previous experiments and block asset gallery retained; accepted lighting and user config preserved.",
+          "evidence": [
+            "build/planet-components/verification.json"
+          ]
+        },
+        "V01": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V02": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V03": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V04": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V05": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V06": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V07": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V08": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V09": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V10": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V11": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V12": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V13": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V14": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V15": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        },
+        "V16": {
+          "status": "not_evaluated",
+          "reason": "Historical canopy criterion; this separate component exercise does not regenerate, evaluate or promote any canopy candidate. The prior failure remains."
+        }
+      }
+    }
+  ],
+  "verification": "build/planet-components/verification.json",
+  "evidence_sha256": {
+    "parts/planets.json": "e7f230d4b2af16453ef92eca5809877b0bd7b0bf29d8233edebbd826a7282051",
+    "parts/catalog.json": "ec1fc546546340e97f3bc64e1f134670caa763d58ce88074b6e663debc3675b6",
+    "parts/requirements.json": "b3c261d9eac7b9c1106ab2d3b2598fd4f61b255257d0e04bef33f597aac01d92",
+    "reference-match-requirements.json": "73342929d010a5c3a739e4e818d342733fca5796b477da57d4a32f69cb32fe5a",
+    "src/planet_parts.h": "31bb7330851d9d8b91f044390755694e6c4e389cd74cf96679230a8dfabe1f72",
+    "src/planet_gallery.h": "a847a87e8c7d600ac30cf2665719d21ea4aa0c49f691dfc735f5b884fd3a6a9e",
+    "src/parts_dictionary.h": "7d4ea2ac9da222e6cffd33851f5a3e35824d7e43ef026cf516967f7ff67fe2e2",
+    "src/parts_renderer.h": "fb78d9e9791bc3f1a937cfdc06b859ee56865a9f806fc8b423d6ea9ed09bbb21",
+    "src/parts_gallery.h": "12437ebb0e1b3cbeda07848af28245863d85257634dd5bf781d5b9782f67bd5c",
+    "src/main.cpp": "580eb58055d91e4054d6499ceb640df319d458f44e0eacdd2e03ba7e711fb520",
+    "src/runtime_config.h.in": "2c348b831b899a19bf1b4ab56dfd3538640628b13f835aa98af7626d3e9e96e1",
+    "CMakeLists.txt": "85047d3dec1bfde026859263dddef0a44c2098bfe8a6cd89d630551ba8514016",
+    "tests/planet_parts_test.cpp": "bb844ca957442a54e235f15f4195138d9b0750b6fd297c1299208177696f1067",
+    "tests/parts_renderer_test.cpp": "ddb522856040eaea2d0a428b711dc403231c06654f2fc992f59d643f2decf467",
+    "tests/test_parts_dictionary.py": "fdfa4dfc0db113bbdc146838a4270ef5e145daa9450f385612a8543a126d8b43",
+    "scripts/build_parts_dictionary.py": "60372ce08d9f837d0b5dad523053dc8322ba9c981deebda66b57298ef2224184",
+    "README.md": "630b4bbad539a3df0e56994735a5a7a2abf8cc263f3db0a2577f6c81344f36d7",
+    "AGENTS.md": "ef4c3cb556aeb0bb08e19d52a4cca0b173e5305438dbc681fd69649363fcd711",
+    "build/parts-library/parts.json": "2def73cb974050164d7c8839389ec7536e319ddba60e56ec6eeb5af23d40eea3",
+    "build/parts-library/textures.rgba": "e00d2893e3b4a0dc27481b3de2bd57028217703ead5d6bea65d53cfe7a534e1e",
+    "build/planet-components/planet-0.png": "d92b9dd5b086a28e2d61761309367236ab3c1be2e1f454f794e99382f1d524b1",
+    "build/planet-components/planet-1.png": "6a9f370bb8aa3fe2d799eaba3b49e9c578cd606b792ed0f1d728d9540adc26f1",
+    "build/planet-components/planet-2.png": "ca63d00f36b4b4361a19da49995531805de5c58d19f1b3721065c9e6aca493c3",
+    "build/planet-components/planet-3.png": "43656f61439daf28ec5eada50c502663211a1d32215b3a4d187a8c3b9fd4a217",
+    "build/planet-components/planet-4.png": "0236d7b2d29225d2c478dc0b974a717daace8e38c0d541b63e34bc7233d813dc",
+    "build/planet-components/planet-5.png": "eca78773b9d28832089daca02830f52b8d08ff8a52d28a68b1a82d8da26ad92d",
+    "build/planet-components/planet-6.png": "51e7eb0847b59c275e3e5b44af35b358c3dcca496496adbf7e0ec9da696fff59",
+    "build/planet-components/planet-7.png": "1f2eb200277cda3c2be504f559bddf67c2721b628040378b50e0b6dcba6ad550",
+    "build/planet-components/planet-8.png": "62159dabc92fa1936ec816007afae0221723158406f81ff37d8b07200febfcf3",
+    "build/planet-components/planet-9.png": "b69db3de4bcede74345fa65db8f8f984278e2eac435f3a30d9cc2d4785121ced",
+    "build/planet-components/planet-10.png": "c2dd826ba89b3a0a739c431bfa0719a3c6f2d52b2aa902a8f768809f8cb91ca8",
+    "build/planet-components/planet-11.png": "0a2793a532f3147a2bf09032a223dcccc006cec3c133463cec7c4826f7607c62",
+    "build/planet-components/planet-12.png": "03fec0ed1b7e4d43395f622df4c55724f0675100d97b2dc2df7b50f9cb71e3d7",
+    "build/planet-components/planet-13.png": "4397a384b78489fdacf44053815613711da6219446f8a87138b87db107fb4afa",
+    "build/planet-components/planet-14.png": "1ee07b526520722e8c419fb553a5091a822587113bc36e6631bdf6ff91c5ace7",
+    "build/planet-components/planet-15.png": "57e0ff5d0de3345b9ae79850b526d4734bebb56c83f1330accdb4d4d91d009f7",
+    "build/planet-components/planet-16.png": "4fc0f86146ba7d1b812738d5d0d04c0942968dca80890dbb1687330be1992d38",
+    "build/planet-components/planet-17.png": "348eab6113b176d9db0e2fba7d9565d1da4371642423af352b1fdaaef698a06f",
+    "build/planet-components/planet-18.png": "1d1992d6c76515e03ae2dc3a161e021f17ce0db3023b84afc3ab99561a53ce05",
+    "build/planet-components/planet-19.png": "8b5206c2b882458e03216c944652877c98727599b1e3b0da492e0c1fdf5a75f3",
+    "build/planet-components/planet-20.png": "c5b409123a6368f6e473fa4bfea555b1ac6fffdd253d74117d9afcea149b1408",
+    "build/planet-components/planet-21.png": "a10ceccdab2b719297c57884e2df987275c7d049234ab5546390b3e4e73bf71a",
+    "build/planet-components/planet-22.png": "6390534a3dee120d4ed0e5ec63947cb7216ac1dcb59b15fad35854e73c0faa36",
+    "build/planet-components/planet-23.png": "07d562cee33806e41c285423a3345ffa781a8eedc5b6c6598b2adc26052575b4",
+    "build/planet-components/planet-24.png": "db79a9dab75467997fd840e11a9c24c552cb761c683f7abee932a81c9133ad78",
+    "build/planet-components/planet-25.png": "8221c4d43ab103e59d7c5214699cb4a4f4ae0a68883e6488e0a164e08dbb70de",
+    "build/planet-components/planet-26.png": "3451580f6c280c472e047479b35179ae0541b84dca3fc9387ac1185c17e5620f",
+    "build/planet-components/planet-27.png": "69b89d719375d9ca766531ffb661c8d6254d264be967d5f80bb16529c036d36a",
+    "build/planet-components/planet-28.png": "c6e65f3ab73cb36d348ab4b60afb448049d2ea3422129e5f91cd38a432fc458e",
+    "build/planet-components/planet-29.png": "103b2046b2745aaf4dea33978f08765a870e626349e62b4bde0feb9d794ac0a6",
+    "build/planet-components/planet-30.png": "a5d7b4de6fa9b7bde53a6afbe69426bd0e6740712afc09a3989409e720e464f3",
+    "build/planet-components/planet-31.png": "6bfd69cf37d3f3499a689cd157985f8da2484d359eb338892672a0210568051d",
+    "build/planet-components/planet-32.png": "1c30d9ad4c0eb095cf0b272653a96a8986f7ca10091f31a12e72843e58c54e9b",
+    "build/planet-components/planet-33.png": "cbacc106f36d38ad75421de198edf775317fb53c1c8fff1d17acccef8532d270",
+    "build/planet-components/planet-34.png": "c982e14d0ac7f80ba5e9f8185461d5327ca25c25f597438bddfd3e19349ba385",
+    "build/planet-components/planet-35.png": "b6e547d275afa09a472eb825524b348440ca41503eeadeb989849f8159849e10",
+    "build/planet-components/contact.png": "28512efb5eab1a8a13a34ee1a10c227107fd429dd67d43ead03dad22f49a0837",
+    "build/planet-components/views.json": "3d112a5e66b3d503746f17c0c6f23410846f3b8a6092c430fc5ad8e504b997fc",
+    "build/planet-components/verification.json": "959a34bebe62f21b80d83ad6968af17b1ffa2605627b43ba16d277884e8e9052",
+    "scar/2026-10-15_00.38.19.png": "492e2fea44c1177c23c4ff2dd017813ffd3d05b4f279ce0a3030d398f94dae33"
+  },
+  "frozen_inputs": "build/planet-components/frozen/"
+}
